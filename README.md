@@ -57,3 +57,4 @@ Site is live at https://osobnirobot.com
 - Marquee use cases
 - Email collection → Supabase with rate limiting
 - Responsive, dark theme, animated
+
