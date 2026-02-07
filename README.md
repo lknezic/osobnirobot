@@ -58,3 +58,4 @@ Site is live at https://osobnirobot.com
 - Email collection → Supabase with rate limiting
 - Responsive, dark theme, animated
 
+v2
