@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 
 type ContainerStatus = 'none' | 'creating' | 'running' | 'stopped' | 'error';
@@ -23,7 +23,10 @@ export default function Dashboard() {
   const [tab, setTab] = useState<Tab>('chat');
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   const HOST = process.env.NEXT_PUBLIC_CONTAINER_HOST || 'osobnirobot.com';
 

@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
-import { PLANS } from "@/lib/types";
+
+const PLANS: Record<string, { stripe_price_id: string; setup_fee: number; stripe_setup_price_id?: string }> = {
+  starter: { stripe_price_id: process.env.STRIPE_STARTER_PRICE_ID || '', setup_fee: 0 },
+  pro: { stripe_price_id: process.env.STRIPE_PRO_PRICE_ID || '', setup_fee: 0 },
+  unlimited: { stripe_price_id: process.env.STRIPE_UNLIMITED_PRICE_ID || '', setup_fee: 0 },
+};
 
 function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!);
