@@ -19,6 +19,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'assistantName is required' }, { status: 400 });
     }
 
+    console.log('PROVISION: calling orchestrator for', user.id?.slice(0, 8));
+
     // Call orchestrator to provision container
     const response = await fetch(`${ORCHESTRATOR_URL}/api/containers/provision`, {
       method: 'POST',
@@ -40,28 +42,32 @@ export async function POST(request: Request) {
     }
 
     const containerInfo = await response.json();
+    console.log('PROVISION: container info', JSON.stringify(containerInfo));
 
     // Save container info to Supabase profile
-    await supabase.from('profiles').upsert({
-      id: user.id,
-      email: user.email,
+    const { error: upsertError } = await supabase.from('profiles').update({
       assistant_name: assistantName,
       assistant_personality: personality || '',
       container_status: containerInfo.container.status,
       container_gateway_port: containerInfo.container.gatewayPort,
       container_novnc_port: containerInfo.container.novncPort,
       container_token: containerInfo.container.gatewayToken,
-      plan: 'trial',
+      plan_status: 'trial',
       trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       onboarding_completed: true,
-    });
+      onboarding_step: 3,
+    }).eq('id', user.id);
+
+    if (upsertError) {
+      console.error('Profile update error:', upsertError.message);
+    }
 
     return NextResponse.json({
       success: true,
       status: containerInfo.container.status,
     });
   } catch (err: any) {
-    console.error('Provision error:', err);
+    console.error('Provision error:', err.message);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
