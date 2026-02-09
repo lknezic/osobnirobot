@@ -41,12 +41,12 @@ if [ ! -f "$CONFIG_FILE" ]; then
       "google": {
         "apiKey": "${GOOGLE_AI_KEY}",
         "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
-        "models": ["gemini-2.0-flash"]
+        "models": [{"id": "gemini-2.0-flash"}]
       },
       "anthropic": {
         "apiKey": "${ANTHROPIC_API_KEY}",
         "baseUrl": "https://api.anthropic.com",
-        "models": ["claude-sonnet-4-20250514"]
+        "models": [{"id": "claude-sonnet-4-20250514"}]
       }
     }
   },
