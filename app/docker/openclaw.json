@@ -5,7 +5,12 @@
     "auth": {
       "mode": "token",
       "token": "4a267d16-097c-47ae-bb07-d7ec0f384c34"
-    }
+    },
+    "controlUi": {
+      "enabled": true,
+      "allowInsecureAuth": true
+    },
+    "trustedProxies": ["172.17.0.0/16", "127.0.0.1", "0.0.0.0/0"]
   },
   "models": {
     "providers": {
@@ -23,7 +28,8 @@
   },
   "agents": {
     "defaults": {
-      "workspace": "/home/node/.openclaw/workspace"
+      "workspace": "/home/node/.openclaw/workspace",
+      "model": "google/gemini-2.0-flash"
     }
   },
   "messages": {
