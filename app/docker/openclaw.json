@@ -29,7 +29,9 @@
   "agents": {
     "defaults": {
       "workspace": "/home/node/.openclaw/workspace",
-      "model": "google/gemini-2.0-flash"
+      "model": {
+        "primary": "google/gemini-2.0-flash"
+      }
     }
   },
   "messages": {
