@@ -12,12 +12,12 @@
       "google": {
         "apiKey": "AIzaSyB9a-dt7CPOI-gTATj8WFTZBVgdsOpdGUQ",
         "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
-        "models": [{"id": "gemini-2.0-flash", "name": "Gemini Flash"}]
+        "models": [{"id": "gemini-2.0-flash", "name": "Gemini 2.0 Flash"}]
       },
       "anthropic": {
         "apiKey": "placeholder",
         "baseUrl": "https://api.anthropic.com",
-        "models": [{"id": "claude-sonnet-4-20250514", "name": "Claude Sonnet"}]
+        "models": [{"id": "claude-sonnet-4-20250514", "name": "Claude Sonnet 4"}]
       }
     }
   },
