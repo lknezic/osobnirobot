@@ -1,0 +1,32 @@
+{
+  "gateway": {
+    "port": 18789,
+    "bind": "lan",
+    "auth": {
+      "mode": "token",
+      "token": "4a267d16-097c-47ae-bb07-d7ec0f384c34"
+    }
+  },
+  "models": {
+    "providers": {
+      "google": {
+        "apiKey": "AIzaSyB9a-dt7CPOI-gTATj8WFTZBVgdsOpdGUQ",
+        "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
+        "models": [{"id": "gemini-2.0-flash", "name": "Gemini Flash"}]
+      },
+      "anthropic": {
+        "apiKey": "placeholder",
+        "baseUrl": "https://api.anthropic.com",
+        "models": [{"id": "claude-sonnet-4-20250514", "name": "Claude Sonnet"}]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "workspace": "/home/node/.openclaw/workspace"
+    }
+  },
+  "messages": {
+    "responsePrefix": "auto"
+  }
+}
