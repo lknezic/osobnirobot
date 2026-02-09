@@ -7,6 +7,8 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/dashboard";
 
+  console.log("AUTH CALLBACK:", { code: code?.slice(0, 8), origin });
+
   if (code) {
     const cookieStore = cookies();
     const supabase = createServerClient(
@@ -27,16 +29,20 @@ export async function GET(request: Request) {
     );
 
     const { error } = await supabase.auth.exchangeCodeForSession(code);
+    console.log("EXCHANGE RESULT:", { error: error?.message || "success" });
 
     if (!error) {
       const { data: { user } } = await supabase.auth.getUser();
+      console.log("USER:", { id: user?.id?.slice(0, 8), email: user?.email });
 
       if (user) {
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("onboarding_step")
           .eq("id", user.id)
           .single();
+
+        console.log("PROFILE:", { profile, profileError: profileError?.message });
 
         if (!profile || profile.onboarding_step < 3) {
           return NextResponse.redirect(new URL("/onboarding", origin));
@@ -45,6 +51,8 @@ export async function GET(request: Request) {
 
       return NextResponse.redirect(new URL(next, origin));
     }
+
+    console.error("EXCHANGE ERROR:", error.message);
   }
 
   return NextResponse.redirect(new URL("/auth/login?error=auth", origin));
