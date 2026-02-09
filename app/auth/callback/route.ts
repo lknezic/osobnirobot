@@ -30,6 +30,7 @@ export async function GET(request: Request) {
 
     if (!error) {
       const { data: { user } } = await supabase.auth.getUser();
+
       if (user) {
         const { data: profile } = await supabase
           .from("profiles")
@@ -37,16 +38,14 @@ export async function GET(request: Request) {
           .eq("id", user.id)
           .single();
 
-        // New user or incomplete onboarding → go to onboarding
         if (!profile || profile.onboarding_step < 3) {
-          return NextResponse.redirect(`${origin}/onboarding`);
+          return NextResponse.redirect(new URL("/onboarding", origin));
         }
       }
 
-      // Returning user → dashboard
-      return NextResponse.redirect(`${origin}${next}`);
+      return NextResponse.redirect(new URL(next, origin));
     }
   }
 
-return NextResponse.redirect(`${origin}/auth/login?error=auth`);
+  return NextResponse.redirect(new URL("/auth/login?error=auth", origin));
 }
