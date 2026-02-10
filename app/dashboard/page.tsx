@@ -24,6 +24,7 @@ export default function Dashboard() {
   const [tab, setTab] = useState<Tab>('chat');
   const [loading, setLoading] = useState(true);
   const [restarting, setRestarting] = useState(false);
+  const [reprovisioning, setReprovisioning] = useState(false);
   const [billingLoading, setBillingLoading] = useState(false);
   const router = useRouter();
 
@@ -34,7 +35,11 @@ export default function Dashboard() {
       const res = await fetch('/api/containers/status');
       const data = await res.json();
       setCs(data);
-      if (!data.exists || data.status === 'none') router.push('/onboarding');
+      // Only redirect to onboarding if no container AND no active subscription
+      const hasPaid = data.planStatus === 'active' || data.planStatus === 'trial';
+      if ((!data.exists || data.status === 'none') && !hasPaid) {
+        router.push('/onboarding');
+      }
     } catch {
     } finally {
       setLoading(false);
@@ -71,6 +76,33 @@ export default function Dashboard() {
       }, 5000);
     } catch {
       setRestarting(false);
+    }
+  };
+
+  const handleReprovision = async () => {
+    setReprovisioning(true);
+    try {
+      const res = await fetch('/api/containers/provision', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          assistantName: cs.assistantName || 'Worker',
+          personality: '',
+          workerType: 'general',
+          workerConfig: {},
+        }),
+      });
+      if (res.ok) {
+        // Poll for status
+        setTimeout(() => fetchStatus(), 3000);
+      } else {
+        const data = await res.json();
+        console.error('Reprovision failed:', data.error);
+        setReprovisioning(false);
+      }
+    } catch (err) {
+      console.error('Reprovision error:', err);
+      setReprovisioning(false);
     }
   };
 
@@ -164,6 +196,56 @@ export default function Dashboard() {
             Log out
           </button>
         </div>
+      </div>
+    );
+  }
+
+  // Paid but container missing or stopped — offer reprovision
+  const hasPaid = cs.planStatus === 'active' || cs.planStatus === 'trial';
+  const containerDown = !cs.exists || cs.status === 'none' || cs.status === 'stopped' || cs.status === 'error';
+  if (hasPaid && containerDown && !reprovisioning) {
+    return (
+      <div style={styles.loadingScreen}>
+        <div style={{ maxWidth: 440, textAlign: 'center', padding: '0 24px' }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>🔧</div>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 8 }}>
+            Worker is offline
+          </h1>
+          <p style={{ fontSize: 14, color: '#888', marginBottom: 24, lineHeight: '1.6' }}>
+            Your subscription is active but your worker isn&apos;t running.
+            {cs.status === 'error' ? ' It may have encountered an error.' : ''} Click below to restart it.
+          </p>
+          <button
+            onClick={handleReprovision}
+            style={{
+              padding: '12px 32px',
+              borderRadius: 8,
+              background: 'linear-gradient(135deg, #7c6bf0, #9b7bf7)',
+              color: '#fff',
+              fontSize: 14,
+              fontWeight: 600,
+              border: 'none',
+              cursor: 'pointer',
+              marginBottom: 12,
+            }}
+          >
+            🔄 Restart worker
+          </button>
+          <br />
+          <button onClick={handleLogout} style={{ ...styles.logoutBtn, marginTop: 8 }}>
+            Log out
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (reprovisioning) {
+    return (
+      <div style={styles.loadingScreen}>
+        <div style={styles.loadingSpinner} />
+        <p style={styles.loadingText}>Restarting your worker...</p>
+        <p style={styles.loadingSubtext}>This may take up to 30 seconds</p>
       </div>
     );
   }
