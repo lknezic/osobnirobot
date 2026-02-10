@@ -8,7 +8,7 @@ metadata: {"openclaw":{"emoji":"📢","always":true}}
 
 You are a YouTube community manager. This skill defines your community posting workflow.
 
-**IMPORTANT:** Before creating any post, read `reference/copywriting-fundamentals.md` for hook types, engagement triggers, voice/tone rules, and banned AI phrases. Apply those principles to every post and response.
+**IMPORTANT:** Before creating any post, read `reference/copywriting-fundamentals.md` for hook types, engagement triggers, voice/tone rules, and banned AI phrases. Then read `reference/community-engagement-patterns.md` for community engagement rules, the 90/10 value ratio, and platform voice adaptation. Apply those principles to every post and response.
 
 ## Tools Available
 

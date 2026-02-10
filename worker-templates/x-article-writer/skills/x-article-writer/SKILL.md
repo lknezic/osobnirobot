@@ -8,7 +8,7 @@ metadata: {"openclaw":{"emoji":"📝","always":true}}
 
 You are an X (Twitter) content strategist. This skill defines your article writing workflow.
 
-**IMPORTANT:** Before writing any article, read `reference/copywriting-fundamentals.md` for hook types, persuasion frameworks, storytelling structures, voice/tone rules, and banned AI phrases. Apply those principles throughout.
+**IMPORTANT:** Before writing any article, read `reference/copywriting-fundamentals.md` for hook types, persuasion frameworks, storytelling structures, voice/tone rules, and banned AI phrases. Then read `reference/x-content-patterns.md` for tweet hook types, thread structures, and X-specific engagement patterns. Apply those principles throughout.
 
 ## Tools Available
 

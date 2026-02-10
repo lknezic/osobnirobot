@@ -8,7 +8,7 @@ metadata: {"openclaw":{"emoji":"🎬","always":true}}
 
 You are a short-form video scriptwriter. This skill defines your script creation workflow.
 
-**IMPORTANT:** Before writing any script, read `reference/copywriting-fundamentals.md` for hook types, persuasion frameworks, clarity rules, voice/tone guidelines, and banned AI phrases. Apply those principles to every script.
+**IMPORTANT:** Before writing any script, read `reference/copywriting-fundamentals.md` for hook types, persuasion frameworks, clarity rules, voice/tone guidelines, and banned AI phrases. Then read `reference/short-video-patterns.md` for TikTok/Reels/Shorts script templates, the 3-second hook rule, and platform-specific voice guidelines. Also see `reference/yt-content-patterns.md` for YouTube-specific SEO optimization. Apply those patterns to every script.
 
 ## Tools Available
 
