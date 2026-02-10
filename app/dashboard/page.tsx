@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 
 type ContainerStatus = 'none' | 'creating' | 'running' | 'stopped' | 'error';
@@ -48,6 +48,10 @@ export default function Dashboard() {
   }, [fetchStatus, cs.status]);
 
   const chatUrl = cs.gatewayPort && cs.gatewayToken
+    ? `https://${cs.gatewayPort}.gw.${HOST}/chat?session=agent%3Amain%3Amain&token=${cs.gatewayToken}`
+    : '';
+
+  const fullDashboardUrl = cs.gatewayPort && cs.gatewayToken
     ? `https://${cs.gatewayPort}.gw.${HOST}/?token=${cs.gatewayToken}`
     : '';
 
@@ -69,7 +73,7 @@ export default function Dashboard() {
   };
 
   const handleLogout = async () => {
-    const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+    const supabase = createClientComponentClient();
     await supabase.auth.signOut();
     router.push('/');
   };
@@ -218,9 +222,9 @@ export default function Dashboard() {
                 Za napredne postavke (vještine, osobnost, memorija), koristi
                 Settings u chat sučelju → tab "⚙️ Postavke" unutar OpenClaw dashboarda.
               </p>
-              {chatUrl && (
+              {fullDashboardUrl && (
                 <a
-                  href={chatUrl}
+                  href={fullDashboardUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={styles.linkBtn}
