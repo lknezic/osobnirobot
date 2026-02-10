@@ -19,6 +19,12 @@ export async function POST() {
       body: JSON.stringify({ userId: user.id }),
     });
 
+    if (!res.ok) {
+      const text = await res.text();
+      console.error('Orchestrator restart error:', text);
+      return NextResponse.json({ error: 'Failed to restart container' }, { status: 502 });
+    }
+
     const data = await res.json();
     return NextResponse.json(data);
   } catch (err: any) {

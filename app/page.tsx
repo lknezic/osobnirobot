@@ -11,6 +11,12 @@ export default function Home() {
     { id: "yt-shorts-script", emoji: "🎬", title: "YouTube Shorts Script", desc: "Writes punchy, hook-driven scripts for vertical short-form videos.", category: "YouTube" },
     { id: "yt-long-script", emoji: "🎥", title: "YouTube Long Script", desc: "Full-length video scripts with hooks, structure, CTAs, and retention tricks.", category: "YouTube" },
     { id: "yt-community", emoji: "📢", title: "YouTube Community Post", desc: "Writes community tab posts that boost engagement and drive views.", category: "YouTube" },
+    { id: "reddit-commenter", emoji: "🤖", title: "Reddit Commenter", desc: "Finds relevant threads in your niche subreddits and leaves helpful, authentic comments.", category: "Reddit & Social" },
+    { id: "discord-engagement", emoji: "🎮", title: "Discord Engagement", desc: "Joins your target Discord servers and builds presence through genuine conversations.", category: "Reddit & Social" },
+    { id: "facebook-group", emoji: "👥", title: "Facebook Group", desc: "Posts and comments in Facebook groups to build authority and drive traffic.", category: "Reddit & Social" },
+    { id: "instagram-content", emoji: "📸", title: "Instagram Content", desc: "Creates captions, Reels scripts, carousel text, and hashtag strategies.", category: "Content & SEO" },
+    { id: "tiktok-content", emoji: "🎵", title: "TikTok Content", desc: "Writes viral TikTok scripts, hooks, and trend-based content for your niche.", category: "Content & SEO" },
+    { id: "seo-optimization", emoji: "🔍", title: "SEO Optimization", desc: "Runs SEO audits, keyword research, and writes optimized content briefs.", category: "Content & SEO" },
   ];
 
   return (
@@ -30,7 +36,7 @@ export default function Home() {
       <section className="text-center pt-[80px] pb-16 px-6 relative">
         <div className="absolute top-[-120px] left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full pointer-events-none opacity-60" style={{ background: "radial-gradient(circle, var(--accent-g) 0%, transparent 65%)" }} />
         <div className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold text-[var(--green)] border border-[var(--green-b)] mb-6" style={{ background: "var(--green-g)" }}>
-          9 Skills Available — 24/7 Workers
+          15 Skills Available — 24/7 Workers
         </div>
         <h1 className="text-[clamp(34px,5.5vw,62px)] font-extrabold tracking-[-2px] leading-[1.08] mb-5 relative">
           AI workers that<br />actually do the work.
@@ -76,59 +82,32 @@ export default function Home() {
 
       {/* SKILLS — grouped by platform */}
       <section className="max-w-[960px] mx-auto px-5 py-16">
-        <h2 className="text-center text-[clamp(22px,3.8vw,34px)] font-bold tracking-tight mb-3">9 skills. Real work.</h2>
+        <h2 className="text-center text-[clamp(22px,3.8vw,34px)] font-bold tracking-tight mb-3">15 skills. Real work.</h2>
         <p className="text-center text-[var(--dim)] text-sm mb-10">Each skill is a trained capability — not a chatbot, a worker with a browser.</p>
 
-        {/* X / Twitter */}
-        <div className="mb-8">
-          <h3 className="text-sm font-semibold text-[var(--accent2)] mb-3 flex items-center gap-2">
-            <span className="w-5 h-5 rounded flex items-center justify-center text-xs" style={{ background: "rgba(124,107,240,0.15)" }}>𝕏</span>
-            X / Twitter
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {skills.filter(s => s.category === "X / Twitter").map(skill => (
-              <div key={skill.id} className="p-5 rounded-[var(--r)] border border-[var(--border)] hover:border-[var(--border-h)] transition-all" style={{ background: "var(--bg2)" }}>
-                <div className="text-2xl mb-2">{skill.emoji}</div>
-                <h4 className="font-bold text-sm mb-1">{skill.title}</h4>
-                <p className="text-xs text-[var(--dim)] leading-relaxed">{skill.desc}</p>
-              </div>
-            ))}
+        {[
+          { name: "X / Twitter", icon: "𝕏" },
+          { name: "Email", icon: "@" },
+          { name: "YouTube", icon: "▶" },
+          { name: "Reddit & Social", icon: "💬" },
+          { name: "Content & SEO", icon: "📈" },
+        ].map((cat, i) => (
+          <div key={cat.name} className={i < 4 ? "mb-8" : ""}>
+            <h3 className="text-sm font-semibold text-[var(--accent2)] mb-3 flex items-center gap-2">
+              <span className="w-5 h-5 rounded flex items-center justify-center text-xs" style={{ background: "rgba(124,107,240,0.15)" }}>{cat.icon}</span>
+              {cat.name}
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {skills.filter(s => s.category === cat.name).map(skill => (
+                <div key={skill.id} className="p-5 rounded-[var(--r)] border border-[var(--border)] hover:border-[var(--border-h)] transition-all" style={{ background: "var(--bg2)" }}>
+                  <div className="text-2xl mb-2">{skill.emoji}</div>
+                  <h4 className="font-bold text-sm mb-1">{skill.title}</h4>
+                  <p className="text-xs text-[var(--dim)] leading-relaxed">{skill.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-
-        {/* Email */}
-        <div className="mb-8">
-          <h3 className="text-sm font-semibold text-[var(--accent2)] mb-3 flex items-center gap-2">
-            <span className="w-5 h-5 rounded flex items-center justify-center text-xs" style={{ background: "rgba(124,107,240,0.15)" }}>@</span>
-            Email
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {skills.filter(s => s.category === "Email").map(skill => (
-              <div key={skill.id} className="p-5 rounded-[var(--r)] border border-[var(--border)] hover:border-[var(--border-h)] transition-all" style={{ background: "var(--bg2)" }}>
-                <div className="text-2xl mb-2">{skill.emoji}</div>
-                <h4 className="font-bold text-sm mb-1">{skill.title}</h4>
-                <p className="text-xs text-[var(--dim)] leading-relaxed">{skill.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* YouTube */}
-        <div>
-          <h3 className="text-sm font-semibold text-[var(--accent2)] mb-3 flex items-center gap-2">
-            <span className="w-5 h-5 rounded flex items-center justify-center text-xs" style={{ background: "rgba(124,107,240,0.15)" }}>▶</span>
-            YouTube
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {skills.filter(s => s.category === "YouTube").map(skill => (
-              <div key={skill.id} className="p-5 rounded-[var(--r)] border border-[var(--border)] hover:border-[var(--border-h)] transition-all" style={{ background: "var(--bg2)" }}>
-                <div className="text-2xl mb-2">{skill.emoji}</div>
-                <h4 className="font-bold text-sm mb-1">{skill.title}</h4>
-                <p className="text-xs text-[var(--dim)] leading-relaxed">{skill.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        ))}
       </section>
 
       {/* PRICING */}
@@ -188,7 +167,7 @@ export default function Home() {
               <span className="text-sm text-[var(--dim)]">/mo</span>
             </div>
             <ul className="space-y-2 text-sm text-[var(--dim)] mb-6">
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>All 9 skills, unlimited</li>
+              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>All 15 skills, unlimited</li>
               <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Runs 24/7 non-stop</li>
               <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Own computer + browser</li>
               <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Deep niche research on setup</li>

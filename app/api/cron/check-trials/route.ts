@@ -31,6 +31,7 @@ export async function GET(request: Request) {
 
     if (expError) {
       console.error("Expired query error:", expError);
+      return NextResponse.json({ error: "Failed to query expired trials" }, { status: 500 });
     }
 
     let stopped = 0;
@@ -73,6 +74,7 @@ export async function GET(request: Request) {
 
     if (warnError) {
       console.error("Warning query error:", warnError);
+      // Non-fatal — still return success for the stop phase
     }
 
     let warned = 0;

@@ -6,13 +6,13 @@ import { createSupabaseBrowser } from "@/lib/supabase-browser";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error">("idle");
-  const supabase = createSupabaseBrowser();
 
   async function handleMagicLink(e: FormEvent) {
     e.preventDefault();
     if (!email) return;
     setStatus("loading");
 
+    const supabase = createSupabaseBrowser();
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
@@ -29,6 +29,7 @@ export default function LoginPage() {
   }
 
   async function handleGoogle() {
+    const supabase = createSupabaseBrowser();
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {

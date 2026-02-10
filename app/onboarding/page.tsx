@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createBrowserClient } from '@supabase/ssr';
 
@@ -65,7 +65,19 @@ function clearConfig() {
   sessionStorage.removeItem('iw_onboarding');
 }
 
-export default function Onboarding() {
+export default function OnboardingPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-12 h-12 border-3 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin" />
+      </div>
+    }>
+      <Onboarding />
+    </Suspense>
+  );
+}
+
+function Onboarding() {
   const searchParams = useSearchParams();
   const urlStep = searchParams.get('step');
 
@@ -136,6 +148,7 @@ export default function Onboarding() {
     }
   };
 
+  const hasXSkill = plan === 'legend' || selectedSkills.some(s => s.startsWith('x-'));
   const BROWSER_SKILLS = ['x-', 'reddit-', 'discord-', 'facebook-', 'instagram-', 'tiktok-'];
   const hasBrowserSkill = plan === 'legend' || selectedSkills.some(s => BROWSER_SKILLS.some(prefix => s.startsWith(prefix)));
 
@@ -386,7 +399,7 @@ export default function Onboarding() {
                 style={{ background: 'var(--bg2)', color: 'var(--text)' }} />
             </div>
 
-            {hasBrowserSkill && (
+            {hasXSkill && (
               <div className="mb-5">
                 <label className="block text-sm text-[var(--dim)] mb-2">X accounts to engage with (one per line)</label>
                 <textarea value={targets} onChange={e => setTargets(e.target.value)}

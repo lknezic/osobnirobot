@@ -40,7 +40,8 @@ export default function Dashboard() {
       if ((!data.exists || data.status === 'none') && !hasPaid) {
         router.push('/onboarding');
       }
-    } catch {
+    } catch (err) {
+      console.error('Status fetch error:', err);
     } finally {
       setLoading(false);
     }
@@ -74,7 +75,8 @@ export default function Dashboard() {
         fetchStatus();
         setRestarting(false);
       }, 5000);
-    } catch {
+    } catch (err) {
+      console.error('Restart error:', err);
       setRestarting(false);
     }
   };
