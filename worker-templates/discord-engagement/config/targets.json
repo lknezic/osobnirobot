@@ -1,0 +1,9 @@
+{
+  "servers": [
+    {{TARGETS}}
+  ],
+  "channels": [
+    {{CHANNELS}}
+  ],
+  "niche": "{{NICHE}}"
+}

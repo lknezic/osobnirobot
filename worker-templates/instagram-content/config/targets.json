@@ -1,0 +1,12 @@
+{
+  "competitor_accounts": [
+    {{TARGETS}}
+  ],
+  "hashtags": [
+    {{HASHTAGS}}
+  ],
+  "branded_hashtags": [
+    {{BRANDED_HASHTAGS}}
+  ],
+  "niche": "{{NICHE}}"
+}

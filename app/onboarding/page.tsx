@@ -14,12 +14,18 @@ const SKILLS = [
   { id: 'yt-shorts-script', emoji: '🎬', title: 'YT Shorts Script', category: 'YouTube' },
   { id: 'yt-long-script', emoji: '🎥', title: 'YT Long Script', category: 'YouTube' },
   { id: 'yt-community', emoji: '📢', title: 'YT Community Post', category: 'YouTube' },
+  { id: 'reddit-commenter', emoji: '🤖', title: 'Reddit Commenter', category: 'Reddit' },
+  { id: 'discord-engagement', emoji: '🎮', title: 'Discord Engagement', category: 'Discord' },
+  { id: 'facebook-group', emoji: '👥', title: 'Facebook Group', category: 'Facebook' },
+  { id: 'instagram-content', emoji: '📸', title: 'Instagram Content', category: 'Instagram' },
+  { id: 'tiktok-content', emoji: '🎵', title: 'TikTok Content', category: 'TikTok' },
+  { id: 'seo-optimization', emoji: '🔍', title: 'SEO Optimization', category: 'SEO' },
 ];
 
 const PLANS = [
   { id: 'simple', title: 'Simple', price: '$99', desc: '1 skill, 24/7', maxSkills: 1 },
   { id: 'expert', title: 'Expert', price: '$399', desc: 'Up to 5 skills, 24/7', maxSkills: 5 },
-  { id: 'legend', title: 'Legend', price: '$499', desc: 'All skills, 24/7', maxSkills: 9 },
+  { id: 'legend', title: 'Legend', price: '$499', desc: 'All skills, 24/7', maxSkills: 15 },
 ];
 
 const TONES = [
@@ -130,7 +136,8 @@ export default function Onboarding() {
     }
   };
 
-  const hasXSkill = selectedSkills.some(s => s.startsWith('x-')) || plan === 'legend';
+  const BROWSER_SKILLS = ['x-', 'reddit-', 'discord-', 'facebook-', 'instagram-', 'tiktok-'];
+  const hasBrowserSkill = plan === 'legend' || selectedSkills.some(s => BROWSER_SKILLS.some(prefix => s.startsWith(prefix)));
 
   const handleLaunch = async () => {
     if (!name.trim()) { setError('Give your worker a name'); return; }
@@ -277,11 +284,11 @@ export default function Onboarding() {
             </h1>
             <p className="text-[var(--dim)] text-sm mb-6">
               {plan === 'legend'
-                ? 'Legend plan includes all 9 skills.'
+                ? `Legend plan includes all ${SKILLS.length} skills.`
                 : `${currentPlan.title} plan: choose ${maxSkills === 1 ? '1 skill' : `up to ${maxSkills} skills`}. ${selectedSkills.length}/${maxSkills} selected.`}
             </p>
 
-            {['X / Twitter', 'Email', 'YouTube'].map(category => (
+            {Array.from(new Set(SKILLS.map(s => s.category))).map(category => (
               <div key={category} className="mb-5">
                 <h3 className="text-xs font-semibold text-[var(--accent2)] mb-2">{category}</h3>
                 <div className="grid grid-cols-1 gap-2">
@@ -379,7 +386,7 @@ export default function Onboarding() {
                 style={{ background: 'var(--bg2)', color: 'var(--text)' }} />
             </div>
 
-            {hasXSkill && (
+            {hasBrowserSkill && (
               <div className="mb-5">
                 <label className="block text-sm text-[var(--dim)] mb-2">X accounts to engage with (one per line)</label>
                 <textarea value={targets} onChange={e => setTargets(e.target.value)}
@@ -458,10 +465,10 @@ export default function Onboarding() {
               </p>
             </div>
 
-            {hasXSkill && (
+            {hasBrowserSkill && (
               <div className="p-4 rounded-[var(--r2)] border border-[var(--green-b)] mb-4" style={{ background: 'var(--green-g)' }}>
                 <p className="text-sm text-[var(--green)]">
-                  After hiring, open the <strong>Browser tab</strong> on your dashboard and log into x.com. Your worker needs access to comment.
+                  After hiring, open the <strong>Browser tab</strong> on your dashboard and log into the platforms your worker needs (X, Reddit, Discord, etc.). Your worker needs access to engage.
                 </p>
               </div>
             )}
