@@ -104,7 +104,7 @@ export default function Dashboard() {
   // Check if subscription is active or in trial
   const isActive = cs.planStatus === 'active' || cs.planStatus === 'trial';
   const isExpired = cs.planStatus === 'cancelled' || cs.planStatus === 'past_due' ||
-    (cs.planStatus === 'trial' && daysLeft <= 0);
+    cs.planStatus === 'expired' || (cs.planStatus === 'trial' && daysLeft <= 0);
 
   const planLabel = cs.selectedPlan
     ? cs.selectedPlan.charAt(0).toUpperCase() + cs.selectedPlan.slice(1)
