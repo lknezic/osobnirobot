@@ -28,10 +28,17 @@ export async function POST(request: Request) {
         const userId = session.metadata?.userId;
         const planId = session.metadata?.planId;
         if (userId && planId) {
+          // Fetch subscription to check if it's trialing
+          const subId = session.subscription as string;
+          const sub = subId ? await stripe.subscriptions.retrieve(subId) : null;
+          const isTrial = sub?.status === "trialing";
+          const trialEnd = sub?.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null;
+
           await supabase.from("profiles").update({
-            plan_status: "active",
+            plan_status: isTrial ? "trial" : "active",
             selected_plan: planId,
-            stripe_subscription_id: session.subscription as string,
+            stripe_subscription_id: subId,
+            ...(trialEnd ? { trial_ends_at: trialEnd } : {}),
           }).eq("id", userId);
         }
         break;
@@ -40,8 +47,21 @@ export async function POST(request: Request) {
         const sub = event.data.object as Stripe.Subscription;
         const userId = sub.metadata?.userId;
         if (userId) {
-          const status = sub.status === "active" || sub.status === "trialing" ? "active" : sub.status === "past_due" ? "past_due" : "cancelled";
-          await supabase.from("profiles").update({ plan_status: status }).eq("id", userId);
+          let status: string;
+          if (sub.status === "trialing") {
+            status = "trial";
+          } else if (sub.status === "active") {
+            status = "active";
+          } else if (sub.status === "past_due") {
+            status = "past_due";
+          } else {
+            status = "cancelled";
+          }
+          const trialEnd = sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null;
+          await supabase.from("profiles").update({
+            plan_status: status,
+            ...(trialEnd ? { trial_ends_at: trialEnd } : {}),
+          }).eq("id", userId);
         }
         break;
       }
