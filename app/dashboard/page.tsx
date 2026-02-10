@@ -48,7 +48,7 @@ export default function Dashboard() {
   }, [fetchStatus, cs.status]);
 
   const chatUrl = cs.gatewayPort && cs.gatewayToken
-    ? `https://${cs.gatewayPort}.gw.${HOST}/chat?session=agent%3Amain%3Amain&token=${cs.gatewayToken}`
+    ? `https://${cs.gatewayPort}.gw.${HOST}/?token=${cs.gatewayToken}`
     : '';
 
   const fullDashboardUrl = cs.gatewayPort && cs.gatewayToken
