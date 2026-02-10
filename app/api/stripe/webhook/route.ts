@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
+import { sendEmail, paymentFailedEmail } from "@/lib/email";
 
 function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -79,9 +80,15 @@ export async function POST(request: Request) {
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
         const customerId = invoice.customer as string;
-        const { data: profile } = await supabase.from("profiles").select("id").eq("stripe_customer_id", customerId).single();
+        const { data: profile } = await supabase.from("profiles").select("id, assistant_name").eq("stripe_customer_id", customerId).single();
         if (profile) {
           await supabase.from("profiles").update({ plan_status: "past_due" }).eq("id", profile.id);
+          // Send payment failed email
+          const customerEmail = typeof invoice.customer_email === "string" ? invoice.customer_email : null;
+          if (customerEmail) {
+            const { subject, html } = paymentFailedEmail(profile.assistant_name || "your worker");
+            sendEmail({ to: customerEmail, subject, html }).catch(() => {});
+          }
         }
         break;
       }

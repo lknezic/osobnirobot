@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { sendEmail, welcomeEmail } from '@/lib/email';
 
 const ORCHESTRATOR_URL = process.env.ORCHESTRATOR_URL || 'http://localhost:3500';
 const ORCHESTRATOR_SECRET = process.env.ORCHESTRATOR_SECRET || '';
@@ -62,6 +63,12 @@ export async function POST(request: Request) {
     if (upsertError) {
       console.error('Profile update error:', upsertError.message);
       return NextResponse.json({ error: 'Failed to save profile' }, { status: 500 });
+    }
+
+    // Send welcome email (non-blocking)
+    if (user.email) {
+      const { subject, html } = welcomeEmail(assistantName);
+      sendEmail({ to: user.email, subject, html }).catch(() => {});
     }
 
     return NextResponse.json({
