@@ -28,11 +28,23 @@ const TONES = [
   { id: 'provocative', emoji: '🔥', label: 'Provocative', desc: 'Bold takes, strong opinions' },
 ];
 
+const WORKER_NAMES = [
+  'Atlas', 'Nova', 'Scout', 'Echo', 'Vega', 'Orion', 'Pixel', 'Sage',
+  'Blaze', 'Ridge', 'Lux', 'Drift', 'Ember', 'Flux', 'Haze', 'Jett',
+  'Koda', 'Maven', 'Nyx', 'Onyx', 'Pulse', 'Quinn', 'Raze', 'Slate',
+  'Thorn', 'Volt', 'Wren', 'Zara', 'Axel', 'Cleo', 'Dash', 'Fern',
+  'Grit', 'Hawk', 'Ivy', 'Jade', 'Knox', 'Luna', 'Milo', 'Nero',
+];
+
+function getRandomName(): string {
+  return WORKER_NAMES[Math.floor(Math.random() * WORKER_NAMES.length)];
+}
+
 export default function Onboarding() {
   const [step, setStep] = useState(1);
   const [plan, setPlan] = useState('simple');
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
-  const [name, setName] = useState('');
+  const [name, setName] = useState(getRandomName);
   const [niche, setNiche] = useState('');
   const [tone, setTone] = useState('witty');
   const [targets, setTargets] = useState('');
@@ -237,10 +249,21 @@ export default function Onboarding() {
 
             <div className="mb-5">
               <label className="block text-sm text-[var(--dim)] mb-2">Worker name</label>
-              <input type="text" value={name} onChange={e => { setName(e.target.value); setError(''); }}
-                placeholder="e.g. Alex, Scout, Echo..." maxLength={30} autoFocus
-                className="w-full px-4 py-3 rounded-[var(--r2)] border border-[var(--border)] text-sm focus:border-[var(--accent)] focus:outline-none transition-colors"
-                style={{ background: 'var(--bg2)', color: 'var(--text)' }} />
+              <div className="flex gap-2">
+                <input type="text" value={name} onChange={e => { setName(e.target.value); setError(''); }}
+                  placeholder="e.g. Atlas, Scout, Echo..." maxLength={30} autoFocus
+                  className="flex-1 px-4 py-3 rounded-[var(--r2)] border border-[var(--border)] text-sm focus:border-[var(--accent)] focus:outline-none transition-colors"
+                  style={{ background: 'var(--bg2)', color: 'var(--text)' }} />
+                <button
+                  type="button"
+                  onClick={() => setName(getRandomName())}
+                  className="px-3 py-3 rounded-[var(--r2)] border border-[var(--border)] text-sm text-[var(--dim)] hover:text-[var(--text)] hover:border-[var(--border-h)] transition-colors"
+                  style={{ background: 'var(--bg2)' }}
+                  title="Random name"
+                >
+                  🎲
+                </button>
+              </div>
             </div>
 
             <div className="mb-5">
