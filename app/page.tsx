@@ -2,12 +2,15 @@
 
 export default function Home() {
   const skills = [
-    { id: "x-commenter", emoji: "🐦", title: "X Commenter", desc: "Comments on posts from accounts you choose. Builds your presence on autopilot.", status: "available" },
-    { id: "email-writer", emoji: "📧", title: "Email Writer", desc: "Drafts and sends cold emails, follow-ups, and replies.", status: "coming" },
-    { id: "researcher", emoji: "📊", title: "Research Analyst", desc: "Monitors competitors, summarizes reports, finds leads.", status: "coming" },
-    { id: "content-writer", emoji: "📝", title: "Content Writer", desc: "Blog posts, social media content, newsletters.", status: "coming" },
-    { id: "lead-gen", emoji: "🎯", title: "Lead Generator", desc: "Finds prospects, qualifies leads, builds lists.", status: "coming" },
-    { id: "bookkeeper", emoji: "💰", title: "Bookkeeper", desc: "Categorizes expenses, generates reports, tracks invoices.", status: "coming" },
+    { id: "x-commenter", emoji: "💬", title: "X Commenter", desc: "Scrolls your feed, finds relevant posts, and leaves smart comments that get you noticed.", category: "X / Twitter" },
+    { id: "x-article-writer", emoji: "📰", title: "X Article Writer", desc: "Writes long-form X articles that position you as a thought leader in your niche.", category: "X / Twitter" },
+    { id: "x-thread-writer", emoji: "🧵", title: "X Thread Writer", desc: "Crafts viral threads that break down ideas, tell stories, and build your following.", category: "X / Twitter" },
+    { id: "email-newsletter", emoji: "📨", title: "Email Newsletter Writer", desc: "Writes engaging newsletters that keep your subscribers hooked and clicking.", category: "Email" },
+    { id: "email-flow", emoji: "⚡", title: "Email Flow Writer", desc: "Creates automated email sequences — welcome, nurture, sales, re-engagement.", category: "Email" },
+    { id: "email-responder", emoji: "📧", title: "Email Responder", desc: "Reads and replies to emails in your voice. Handles inbox on autopilot.", category: "Email" },
+    { id: "yt-shorts-script", emoji: "🎬", title: "YouTube Shorts Script", desc: "Writes punchy, hook-driven scripts for vertical short-form videos.", category: "YouTube" },
+    { id: "yt-long-script", emoji: "🎥", title: "YouTube Long Script", desc: "Full-length video scripts with hooks, structure, CTAs, and retention tricks.", category: "YouTube" },
+    { id: "yt-community", emoji: "📢", title: "YouTube Community Post", desc: "Writes community tab posts that boost engagement and drive views.", category: "YouTube" },
   ];
 
   return (
@@ -27,14 +30,14 @@ export default function Home() {
       <section className="text-center pt-[80px] pb-16 px-6 relative">
         <div className="absolute top-[-120px] left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full pointer-events-none opacity-60" style={{ background: "radial-gradient(circle, var(--accent-g) 0%, transparent 65%)" }} />
         <div className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold text-[var(--green)] border border-[var(--green-b)] mb-6" style={{ background: "var(--green-g)" }}>
-          Now Live — X Commenter Available
+          9 Skills Available — 24/7 Workers
         </div>
         <h1 className="text-[clamp(34px,5.5vw,62px)] font-extrabold tracking-[-2px] leading-[1.08] mb-5 relative">
-          AI workers with<br />real skills.
+          AI workers that<br />actually do the work.
         </h1>
-        <p className="text-[clamp(15px,2.2vw,19px)] text-[var(--dim)] max-w-[520px] mx-auto leading-relaxed relative">
-          Each worker has its own computer, browser, and a specific skill.
-          It runs 24/7 — commenting on X, writing emails, doing research.
+        <p className="text-[clamp(15px,2.2vw,19px)] text-[var(--dim)] max-w-[540px] mx-auto leading-relaxed relative">
+          Pick a skill. Your worker gets its own computer, logs into your accounts,
+          and works 24/7 — commenting on X, writing emails, scripting YouTube videos.
         </p>
 
         <div className="max-w-[440px] mx-auto mt-9 relative">
@@ -54,79 +57,97 @@ export default function Home() {
       {/* HOW IT WORKS */}
       <section className="max-w-[840px] mx-auto px-5 py-16">
         <h2 className="text-center text-[clamp(22px,3.8vw,34px)] font-bold tracking-tight mb-3">How it works</h2>
-        <p className="text-center text-[var(--dim)] text-sm mb-10">Three steps. Under a minute.</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <p className="text-center text-[var(--dim)] text-sm mb-10">Four steps. Your worker does the rest.</p>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
           {[
-            { step: "1", title: "Pick a skill", desc: "Choose what your worker does — comment on X, write emails, do research." },
-            { step: "2", title: "Configure it", desc: "Set your niche, targets, and tone. Your worker boots up in seconds." },
-            { step: "3", title: "It starts working", desc: "Your worker runs 24/7 on its own computer with a real browser." },
+            { step: "1", title: "Pick skills", desc: "Choose what your worker does — X comments, emails, YouTube scripts." },
+            { step: "2", title: "Tell us your niche", desc: "Your worker researches your audience, competitors, and pain points." },
+            { step: "3", title: "Configure tone", desc: "Set personality, voice, and style. Your worker writes like you." },
+            { step: "4", title: "It starts working", desc: "Logs in, scrolls, comments, writes — like a real person, 24/7." },
           ].map((s) => (
-            <div key={s.step} className="text-center p-6 rounded-[var(--r)] border border-[var(--border)]" style={{ background: "var(--bg2)" }}>
-              <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-4 font-bold text-white" style={{ background: "linear-gradient(135deg, var(--accent), #9b7bf7)" }}>{s.step}</div>
-              <h3 className="font-bold text-base mb-2">{s.title}</h3>
-              <p className="text-sm text-[var(--dim)] leading-relaxed">{s.desc}</p>
+            <div key={s.step} className="text-center p-5 rounded-[var(--r)] border border-[var(--border)]" style={{ background: "var(--bg2)" }}>
+              <div className="w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-sm text-white" style={{ background: "linear-gradient(135deg, var(--accent), #9b7bf7)" }}>{s.step}</div>
+              <h3 className="font-bold text-sm mb-1.5">{s.title}</h3>
+              <p className="text-xs text-[var(--dim)] leading-relaxed">{s.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* AVAILABLE SKILLS */}
+      {/* SKILLS — grouped by platform */}
       <section className="max-w-[960px] mx-auto px-5 py-16">
-        <h2 className="text-center text-[clamp(22px,3.8vw,34px)] font-bold tracking-tight mb-3">Worker skills</h2>
-        <p className="text-center text-[var(--dim)] text-sm mb-10">Each skill is a real capability. Not a prompt — a trained worker.</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {skills.map((skill) => (
-            <div
-              key={skill.id}
-              className={`relative p-6 rounded-[var(--r)] border transition-all ${
-                skill.status === "available"
-                  ? "border-[var(--accent)]"
-                  : "border-[var(--border)] opacity-70"
-              }`}
-              style={{
-                background: skill.status === "available"
-                  ? "rgba(124,107,240,0.06)"
-                  : "var(--bg2)",
-              }}
-            >
-              {skill.status === "coming" && (
-                <span className="absolute top-3 right-3 text-[10px] font-semibold px-2.5 py-0.5 rounded-full" style={{ background: "var(--yellow-bg)", color: "var(--yellow)" }}>Coming soon</span>
-              )}
-              {skill.status === "available" && (
-                <span className="absolute top-3 right-3 text-[10px] font-bold px-2.5 py-1 rounded-full text-[var(--green)]" style={{ background: "var(--green-g)", border: "1px solid var(--green-b)" }}>Available</span>
-              )}
-              <div className="text-3xl mb-3">{skill.emoji}</div>
-              <h3 className="font-bold text-base mb-1">{skill.title}</h3>
-              <p className="text-xs text-[var(--dim)] mb-4 leading-relaxed">{skill.desc}</p>
-              {skill.status === "available" ? (
-                <a href="/auth/login" className="text-sm font-semibold px-4 py-2 rounded-[var(--r2)] text-white transition-all hover:brightness-110 inline-block" style={{ background: "linear-gradient(135deg, var(--accent), #9b7bf7)" }}>
-                  Hire now →
-                </a>
-              ) : (
-                <span className="text-xs text-[var(--muted)]">Coming soon</span>
-              )}
-            </div>
-          ))}
+        <h2 className="text-center text-[clamp(22px,3.8vw,34px)] font-bold tracking-tight mb-3">9 skills. Real work.</h2>
+        <p className="text-center text-[var(--dim)] text-sm mb-10">Each skill is a trained capability — not a chatbot, a worker with a browser.</p>
+
+        {/* X / Twitter */}
+        <div className="mb-8">
+          <h3 className="text-sm font-semibold text-[var(--accent2)] mb-3 flex items-center gap-2">
+            <span className="w-5 h-5 rounded flex items-center justify-center text-xs" style={{ background: "rgba(124,107,240,0.15)" }}>𝕏</span>
+            X / Twitter
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {skills.filter(s => s.category === "X / Twitter").map(skill => (
+              <div key={skill.id} className="p-5 rounded-[var(--r)] border border-[var(--border)] hover:border-[var(--border-h)] transition-all" style={{ background: "var(--bg2)" }}>
+                <div className="text-2xl mb-2">{skill.emoji}</div>
+                <h4 className="font-bold text-sm mb-1">{skill.title}</h4>
+                <p className="text-xs text-[var(--dim)] leading-relaxed">{skill.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Email */}
+        <div className="mb-8">
+          <h3 className="text-sm font-semibold text-[var(--accent2)] mb-3 flex items-center gap-2">
+            <span className="w-5 h-5 rounded flex items-center justify-center text-xs" style={{ background: "rgba(124,107,240,0.15)" }}>@</span>
+            Email
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {skills.filter(s => s.category === "Email").map(skill => (
+              <div key={skill.id} className="p-5 rounded-[var(--r)] border border-[var(--border)] hover:border-[var(--border-h)] transition-all" style={{ background: "var(--bg2)" }}>
+                <div className="text-2xl mb-2">{skill.emoji}</div>
+                <h4 className="font-bold text-sm mb-1">{skill.title}</h4>
+                <p className="text-xs text-[var(--dim)] leading-relaxed">{skill.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* YouTube */}
+        <div>
+          <h3 className="text-sm font-semibold text-[var(--accent2)] mb-3 flex items-center gap-2">
+            <span className="w-5 h-5 rounded flex items-center justify-center text-xs" style={{ background: "rgba(124,107,240,0.15)" }}>▶</span>
+            YouTube
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {skills.filter(s => s.category === "YouTube").map(skill => (
+              <div key={skill.id} className="p-5 rounded-[var(--r)] border border-[var(--border)] hover:border-[var(--border-h)] transition-all" style={{ background: "var(--bg2)" }}>
+                <div className="text-2xl mb-2">{skill.emoji}</div>
+                <h4 className="font-bold text-sm mb-1">{skill.title}</h4>
+                <p className="text-xs text-[var(--dim)] leading-relaxed">{skill.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* PRICING */}
       <section className="max-w-[960px] mx-auto px-5 py-16">
         <h2 className="text-center text-[clamp(22px,3.8vw,34px)] font-bold tracking-tight mb-3">Simple pricing</h2>
-        <p className="text-center text-[var(--dim)] text-sm mb-10">No surprise bills. No API costs. Just a flat monthly rate.</p>
+        <p className="text-center text-[var(--dim)] text-sm mb-10">Every plan runs 24/7. No API bills. No surprises.</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* ONE */}
+          {/* SIMPLE */}
           <div className="p-6 rounded-[var(--r)] border border-[var(--border)]" style={{ background: "var(--bg2)" }}>
-            <h3 className="font-bold text-lg mb-1">One</h3>
-            <p className="text-xs text-[var(--dim)] mb-4">1 skill worker</p>
+            <h3 className="font-bold text-lg mb-1">Simple</h3>
+            <p className="text-xs text-[var(--dim)] mb-4">24/7 worker, 1 skill</p>
             <div className="mb-4">
-              <span className="text-3xl font-extrabold">$49</span>
+              <span className="text-3xl font-extrabold">$99</span>
               <span className="text-sm text-[var(--dim)]">/mo</span>
             </div>
             <ul className="space-y-2 text-sm text-[var(--dim)] mb-6">
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>1 specific skill</li>
+              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>1 skill of your choice</li>
+              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Runs 24/7 non-stop</li>
               <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Own computer + browser</li>
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Runs on schedule</li>
               <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Chat with your worker</li>
               <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Watch it work live</li>
             </ul>
@@ -135,19 +156,20 @@ export default function Home() {
             </a>
           </div>
 
-          {/* MULTI */}
+          {/* EXPERT */}
           <div className="p-6 rounded-[var(--r)] border border-[var(--accent)] relative" style={{ background: "rgba(124,107,240,0.06)" }}>
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-bold px-3 py-1 rounded-full text-white" style={{ background: "linear-gradient(135deg, var(--accent), #9b7bf7)" }}>Most popular</span>
-            <h3 className="font-bold text-lg mb-1">Multi</h3>
-            <p className="text-xs text-[var(--dim)] mb-4">Up to 3 skills</p>
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-bold px-3 py-1 rounded-full text-white" style={{ background: "linear-gradient(135deg, var(--accent), #9b7bf7)" }}>Best value</span>
+            <h3 className="font-bold text-lg mb-1">Expert</h3>
+            <p className="text-xs text-[var(--dim)] mb-4">24/7 worker, up to 5 skills</p>
             <div className="mb-4">
-              <span className="text-3xl font-extrabold">$99</span>
+              <span className="text-3xl font-extrabold">$399</span>
               <span className="text-sm text-[var(--dim)]">/mo</span>
             </div>
             <ul className="space-y-2 text-sm text-[var(--text)] mb-6">
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Up to 3 skills on 1 worker</li>
+              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Up to 5 skills</li>
+              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Runs 24/7 non-stop</li>
               <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Own computer + browser</li>
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>24/7 operation</li>
+              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Deep niche research on setup</li>
               <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Chat with your worker</li>
               <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Watch it work live</li>
               <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Priority support</li>
@@ -160,19 +182,20 @@ export default function Home() {
           {/* LEGEND */}
           <div className="p-6 rounded-[var(--r)] border border-[var(--border)]" style={{ background: "var(--bg2)" }}>
             <h3 className="font-bold text-lg mb-1">Legend</h3>
-            <p className="text-xs text-[var(--dim)] mb-4">All skills, 24/7</p>
+            <p className="text-xs text-[var(--dim)] mb-4">24/7 worker, all skills</p>
             <div className="mb-4">
-              <span className="text-3xl font-extrabold">$199</span>
+              <span className="text-3xl font-extrabold">$499</span>
               <span className="text-sm text-[var(--dim)]">/mo</span>
             </div>
             <ul className="space-y-2 text-sm text-[var(--dim)] mb-6">
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>All skills, unlimited</li>
+              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>All 9 skills, unlimited</li>
+              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Runs 24/7 non-stop</li>
               <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Own computer + browser</li>
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>24/7 non-stop operation</li>
+              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Deep niche research on setup</li>
+              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Custom skill requests</li>
               <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Chat with your worker</li>
               <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Watch it work live</li>
               <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Priority support</li>
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Custom skill requests</li>
             </ul>
             <a href="/auth/login" className="block text-center py-2.5 rounded-[var(--r2)] text-sm font-semibold border border-[var(--border)] text-[var(--text)] hover:border-[var(--accent)] transition-colors">
               Start free trial →
@@ -182,24 +205,24 @@ export default function Home() {
         <p className="text-center text-xs text-[var(--muted)] mt-6">All plans include 7-day free trial. No credit card required. Cancel anytime.</p>
       </section>
 
-      {/* VS HUMAN */}
+      {/* VS FREELANCER */}
       <section className="max-w-[840px] mx-auto px-5 py-16">
         <h2 className="text-center text-[clamp(22px,3.8vw,34px)] font-bold tracking-tight mb-10">Why hire an AI worker?</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="p-6 rounded-[var(--r)] border border-[var(--border)]" style={{ background: "var(--bg2)" }}>
             <h3 className="font-bold text-lg mb-4 text-red-400">Hiring a freelancer</h3>
             <ul className="space-y-3 text-sm text-[var(--dim)]">
-              <li className="flex gap-2"><span className="text-red-400">✗</span>$500–2,000/month per task</li>
+              <li className="flex gap-2"><span className="text-red-400">✗</span>$500–3,000/month per task</li>
               <li className="flex gap-2"><span className="text-red-400">✗</span>Works when they feel like it</li>
               <li className="flex gap-2"><span className="text-red-400">✗</span>Days to hire, train, onboard</li>
               <li className="flex gap-2"><span className="text-red-400">✗</span>Ghosting, delays, excuses</li>
-              <li className="flex gap-2"><span className="text-red-400">✗</span>Quality varies wildly</li>
+              <li className="flex gap-2"><span className="text-red-400">✗</span>Inconsistent quality</li>
             </ul>
           </div>
           <div className="p-6 rounded-[var(--r)] border border-[var(--accent)]" style={{ background: "rgba(124,107,240,0.06)" }}>
             <h3 className="font-bold text-lg mb-4 text-[var(--green)]">AI worker</h3>
             <ul className="space-y-3 text-sm text-[var(--text)]">
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>From $49/month — flat rate</li>
+              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>From $99/month — flat rate</li>
               <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Works 24/7, never stops</li>
               <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Ready in 60 seconds</li>
               <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Always available, always consistent</li>
