@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "♦ OsobniRobot OpenClaw Container Starting..."
+echo "♦ InstantWorker Container Starting..."
 
 # ————————————————————————————————
 # 1. Initialize config if first run

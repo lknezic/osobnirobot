@@ -57,5 +57,5 @@ cron.schedule('0 * * * *', async () => {
 });
 
 app.listen(PORT, () => {
-  console.log(`\u2666 OsobniRobot Orchestrator running on port ${PORT}`);
+  console.log(`\u2666 InstantWorker Orchestrator running on port ${PORT}`);
 });

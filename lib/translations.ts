@@ -1,7 +1,7 @@
 export const translations = {
   hr: {
     // Nav
-    brand: "OsobniRobot",
+    brand: "InstantWorker",
     navCta: "Prijavi se",
 
     // Hero
@@ -56,18 +56,18 @@ export const translations = {
     painSetupTitle: "⏰ Setup traje satima",
     painSetupQuote: '"Proveo sam 3 dana konfigurirajući i izgubio $50 na tokenima."',
     painSetupSource: "— Reddit korisnik",
-    painSetupAnswer: "OsobniRobot: 60 sekundi. Bez terminala.",
+    painSetupAnswer: "InstantWorker: 60 sekundi. Bez terminala.",
     painCostTitle: "💸 Računi iznenađenja",
     painCostQuote: '"Jedan developer je dobio račun od $623 u prvom mjesecu."',
     painCostSource: "— ReviewNexa",
-    painCostAnswer: "OsobniRobot: Fiksna cijena. Bez iznenađenja.",
+    painCostAnswer: "InstantWorker: Fiksna cijena. Bez iznenađenja.",
     painSecTitle: "🔒 Sigurnosne rupe",
     painSecQuote: '"42,665 javno dostupnih instanci bez lozinke."',
     painSecSource: "— Istraživanje sigurnosti",
-    painSecAnswer: "OsobniRobot: Izoliran server. Mi upravljamo sigurnošću.",
+    painSecAnswer: "InstantWorker: Izoliran server. Mi upravljamo sigurnošću.",
 
     // Comparison
-    compTitle: "Tradicionalno vs OsobniRobot",
+    compTitle: "Tradicionalno vs InstantWorker",
     compTradTitle: "Tradicionalno",
     compStep1: "Kupnja virtualnog servera",
     compStep2: "Kreiranje SSH ključeva",
@@ -80,7 +80,7 @@ export const translations = {
     compTotal: "Ukupno",
     compTradNote:
       "Ako nisi tehničan, pomnoži ova vremena s 10.",
-    compSimpleTitle: "OsobniRobot",
+    compSimpleTitle: "InstantWorker",
     compSimpleBig: "<1 min",
     compSimpleDesc: "Odaberi model, poveži Telegram, pokreni — gotovo.",
     compSimpleDesc2: "Serveri i OpenClaw su već postavljeni i čekaju tebe.",
@@ -137,7 +137,7 @@ export const translations = {
   },
 
   en: {
-    brand: "OsobniRobot",
+    brand: "InstantWorker",
     navCta: "Sign up",
 
     prelaunch: "● Now Live — Free for 7 Days",
@@ -186,17 +186,17 @@ export const translations = {
     painSetupTitle: "⏰ Setup takes hours",
     painSetupQuote: '"I spent 3 days configuring and lost $50 in tokens."',
     painSetupSource: "— Reddit user",
-    painSetupAnswer: "OsobniRobot: 60 seconds. No terminal needed.",
+    painSetupAnswer: "InstantWorker: 60 seconds. No terminal needed.",
     painCostTitle: "💸 Surprise bills",
     painCostQuote: '"One developer got a $623 bill in their first month."',
     painCostSource: "— ReviewNexa",
-    painCostAnswer: "OsobniRobot: Fixed price. No surprises.",
+    painCostAnswer: "InstantWorker: Fixed price. No surprises.",
     painSecTitle: "🔒 Security holes",
     painSecQuote: '"42,665 publicly accessible instances without a password."',
     painSecSource: "— Security research",
-    painSecAnswer: "OsobniRobot: Isolated server. We handle security.",
+    painSecAnswer: "InstantWorker: Isolated server. We handle security.",
 
-    compTitle: "Traditional vs OsobniRobot",
+    compTitle: "Traditional vs InstantWorker",
     compTradTitle: "Traditional",
     compStep1: "Buy a virtual server",
     compStep2: "Create SSH keys",
@@ -208,7 +208,7 @@ export const translations = {
     compStep8: "Connect Telegram",
     compTotal: "Total",
     compTradNote: "If you're not technical, multiply these times by 10.",
-    compSimpleTitle: "OsobniRobot",
+    compSimpleTitle: "InstantWorker",
     compSimpleBig: "<1 min",
     compSimpleDesc: "Pick a model, connect Telegram, deploy — done.",
     compSimpleDesc2: "Servers and OpenClaw are already set up, waiting for you.",
