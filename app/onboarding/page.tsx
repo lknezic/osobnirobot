@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 const PERSONALITIES = [
-  { id: 'friendly', emoji: '😊', label: 'Prijateljski', labelEn: 'Friendly', desc: 'Topao i pristupačan' },
-  { id: 'professional', emoji: '💼', label: 'Profesionalan', labelEn: 'Professional', desc: 'Koncizan i efikasan' },
-  { id: 'funny', emoji: '😄', label: 'Duhovit', labelEn: 'Funny', desc: 'Zabavan uz posao' },
-  { id: 'minimal', emoji: '🎯', label: 'Minimalan', labelEn: 'Minimal', desc: 'Samo bitno, bez muda' },
+  { id: 'friendly', emoji: '😊', label: 'Friendly', desc: 'Warm and approachable' },
+  { id: 'professional', emoji: '💼', label: 'Professional', desc: 'Concise and efficient' },
+  { id: 'funny', emoji: '😄', label: 'Witty', desc: 'Fun while getting things done' },
+  { id: 'minimal', emoji: '🎯', label: 'Minimal', desc: 'Just the essentials' },
 ];
 
 export default function Onboarding() {
@@ -19,7 +19,7 @@ export default function Onboarding() {
 
   const handleLaunch = async () => {
     if (!name.trim()) {
-      setError('Upiši ime za svog asistenta');
+      setError('Give your AI employee a name');
       return;
     }
 
@@ -38,10 +38,9 @@ export default function Onboarding() {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || 'Greška pri pokretanju');
+        throw new Error(data.error || 'Failed to start worker');
       }
 
-      // Redirect to dashboard — it will show provisioning status
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.message);
@@ -49,17 +48,16 @@ export default function Onboarding() {
     }
   };
 
-  // ── Launching screen ──
   if (launching) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#0a0a0a] text-white">
         <div className="text-center max-w-md px-8">
           <div className="w-12 h-12 border-3 border-gray-700 border-t-blue-500 rounded-full animate-spin mx-auto mb-6" />
           <h2 className="text-2xl font-bold mb-3">
-            Pokrećem {name}...
+            Hiring {name}...
           </h2>
           <p className="text-gray-500">
-            Pripremam tvog osobnog AI asistenta. Samo trenutak.
+            Setting up your AI employee. This takes about 30 seconds.
           </p>
         </div>
       </div>
@@ -69,37 +67,34 @@ export default function Onboarding() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#0a0a0a] text-white">
       <div className="w-full max-w-md px-8">
-        {/* Header */}
         <div className="text-center mb-10">
-          <div className="text-5xl mb-4">🤖</div>
+          <div className="text-5xl mb-4">🧠</div>
           <h1 className="text-3xl font-bold mb-2">
-            Tvoj osobni asistent
+            Hire your AI employee
           </h1>
           <p className="text-gray-500">
-            Daj mu ime i pokreni ga. Traje manje od minute.
+            Give it a name and it&apos;ll be ready in under a minute.
           </p>
         </div>
 
-        {/* Name input */}
         <div className="mb-8">
           <label className="block text-sm text-gray-400 mb-2">
-            Kako se zove tvoj asistent?
+            What&apos;s your AI employee&apos;s name?
           </label>
           <input
             type="text"
             value={name}
             onChange={(e) => { setName(e.target.value); setError(''); }}
-            placeholder="npr. Marko, Luna, Asistent..."
+            placeholder="e.g. Alex, Luna, Max..."
             maxLength={30}
             autoFocus
             className="w-full px-4 py-3 bg-[#1a1a1a] border border-gray-700 rounded-lg text-white text-lg focus:border-blue-500 focus:outline-none placeholder-gray-600"
           />
         </div>
 
-        {/* Personality picker */}
         <div className="mb-8">
           <label className="block text-sm text-gray-400 mb-3">
-            Kakav stil komunikacije?
+            Communication style?
           </label>
           <div className="grid grid-cols-2 gap-3">
             {PERSONALITIES.map((p) => (
@@ -120,14 +115,12 @@ export default function Onboarding() {
           </div>
         </div>
 
-        {/* Error */}
         {error && (
           <div className="mb-4 p-3 bg-red-900/20 border border-red-800 rounded-lg text-red-400 text-sm">
             {error}
           </div>
         )}
 
-        {/* Launch button */}
         <button
           onClick={handleLaunch}
           disabled={!name.trim()}
@@ -137,11 +130,11 @@ export default function Onboarding() {
               : 'bg-gray-800 text-gray-500 cursor-not-allowed'
           }`}
         >
-          Pokreni {name || 'asistenta'} →
+          Hire {name || 'your worker'} →
         </button>
 
         <p className="text-center text-gray-600 text-xs mt-4">
-          Besplatno 7 dana · Nije potrebna kartica
+          Free for 7 days · No credit card required
         </p>
       </div>
     </div>

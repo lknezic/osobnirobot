@@ -86,7 +86,7 @@ export default function Dashboard() {
     return (
       <div style={styles.loadingScreen}>
         <div style={styles.loadingSpinner} />
-        <p style={styles.loadingText}>Učitavanje...</p>
+        <p style={styles.loadingText}>Loading...</p>
       </div>
     );
   }
@@ -95,8 +95,8 @@ export default function Dashboard() {
     return (
       <div style={styles.loadingScreen}>
         <div style={styles.loadingSpinner} />
-        <p style={styles.loadingText}>Kreiramo tvog asistenta...</p>
-        <p style={styles.loadingSubtext}>Ovo može potrajati do 30 sekundi</p>
+        <p style={styles.loadingText}>Setting up your AI employee...</p>
+        <p style={styles.loadingSubtext}>This may take up to 30 seconds</p>
       </div>
     );
   }
@@ -110,7 +110,7 @@ export default function Dashboard() {
             {(cs.assistantName || 'A').charAt(0).toUpperCase()}
           </div>
           <div>
-            <h1 style={styles.assistantName}>{cs.assistantName || 'Asistent'}</h1>
+            <h1 style={styles.assistantName}>{cs.assistantName || 'Worker'}</h1>
             <span style={{
               ...styles.statusBadge,
               background: cs.status === 'running' ? '#059669' : '#dc2626',
@@ -122,19 +122,19 @@ export default function Dashboard() {
         <div style={styles.headerRight}>
           {cs.plan === 'trial' && daysLeft > 0 && (
             <span style={styles.trialBadge}>
-              Probni period: {daysLeft} dana
+              Free trial: {daysLeft} days left
             </span>
           )}
-          <button onClick={handleLogout} style={styles.logoutBtn}>Odjava</button>
+          <button onClick={handleLogout} style={styles.logoutBtn}>Log out</button>
         </div>
       </header>
 
       {/* Tabs */}
       <nav style={styles.tabBar}>
         {([
-          { id: 'chat' as Tab, label: '💬 Razgovor', icon: '' },
-          { id: 'browser' as Tab, label: '🖥️ Preglednik', icon: '' },
-          { id: 'settings' as Tab, label: '⚙️ Postavke', icon: '' },
+          { id: 'chat' as Tab, label: '💬 Chat', icon: '' },
+          { id: 'browser' as Tab, label: '🖥️ Browser', icon: '' },
+          { id: 'settings' as Tab, label: '⚙️ Settings', icon: '' },
         ]).map(t => (
           <button
             key={t.id}
@@ -163,7 +163,7 @@ export default function Dashboard() {
               />
             ) : (
               <div style={styles.placeholder}>
-                <p>⏳ Čekam spajanje na asistenta...</p>
+                <p>⏳ Connecting to your AI employee...</p>
               </div>
             )}
           </div>
@@ -175,8 +175,8 @@ export default function Dashboard() {
             {browserUrl ? (
               <>
                 <div style={styles.browserNotice}>
-                  👁️ Ovdje možeš vidjeti što tvoj asistent radi u pregledniku.
-                  Ako treba unijeti lozinku, unesi je ovdje.
+                  👁️ Watch your AI employee browse the web in real time.
+                  If it needs a password, enter it here.
                 </div>
                 <iframe
                   src={browserUrl}
@@ -187,7 +187,7 @@ export default function Dashboard() {
               </>
             ) : (
               <div style={styles.placeholder}>
-                <p>🖥️ Preglednik nije dostupan</p>
+                <p>🖥️ Browser not available</p>
               </div>
             )}
           </div>
@@ -197,9 +197,9 @@ export default function Dashboard() {
         {tab === 'settings' && (
           <div style={styles.settingsPanel}>
             <div style={styles.settingsCard}>
-              <h2 style={styles.settingsTitle}>Asistent</h2>
+              <h2 style={styles.settingsTitle}>AI Employee</h2>
               <div style={styles.settingRow}>
-                <span style={styles.settingLabel}>Ime</span>
+                <span style={styles.settingLabel}>Name</span>
                 <span style={styles.settingValue}>{cs.assistantName || '—'}</span>
               </div>
               <div style={styles.settingRow}>
@@ -211,16 +211,16 @@ export default function Dashboard() {
               <div style={styles.settingRow}>
                 <span style={styles.settingLabel}>Plan</span>
                 <span style={styles.settingValue}>
-                  {cs.plan === 'trial' ? `Probni period (${daysLeft} dana)` : cs.plan || '—'}
+                  {cs.plan === 'trial' ? `Free trial (${daysLeft} days)` : cs.plan || '—'}
                 </span>
               </div>
             </div>
 
             <div style={styles.settingsCard}>
-              <h2 style={styles.settingsTitle}>Konfiguracija</h2>
+              <h2 style={styles.settingsTitle}>Configuration</h2>
               <p style={styles.settingHint}>
-                Za napredne postavke (vještine, osobnost, memorija), koristi
-                Settings u chat sučelju → tab "⚙️ Postavke" unutar OpenClaw dashboarda.
+                For advanced settings (skills, personality, memory), use the
+                Settings in the chat interface → the full dashboard link below.
               </p>
               {fullDashboardUrl && (
                 <a
@@ -229,13 +229,13 @@ export default function Dashboard() {
                   rel="noopener noreferrer"
                   style={styles.linkBtn}
                 >
-                  Otvori puni dashboard ↗
+                  Open full dashboard ↗
                 </a>
               )}
             </div>
 
             <div style={styles.settingsCard}>
-              <h2 style={styles.settingsTitle}>Upravljanje</h2>
+              <h2 style={styles.settingsTitle}>Management</h2>
               <button
                 onClick={handleRestart}
                 disabled={restarting}
@@ -244,17 +244,17 @@ export default function Dashboard() {
                   opacity: restarting ? 0.5 : 1,
                 }}
               >
-                {restarting ? '⏳ Restartiram...' : '🔄 Restart asistenta'}
+                {restarting ? '⏳ Restarting...' : '🔄 Restart worker'}
               </button>
               <p style={styles.settingHint}>
-                Restart će privremeno prekinuti razgovor (~30 sekundi).
+                Restart will temporarily interrupt the conversation (~30 seconds).
               </p>
             </div>
 
             <div style={{ ...styles.settingsCard, borderColor: '#dc2626' }}>
-              <h2 style={{ ...styles.settingsTitle, color: '#dc2626' }}>Opasna zona</h2>
+              <h2 style={{ ...styles.settingsTitle, color: '#dc2626' }}>Danger zone</h2>
               <button onClick={handleLogout} style={styles.dangerBtn}>
-                Odjavi se
+                Log out
               </button>
             </div>
           </div>

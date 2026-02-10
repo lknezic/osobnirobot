@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "OsobniRobot — Tvoj osobni AI asistent",
+  title: "InstantWorker — Hire Your AI Employee in 1 Click",
   description:
-    "Pokreni svog osobnog AI asistenta za 60 sekundi. Bez tehničkog znanja. Na hrvatskom.",
+    "Deploy a ready-to-work AI employee in 60 seconds. It browses the web, writes emails, does research. No setup, no coding. 7 days free.",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "32x32" },
@@ -12,27 +12,27 @@ export const metadata: Metadata = {
     apple: "/apple-icon.png",
   },
   openGraph: {
-    title: "OsobniRobot — Tvoj osobni AI asistent",
+    title: "InstantWorker — Hire Your AI Employee in 1 Click",
     description:
-      "Jednim klikom pokreni 24/7 AI asistenta na Telegramu. Fiksna cijena, bez iznenađenja.",
-    url: "https://osobnirobot.com",
-    siteName: "OsobniRobot",
-    locale: "hr_HR",
+      "Deploy a ready-to-work AI employee in 60 seconds. It browses the web, writes emails, does research. 7 days free.",
+    url: "https://instantworker.ai",
+    siteName: "InstantWorker",
+    locale: "en_US",
     type: "website",
     images: [
       {
-        url: "https://osobnirobot.com/og-image.png",
+        url: "https://instantworker.ai/og-image.png",
         width: 1200,
         height: 630,
-        alt: "OsobniRobot — Tvoj osobni AI asistent",
+        alt: "InstantWorker — Hire Your AI Employee",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "OsobniRobot — Tvoj osobni AI asistent",
-    description: "Pokreni AI asistenta za 60 sekundi. Fiksna cijena od $19/mj.",
-    images: ["https://osobnirobot.com/og-image.png"],
+    title: "InstantWorker — Hire Your AI Employee in 1 Click",
+    description: "Deploy a ready-to-work AI employee in 60 seconds. 7 days free.",
+    images: ["https://instantworker.ai/og-image.png"],
   },
 };
 
@@ -42,7 +42,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="hr">
+    <html lang="en">
       <body>{children}</body>
     </html>
   );

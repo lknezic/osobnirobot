@@ -1,21 +1,12 @@
 "use client";
 
-import { useState, useEffect, FormEvent } from "react";
+import { useState, FormEvent } from "react";
 import { createSupabaseBrowser } from "@/lib/supabase-browser";
-import { dashTranslations, DashLang } from "@/lib/dash-translations";
 
 export default function LoginPage() {
-  const [lang, setLang] = useState<DashLang>("hr");
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error">("idle");
   const supabase = createSupabaseBrowser();
-  const t = dashTranslations[lang];
-
-  useEffect(() => {
-    const b = navigator.language?.toLowerCase() || "";
-    if (b.startsWith("hr") || b.startsWith("sr") || b.startsWith("bs")) setLang("hr");
-    else setLang("en");
-  }, []);
 
   async function handleMagicLink(e: FormEvent) {
     e.preventDefault();
@@ -26,7 +17,6 @@ export default function LoginPage() {
       email,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
-        data: { language: lang },
       },
     });
 
@@ -53,16 +43,16 @@ export default function LoginPage() {
       <div className="w-full max-w-[380px]">
         {/* Back link */}
         <a href="/" className="text-sm text-[var(--muted)] hover:text-[var(--text)] transition-colors mb-8 inline-block">
-          {t.backToHome}
+          &larr; Back
         </a>
 
         {/* Logo */}
         <div className="font-bold text-xl tracking-tight mb-8">
-          Osobni<span className="text-[var(--accent2)]">Robot</span>
+          Instant<span className="text-[var(--accent2)]">Worker</span>
         </div>
 
-        <h1 className="text-2xl font-bold mb-2">{t.loginTitle}</h1>
-        <p className="text-sm text-[var(--dim)] mb-8">{t.loginSub}</p>
+        <h1 className="text-2xl font-bold mb-2">Sign in</h1>
+        <p className="text-sm text-[var(--dim)] mb-8">Enter your email to sign in with a magic link</p>
 
         {/* Google OAuth */}
         <button
@@ -76,20 +66,20 @@ export default function LoginPage() {
             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
           </svg>
-          {t.loginGoogle}
+          Continue with Google
         </button>
 
         {/* Divider */}
         <div className="flex items-center gap-3 mb-4">
           <div className="flex-1 h-px bg-[var(--border)]" />
-          <span className="text-xs text-[var(--muted)]">{t.loginOr}</span>
+          <span className="text-xs text-[var(--muted)]">or</span>
           <div className="flex-1 h-px bg-[var(--border)]" />
         </div>
 
         {/* Magic Link */}
         {status === "sent" ? (
           <div className="text-center py-8">
-            <p className="text-[var(--green)] font-semibold">{t.loginSent}</p>
+            <p className="text-[var(--green)] font-semibold">Check your email! Click the link to sign in.</p>
           </div>
         ) : (
           <form onSubmit={handleMagicLink} className="space-y-3">
@@ -97,7 +87,7 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder={t.loginEmail}
+              placeholder="your@email.com"
               required
               className="w-full px-4 py-3 rounded-[var(--r2)] border border-[var(--border)] text-sm focus:border-[var(--accent)] focus:outline-none transition-colors"
               style={{ background: "var(--bg2)", color: "var(--text)" }}
@@ -108,22 +98,14 @@ export default function LoginPage() {
               className="w-full py-3 rounded-[var(--r2)] font-semibold text-sm text-white transition-all hover:brightness-110 disabled:opacity-50"
               style={{ background: "linear-gradient(135deg, var(--accent), #9b7bf7)" }}
             >
-              {status === "loading" ? "..." : t.loginButton}
+              {status === "loading" ? "..." : "Send magic link"}
             </button>
           </form>
         )}
 
         {status === "error" && (
-          <p className="text-red-400 text-xs mt-3 text-center">{t.loginError}</p>
+          <p className="text-red-400 text-xs mt-3 text-center">Error sending link. Please try again.</p>
         )}
-
-        {/* Language toggle */}
-        <button
-          onClick={() => setLang(lang === "hr" ? "en" : "hr")}
-          className="text-xs text-[var(--muted)] hover:text-[var(--text)] transition-colors mt-6 block mx-auto cursor-pointer"
-        >
-          {lang === "hr" ? "🇬🇧 English" : "🇭🇷 Hrvatski"}
-        </button>
       </div>
     </main>
   );
