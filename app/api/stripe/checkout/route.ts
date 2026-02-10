@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
-const PLANS: Record<string, { stripe_price_id: string; setup_fee: number; stripe_setup_price_id?: string }> = {
-  starter: { stripe_price_id: process.env.STRIPE_STARTER_PRICE_ID || '', setup_fee: 0 },
-  pro: { stripe_price_id: process.env.STRIPE_PRO_PRICE_ID || '', setup_fee: 0 },
-  unlimited: { stripe_price_id: process.env.STRIPE_UNLIMITED_PRICE_ID || '', setup_fee: 0 },
+const PLANS: Record<string, { stripe_price_id: string }> = {
+  simple: { stripe_price_id: process.env.STRIPE_SIMPLE_PRICE_ID || '' },
+  expert: { stripe_price_id: process.env.STRIPE_EXPERT_PRICE_ID || '' },
+  legend: { stripe_price_id: process.env.STRIPE_LEGEND_PRICE_ID || '' },
 };
 
 function getStripe() {
@@ -36,22 +36,14 @@ export async function POST(request: Request) {
       await supabase.from("profiles").update({ stripe_customer_id: customerId }).eq("id", userId);
     }
 
-    // Build line items
-    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
-      { price: plan.stripe_price_id, quantity: 1 },
-    ];
-
-    // Add setup fee if applicable
-    if (plan.setup_fee > 0 && plan.stripe_setup_price_id) {
-      lineItems.push({ price: plan.stripe_setup_price_id, quantity: 1 });
-    }
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://instantworker.ai";
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: "subscription",
-      line_items: lineItems,
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://osobnirobot.com"}/dashboard?payment=success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://osobnirobot.com"}/dashboard?payment=cancelled`,
+      line_items: [{ price: plan.stripe_price_id, quantity: 1 }],
+      success_url: `${appUrl}/onboarding?step=provision&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${appUrl}/onboarding?step=cancelled`,
       metadata: { userId, planId },
       subscription_data: { trial_period_days: 7, metadata: { userId, planId } },
     });

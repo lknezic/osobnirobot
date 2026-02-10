@@ -49,8 +49,10 @@ export async function POST(request: Request) {
         const sub = event.data.object as Stripe.Subscription;
         const userId = sub.metadata?.userId;
         if (userId) {
-          await supabase.from("profiles").update({ plan_status: "cancelled" }).eq("id", userId);
-          await supabase.from("bots").update({ status: "offline" }).eq("user_id", userId);
+          await supabase.from("profiles").update({
+            plan_status: "cancelled",
+            container_status: "stopped",
+          }).eq("id", userId);
         }
         break;
       }

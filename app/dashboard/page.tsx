@@ -14,7 +14,8 @@ interface ContainerState {
   novncPort?: number;
   gatewayToken?: string;
   assistantName?: string;
-  plan?: string;
+  planStatus?: string;
+  selectedPlan?: string;
   trialEndsAt?: string;
 }
 
@@ -25,7 +26,7 @@ export default function Dashboard() {
   const [restarting, setRestarting] = useState(false);
   const router = useRouter();
 
-  const HOST = process.env.NEXT_PUBLIC_CONTAINER_HOST || 'osobnirobot.com';
+  const HOST = process.env.NEXT_PUBLIC_CONTAINER_HOST || 'instantworker.ai';
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -82,6 +83,15 @@ export default function Dashboard() {
     ? Math.max(0, Math.ceil((new Date(cs.trialEndsAt).getTime() - Date.now()) / 86400000))
     : 0;
 
+  // Check if subscription is active or in trial
+  const isActive = cs.planStatus === 'active' || cs.planStatus === 'trial';
+  const isExpired = cs.planStatus === 'cancelled' || cs.planStatus === 'past_due' ||
+    (cs.planStatus === 'trial' && daysLeft <= 0);
+
+  const planLabel = cs.selectedPlan
+    ? cs.selectedPlan.charAt(0).toUpperCase() + cs.selectedPlan.slice(1)
+    : 'Free Trial';
+
   if (loading) {
     return (
       <div style={styles.loadingScreen}>
@@ -97,6 +107,45 @@ export default function Dashboard() {
         <div style={styles.loadingSpinner} />
         <p style={styles.loadingText}>Setting up your AI employee...</p>
         <p style={styles.loadingSubtext}>This may take up to 30 seconds</p>
+      </div>
+    );
+  }
+
+  // Subscription expired — show upgrade prompt
+  if (isExpired) {
+    return (
+      <div style={styles.loadingScreen}>
+        <div style={{ maxWidth: 440, textAlign: 'center', padding: '0 24px' }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>⏰</div>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 8 }}>
+            {cs.planStatus === 'past_due' ? 'Payment failed' : 'Your plan has expired'}
+          </h1>
+          <p style={{ fontSize: 14, color: '#888', marginBottom: 24, lineHeight: '1.6' }}>
+            {cs.planStatus === 'past_due'
+              ? 'Your last payment didn\'t go through. Update your payment method to keep your worker running.'
+              : 'Your free trial or subscription has ended. Subscribe to keep your worker running 24/7.'}
+          </p>
+          <button
+            onClick={() => router.push('/onboarding')}
+            style={{
+              padding: '12px 32px',
+              borderRadius: 8,
+              background: 'linear-gradient(135deg, #7c6bf0, #9b7bf7)',
+              color: '#fff',
+              fontSize: 14,
+              fontWeight: 600,
+              border: 'none',
+              cursor: 'pointer',
+              marginBottom: 12,
+            }}
+          >
+            Choose a plan
+          </button>
+          <br />
+          <button onClick={handleLogout} style={{ ...styles.logoutBtn, marginTop: 8 }}>
+            Log out
+          </button>
+        </div>
       </div>
     );
   }
@@ -120,9 +169,14 @@ export default function Dashboard() {
           </div>
         </div>
         <div style={styles.headerRight}>
-          {cs.plan === 'trial' && daysLeft > 0 && (
+          {cs.planStatus === 'trial' && daysLeft > 0 && (
             <span style={styles.trialBadge}>
-              Free trial: {daysLeft} days left
+              Free trial: {daysLeft} day{daysLeft !== 1 ? 's' : ''} left
+            </span>
+          )}
+          {cs.planStatus === 'active' && (
+            <span style={styles.activeBadge}>
+              {planLabel} plan
             </span>
           )}
           <button onClick={handleLogout} style={styles.logoutBtn}>Log out</button>
@@ -211,7 +265,11 @@ export default function Dashboard() {
               <div style={styles.settingRow}>
                 <span style={styles.settingLabel}>Plan</span>
                 <span style={styles.settingValue}>
-                  {cs.plan === 'trial' ? `Free trial (${daysLeft} days)` : cs.plan || '—'}
+                  {cs.planStatus === 'trial'
+                    ? `Free trial (${daysLeft} day${daysLeft !== 1 ? 's' : ''} left)`
+                    : cs.planStatus === 'active'
+                      ? `${planLabel} — Active`
+                      : cs.planStatus || '—'}
                 </span>
               </div>
             </div>
@@ -355,6 +413,14 @@ const styles: { [key: string]: React.CSSProperties } = {
     borderRadius: 6,
     background: '#1e3a5f',
     color: '#93c5fd',
+    fontWeight: 500,
+  },
+  activeBadge: {
+    fontSize: 12,
+    padding: '4px 10px',
+    borderRadius: 6,
+    background: '#052e16',
+    color: '#4ade80',
     fontWeight: 500,
   },
   logoutBtn: {

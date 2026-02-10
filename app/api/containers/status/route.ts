@@ -51,7 +51,7 @@ export async function GET() {
 
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
-      .select('container_token, container_gateway_port, container_novnc_port, assistant_name, plan_status, trial_ends_at')
+      .select('container_token, container_gateway_port, container_novnc_port, assistant_name, plan_status, selected_plan, trial_ends_at')
       .eq('id', user.id)
       .single();
 
@@ -63,7 +63,8 @@ export async function GET() {
       ...data,
       gatewayToken: profile?.container_token,
       assistantName: profile?.assistant_name,
-      plan: profile?.plan_status,
+      planStatus: profile?.plan_status,
+      selectedPlan: profile?.selected_plan,
       trialEndsAt: profile?.trial_ends_at,
     });
   } catch (err: any) {

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { createBrowserClient } from '@supabase/ssr';
 
 const SKILLS = [
   { id: 'x-commenter', emoji: '💬', title: 'X Commenter', category: 'X / Twitter' },
@@ -40,7 +41,28 @@ function getRandomName(): string {
   return WORKER_NAMES[Math.floor(Math.random() * WORKER_NAMES.length)];
 }
 
+// Store onboarding config in sessionStorage so it survives the Stripe redirect
+function saveConfig(config: Record<string, unknown>) {
+  sessionStorage.setItem('iw_onboarding', JSON.stringify(config));
+}
+
+function loadConfig(): Record<string, unknown> | null {
+  try {
+    const raw = sessionStorage.getItem('iw_onboarding');
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function clearConfig() {
+  sessionStorage.removeItem('iw_onboarding');
+}
+
 export default function Onboarding() {
+  const searchParams = useSearchParams();
+  const urlStep = searchParams.get('step');
+
   const [step, setStep] = useState(1);
   const [plan, setPlan] = useState('simple');
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
@@ -50,17 +72,57 @@ export default function Onboarding() {
   const [targets, setTargets] = useState('');
   const [brandDesc, setBrandDesc] = useState('');
   const [launching, setLaunching] = useState(false);
+  const [provisioning, setProvisioning] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
 
   const currentPlan = PLANS.find(p => p.id === plan)!;
   const maxSkills = currentPlan.maxSkills;
 
-  const toggleSkill = (id: string) => {
-    if (plan === 'legend') {
-      // Legend gets all skills automatically
+  // Handle return from Stripe checkout
+  useEffect(() => {
+    if (urlStep === 'provision') {
+      setProvisioning(true);
+      provisionWorker();
+    } else if (urlStep === 'cancelled') {
+      setError('Payment was cancelled. You can try again.');
+      setStep(4);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlStep]);
+
+  async function provisionWorker() {
+    const config = loadConfig();
+    if (!config) {
+      setError('Session expired. Please configure your worker again.');
+      setProvisioning(false);
+      setStep(3);
       return;
     }
+
+    try {
+      const res = await fetch('/api/containers/provision', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to start worker');
+      }
+
+      clearConfig();
+      router.push('/dashboard');
+    } catch (err: any) {
+      setError(err.message);
+      setProvisioning(false);
+      setStep(4);
+    }
+  }
+
+  const toggleSkill = (id: string) => {
+    if (plan === 'legend') return;
     if (selectedSkills.includes(id)) {
       setSelectedSkills(selectedSkills.filter(s => s !== id));
     } else if (selectedSkills.length < maxSkills) {
@@ -81,44 +143,78 @@ export default function Onboarding() {
       const toneDesc = TONES.find(t => t.id === tone)?.desc || tone;
       const skillIds = plan === 'legend' ? SKILLS.map(s => s.id) : selectedSkills;
 
-      const res = await fetch('/api/containers/provision', {
+      // Save config to sessionStorage (survives Stripe redirect)
+      const provisionConfig = {
+        assistantName: name.trim(),
+        personality: toneDesc,
+        workerType: skillIds[0] || 'x-commenter',
+        workerConfig: {
+          skills: skillIds,
+          plan,
+          targets: targetList,
+          niche: niche.trim(),
+          brandDescription: brandDesc.trim(),
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        },
+      };
+      saveConfig(provisionConfig);
+
+      // Get user ID for Stripe checkout
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Create Stripe checkout session
+      const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          assistantName: name.trim(),
-          personality: toneDesc,
-          workerType: skillIds[0] || 'x-commenter',
-          workerConfig: {
-            skills: skillIds,
-            plan,
-            targets: targetList,
-            niche: niche.trim(),
-            brandDescription: brandDesc.trim(),
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          },
-        }),
+        body: JSON.stringify({ userId: user.id, planId: plan }),
       });
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || 'Failed to start worker');
+        throw new Error(data.error || 'Failed to create checkout session');
       }
 
-      router.push('/dashboard');
+      const { url } = await res.json();
+      if (!url) throw new Error('No checkout URL returned');
+
+      // Redirect to Stripe Checkout
+      window.location.href = url;
     } catch (err: any) {
       setError(err.message);
       setLaunching(false);
     }
   };
 
+  // Provisioning screen (after Stripe success)
+  if (provisioning) {
+    const savedConfig = loadConfig();
+    const workerName = (savedConfig?.assistantName as string) || 'your worker';
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center max-w-md px-8">
+          <div className="w-12 h-12 border-3 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin mx-auto mb-6" />
+          <h2 className="text-2xl font-bold mb-3">Hiring {workerName}...</h2>
+          <p className="text-[var(--dim)] text-sm mb-2">Payment confirmed. Setting up your worker and researching your niche.</p>
+          <p className="text-[var(--muted)] text-xs">This takes about 30 seconds.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Launching screen (redirecting to Stripe)
   if (launching) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center max-w-md px-8">
           <div className="w-12 h-12 border-3 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin mx-auto mb-6" />
-          <h2 className="text-2xl font-bold mb-3">Hiring {name}...</h2>
-          <p className="text-[var(--dim)] text-sm mb-2">Setting up your worker and researching your niche.</p>
-          <p className="text-[var(--muted)] text-xs">This takes about 30 seconds.</p>
+          <h2 className="text-2xl font-bold mb-3">Redirecting to checkout...</h2>
+          <p className="text-[var(--dim)] text-sm mb-2">Setting up your 7-day free trial.</p>
+          <p className="text-[var(--muted)] text-xs">You won&apos;t be charged today.</p>
         </div>
       </div>
     );
@@ -380,12 +476,12 @@ export default function Onboarding() {
                 className="flex-1 py-3.5 rounded-[var(--r2)] font-bold text-sm text-white transition-all hover:brightness-110 hover:scale-[1.01]"
                 style={{ background: 'linear-gradient(135deg, var(--accent), #9b7bf7)' }}
               >
-                Hire {name} →
+                Start free trial →
               </button>
             </div>
 
             <p className="text-center text-[var(--muted)] text-xs mt-4">
-              Free for 7 days · No credit card required
+              7-day free trial · Cancel anytime · You won&apos;t be charged today
             </p>
           </>
         )}
