@@ -51,20 +51,19 @@ export async function GET() {
 
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
-      .select('container_token, container_gateway_port, container_novnc_port, assistant_name, plan, trial_ends_at')
+      .select('container_token, container_gateway_port, container_novnc_port, assistant_name, plan_status, trial_ends_at')
       .eq('id', user.id)
       .single();
 
-    // Debug logging
-    console.log('STATUS_DEBUG: userId=', user.id);
-    console.log('STATUS_DEBUG: profileError=', profileError);
-    console.log('STATUS_DEBUG: profile=', profile);
+    if (profileError) {
+      console.error('Profile query error:', profileError);
+    }
 
     return NextResponse.json({
       ...data,
       gatewayToken: profile?.container_token,
       assistantName: profile?.assistant_name,
-      plan: profile?.plan,
+      plan: profile?.plan_status,
       trialEndsAt: profile?.trial_ends_at,
     });
   } catch (err: any) {
