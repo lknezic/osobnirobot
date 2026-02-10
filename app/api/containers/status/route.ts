@@ -49,11 +49,16 @@ export async function GET() {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    const { data: profile } = await supabaseAdmin
+    const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('container_token, container_gateway_port, container_novnc_port, assistant_name, plan, trial_ends_at')
       .eq('id', user.id)
       .single();
+
+    // Debug logging
+    console.log('STATUS_DEBUG: userId=', user.id);
+    console.log('STATUS_DEBUG: profileError=', profileError);
+    console.log('STATUS_DEBUG: profile=', profile);
 
     return NextResponse.json({
       ...data,
