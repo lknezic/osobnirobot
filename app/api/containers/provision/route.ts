@@ -13,13 +13,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const { assistantName, personality } = await request.json();
+    const { assistantName, personality, workerType, workerConfig } = await request.json();
 
     if (!assistantName) {
       return NextResponse.json({ error: 'assistantName is required' }, { status: 400 });
     }
 
-    console.log('PROVISION: calling orchestrator for', user.id?.slice(0, 8));
+    console.log('PROVISION: calling orchestrator for', user.id?.slice(0, 8), 'workerType:', workerType || 'general');
 
     // Call orchestrator to provision container
     const response = await fetch(`${ORCHESTRATOR_URL}/api/containers/provision`, {
@@ -32,6 +32,8 @@ export async function POST(request: Request) {
         userId: user.id,
         assistantName,
         personality: personality || '',
+        workerType: workerType || 'general',
+        workerConfig: workerConfig || {},
       }),
     });
 
