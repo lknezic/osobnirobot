@@ -43,6 +43,16 @@
 - "What's your [setting/target]?"
 - "Ever [lost track / messed up / missed] [something]?"
 
+### STORY HOOKS (First 3 Seconds):
+- "Last week I [did X]. Worst decision."
+- "My [client/boss/audience] asked me to [task]. Here's what happened."
+- "Day 1 vs Day 30 of [approach]:"
+
+### CONTRARIAN HOOKS (First 3 Seconds):
+- "[Popular advice] is wrong. Here's proof."
+- "Everyone's doing [X]. I stopped. Results improved."
+- "Unpopular opinion: [bold claim]"
+
 **Universal Pattern:** [Attention-grabber] + [Promise of value]
 
 Always: Hook → Value → CTA in under 60 sec
@@ -95,7 +105,7 @@ Always: Hook → Value → CTA in under 60 sec
 
 ```
 [0:00-0:03] "[Method A] vs [Method B] - [N] attempts analyzed"
-[0:03-0:10] "Swipe for full breakdown →" OR just show data
+[0:03-0:10] "Here's the full breakdown:" OR show data side-by-side
 [0:10-0:20] Method A results with numbers
 [0:20-0:30] Method B results with numbers
 [0:25-0:30] "Not saying [A] is wrong. Just sharing what worked for me."
@@ -108,7 +118,7 @@ Always: Hook → Value → CTA in under 60 sec
 ```
 [0:00-0:03] "[Rule/Method name] ⚡"
 [0:03-0:10] Simple explanation (one sentence)
-[0:10-0:25] "Why? Swipe to see the math →" OR show data/chart
+[0:10-0:25] "Why? Here's the math:" + show data/chart on screen
 [0:25-0:35] Visual proof (chart, screenshot, data)
 [0:35-0:45] "Simple rule. Better results. Less stress."
 ```
@@ -201,6 +211,84 @@ Always: Hook → Value → CTA in under 60 sec
 
 ### Visual Priority:
 Instagram > TikTok > YouTube Shorts (visual expectations)
+
+---
+
+## INSTAGRAM-SPECIFIC: CAROUSEL & STATIC POSTS
+
+Carousels consistently get the highest engagement on Instagram (even above Reels for educational content).
+
+### Carousel Structure (5-10 slides):
+
+```
+Slide 1: HOOK — Bold text, curiosity or data point
+         (This is the "thumbnail" — must stop the scroll)
+Slide 2: CONTEXT — Set up the problem or topic
+Slide 3-8: VALUE — One point per slide, clean design
+         (Use large text, minimal words, high contrast)
+Slide 9: SUMMARY — Recap key points
+Slide 10: CTA — "Save this", "Share with someone who needs it", "Follow for more"
+```
+
+### Carousel Design Rules:
+- **Text per slide:** 15-30 words maximum
+- **Font size:** Large enough to read without zooming
+- **Color:** Consistent brand palette across slides
+- **Last slide:** Always include a CTA
+- **Arrow/indicator:** Show viewers to keep swiping ("→" or "Swipe →" on early slides)
+
+### Carousel Topics That Work:
+- "[N] things about [topic]" — listicle format
+- "Beginner vs Pro" comparisons
+- Step-by-step tutorials (1 step per slide)
+- Myth vs Reality
+- Before/After transformations
+- Data breakdowns with charts
+
+### Static Post Guidelines:
+- **Image posts:** High-quality, relevant visual
+- **Quote posts:** Clean design, bold text, brand colors
+- **Infographic:** One concept, visually explained
+- **Behind-the-scenes:** Authentic, not staged
+- Caption is critical — see caption template above
+
+---
+
+## CONTENT REPURPOSING GUIDE
+
+One piece of content → multiple platforms. Work smarter.
+
+### Long-form → Short-form Pipeline:
+```
+YouTube Long Video (10-15 min)
+  ├── YouTube Short (best 30-sec moment)
+  ├── TikTok (re-edit for TikTok voice/pacing)
+  ├── Instagram Reel (same as TikTok, add caption)
+  ├── Instagram Carousel (key points as slides)
+  ├── X/Twitter Thread (script adapted to tweet format)
+  └── Email Newsletter (video recap + link)
+```
+
+### Short-form → Other Formats:
+```
+TikTok/Reel that performs well
+  ├── Expand into YouTube long-form video
+  ├── Turn into X/Twitter thread with more detail
+  ├── Write blog post / article version
+  └── Create Instagram carousel with the data
+```
+
+### Repurposing Rules:
+- **Adapt, don't copy-paste.** Each platform has its own voice and format.
+- **Best-performing content** should be repurposed first (proven concept).
+- **Timing:** Stagger across platforms (don't post everywhere at once).
+- **Track which platform version performs best** — that tells you where your audience lives.
+
+### What to Repurpose (Priority):
+1. Content that got high engagement on any platform
+2. Educational content (works everywhere)
+3. Results/data content (universal appeal)
+4. Mistakes/lessons learned (relatable across platforms)
 
 ---
 

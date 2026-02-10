@@ -13,27 +13,27 @@
 **Pattern:** [Exact Number] + [Outcome] + [Context/Timeframe]
 
 **Result hooks:**
-- "[$ Amount] profit in [X] days. [Context]. Here's the breakdown:"
-- "Closed [N] trades this week. [$ Total]. [N] wins, [N] still open."
-- "[$ Amount] over [N] months. [N] trades. [Win rate]%. Full transparency:"
-- "Lost [$ Amount] on this one. Still managing it. Here's what went wrong:"
+- "[$ Amount] [result] in [X] days. Here's the breakdown:"
+- "Went from [starting point] to [outcome] in [N] months. Full transparency:"
+- "[N]% [improvement] after [change]. [N] [things] tested."
+- "Lost [$ Amount / N hours / key metric] on this one. Here's what went wrong:"
 
 **Metric hooks:**
-- "[Win rate]% on [method] over [N] trades."
-- "Hit [target]% in [N] days. Could've held [N] more but didn't."
-- "Saved [N] hours/week with [approach change]."
-- "Zero [mistakes] in [N] iterations. Here's my system:"
+- "[Win rate / conversion / growth]% over [N] [attempts / months / campaigns]."
+- "Saved [N] hours/week with [one specific change]."
+- "Zero [mistakes / complaints / failures] in [N] iterations. Here's my system:"
+- "[N]x [improvement] after switching from [old] to [new]."
 
 ### Type #2: PROBLEM HOOKS (Pain Points)
 **Why they work:** Relatable pain creates instant connection
 **Pattern:** [Relatable Problem] → [Promise of solution or shared experience]
 
 **Templates:**
-- "[Did X] 3 times and lost track of [Y]?"
-- "Ever [do X] and your [system] shows a different result than you calculated?"
-- "[Process] broke your [tool]. Again."
-- "[Authority/deadline] asks for [data]. You have no idea."
-- "[Action taken]. It's profitable. But when do I [next step]?"
+- "Spent [N] hours on [task]. Could've done it in [N] minutes."
+- "Ever [do X] and your [system/tool] shows completely different numbers?"
+- "[Process] broke your [workflow]. Again."
+- "[Boss / client / deadline] asks for [data]. You have no idea where it is."
+- "Everyone says [common advice]. I followed it. Here's what actually happened:"
 
 ### Type #3: CURIOSITY HOOKS (Open Loops)
 **Why they work:** Brain seeks closure on incomplete information
@@ -287,6 +287,102 @@
 - Show wins AND losses
 - Data-driven
 - No hype in any tweet
+
+---
+
+## SINGLE TWEET TEMPLATES
+
+Not everything needs to be a thread. Standalone tweets drive daily engagement.
+
+### Template #1: Insight Tweet
+```
+[Observation or data point]
+
+[Why it matters in 1-2 lines]
+
+[Takeaway or question]
+```
+
+### Template #2: Hot Take Tweet
+```
+[Contrarian opinion]
+
+[1-2 lines of reasoning]
+
+Agree or disagree?
+```
+
+### Template #3: Listicle Tweet
+```
+[N] things I learned [doing X] for [N] months:
+
+1. [Insight]
+2. [Insight]
+3. [Insight]
+4. [Insight]
+5. [Insight]
+
+Which one surprised you?
+```
+
+### Template #4: Before/After Tweet
+```
+[Time period] ago: [old way / old result]
+Today: [new way / new result]
+
+The difference? [One key change]
+```
+
+### Template #5: Story Snippet Tweet
+```
+[Vivid moment — 1 sentence]
+
+[What happened next — 1-2 sentences]
+
+[Lesson or punchline]
+```
+
+### Template #6: Resource/Value Tweet
+```
+[Resource type] I wish I had [time] ago:
+
+[Bullet 1]
+[Bullet 2]
+[Bullet 3]
+
+Save this for later.
+```
+
+---
+
+## ALGORITHM & TIMING
+
+### How X/Twitter Algorithm Works (2024-2025)
+- **Replies and quote tweets** weigh more than likes
+- **Dwell time** (how long people read) matters — longer tweets with line breaks win
+- **Images in tweet 1** boost impressions ~2x
+- **Threads** get algorithmic boost when engagement is strong on tweet 1
+- **Consistency** beats virality — daily posting trains the algorithm
+
+### Optimal Posting Times
+- **Weekdays:** 8-10 AM and 5-7 PM (audience timezone)
+- **Weekends:** 9-11 AM
+- **Threads:** Mornings perform best (people have time to read)
+- **Engagement tweets:** Evenings (people browsing casually)
+
+### Frequency Guidelines
+- **Minimum:** 1 tweet/day (consistency signal)
+- **Sweet spot:** 3-5 tweets/day + 10-20 replies
+- **Threads:** 2-3 per week maximum (quality over quantity)
+- **Replies to others:** This is where real growth happens — aim for 10+ quality replies daily
+
+### Reply Strategy (Growth Hack)
+Replying to larger accounts in your niche is the fastest organic growth strategy:
+- Find 5-10 accounts with 10x+ your following in the same niche
+- Turn on notifications for their posts
+- Be among the first to reply with genuine value
+- Add data, personal experience, or a different angle — never "great post!"
+- Consistent quality replies get noticed by their audience
 
 ---
 
