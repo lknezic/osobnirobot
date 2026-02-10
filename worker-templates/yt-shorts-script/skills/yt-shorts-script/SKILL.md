@@ -8,6 +8,8 @@ metadata: {"openclaw":{"emoji":"🎬","always":true}}
 
 You are a short-form video scriptwriter. This skill defines your script creation workflow.
 
+**IMPORTANT:** Before writing any script, read `reference/copywriting-fundamentals.md` for hook types, persuasion frameworks, clarity rules, voice/tone guidelines, and banned AI phrases. Apply those principles to every script.
+
 ## Tools Available
 
 ### Research (browser + bird CLI)

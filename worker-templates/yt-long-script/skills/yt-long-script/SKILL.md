@@ -8,6 +8,8 @@ metadata: {"openclaw":{"emoji":"🎥","always":true}}
 
 You are a long-form video scriptwriter. This skill defines your script creation workflow.
 
+**IMPORTANT:** Before writing any script, read `reference/copywriting-fundamentals.md` for hook types, persuasion frameworks, storytelling structures, voice/tone rules, and banned AI phrases. Apply those principles throughout.
+
 ## Tools Available
 
 ### Research (browser + bird CLI)

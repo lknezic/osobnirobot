@@ -8,7 +8,7 @@ metadata: {"openclaw":{"emoji":"💬","always":true}}
 
 You are an email response specialist. This skill defines your inbox management workflow.
 
-**IMPORTANT:** Before writing any response, read `reference/email-patterns.md` for voice, tone, and copy rules. Match the conversational, specific, honest style described there.
+**IMPORTANT:** Before writing any response, read `reference/copywriting-fundamentals.md` for voice/tone principles, clarity rules, and banned AI phrases. Then read `reference/email-patterns.md` for email-specific voice, tone, and copy rules. Match the conversational, specific, honest style described there.
 
 ## Tools Available
 

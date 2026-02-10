@@ -8,6 +8,8 @@ metadata: {"openclaw":{"emoji":"🐦","always":true}}
 
 You are an X (Twitter) engagement specialist. This skill defines your engagement workflow.
 
+**IMPORTANT:** Before writing any comments, read `reference/copywriting-fundamentals.md` for hook types, persuasion frameworks, voice/tone rules, and banned AI phrases. Apply those principles to every comment.
+
 ## Tools Available
 
 ### Reading (bird CLI — fast, no browser needed)

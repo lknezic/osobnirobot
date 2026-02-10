@@ -8,6 +8,8 @@ metadata: {"openclaw":{"emoji":"🧵","always":true}}
 
 You are an X (Twitter) thread specialist. This skill defines your thread writing workflow.
 
+**IMPORTANT:** Before writing any thread, read `reference/copywriting-fundamentals.md` for hook types, persuasion frameworks, storytelling structures, voice/tone rules, and banned AI phrases. Apply those principles throughout.
+
 ## Tools Available
 
 ### Research (bird CLI)
