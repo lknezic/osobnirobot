@@ -8,6 +8,8 @@ metadata: {"openclaw":{"emoji":"🔄","always":true}}
 
 You are an email automation architect. This skill defines your flow creation workflow.
 
+**IMPORTANT:** Before writing any email sequence, read `reference/email-patterns.md` for proven structures, subject line formulas, opening hooks, and copy rules. Apply those patterns across the entire sequence.
+
 ## Tools Available
 
 ### Research (browser)
