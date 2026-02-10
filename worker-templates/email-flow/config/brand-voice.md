@@ -4,22 +4,23 @@
 **Niche/Industry:** {{NICHE}}
 **Description:** {{BRAND_DESCRIPTION}}
 
-## Comment Tone
+## Email Sequence Tone
 **Style:** {{PERSONALITY}}
 
-## Example Comments (for reference)
-These are the kinds of comments you should write. Match this energy and style:
+## Example Content (for reference)
+Match this energy and style across all emails in the sequence:
 
 {{EXAMPLE_COMMENTS}}
 
-## Topics to Engage With
+## Topics to Cover in Flows
 - Topics related to: {{NICHE}}
-- Posts about industry trends, news, opinions
-- Questions from the community
-- Thought leadership posts
+- Educational content that builds trust
+- Customer success stories and case studies
+- Product/service value demonstration
+- Onboarding and quick-win content
 
 ## Topics to AVOID
 - Politics, religion, controversy
 - Competitor bashing
-- Anything unrelated to the niche
-- Posts with heated arguments in replies
+- High-pressure sales tactics
+- Spam trigger words (FREE, ACT NOW, etc.)
