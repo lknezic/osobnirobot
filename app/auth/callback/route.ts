@@ -38,13 +38,13 @@ export async function GET(request: Request) {
       if (user) {
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
-          .select("onboarding_step")
+          .select("onboarding_completed, container_status")
           .eq("id", user.id)
           .single();
 
         console.log("PROFILE:", { profile, profileError: profileError?.message });
 
-        if (!profile || profile.onboarding_step < 3) {
+        if (!profile || !profile.onboarding_completed) {
           return NextResponse.redirect(new URL("/onboarding", origin));
         }
       }

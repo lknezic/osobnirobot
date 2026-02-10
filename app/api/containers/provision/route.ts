@@ -55,11 +55,11 @@ export async function POST(request: Request) {
       plan_status: 'trial',
       trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       onboarding_completed: true,
-      onboarding_step: 3,
     }).eq('id', user.id);
 
     if (upsertError) {
       console.error('Profile update error:', upsertError.message);
+      return NextResponse.json({ error: 'Failed to save profile' }, { status: 500 });
     }
 
     return NextResponse.json({
