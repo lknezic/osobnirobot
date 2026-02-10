@@ -24,6 +24,7 @@ export default function Dashboard() {
   const [tab, setTab] = useState<Tab>('chat');
   const [loading, setLoading] = useState(true);
   const [restarting, setRestarting] = useState(false);
+  const [billingLoading, setBillingLoading] = useState(false);
   const router = useRouter();
 
   const HOST = process.env.NEXT_PUBLIC_CONTAINER_HOST || 'instantworker.ai';
@@ -70,6 +71,23 @@ export default function Dashboard() {
       }, 5000);
     } catch {
       setRestarting(false);
+    }
+  };
+
+  const handleBilling = async () => {
+    setBillingLoading(true);
+    try {
+      const res = await fetch('/api/stripe/portal', { method: 'POST' });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error('No portal URL:', data.error);
+      }
+    } catch (err) {
+      console.error('Billing error:', err);
+    } finally {
+      setBillingLoading(false);
     }
   };
 
@@ -290,6 +308,23 @@ export default function Dashboard() {
                   Open full dashboard ↗
                 </a>
               )}
+            </div>
+
+            <div style={styles.settingsCard}>
+              <h2 style={styles.settingsTitle}>Billing</h2>
+              <p style={styles.settingHint}>
+                Manage your subscription, update payment method, or change plans.
+              </p>
+              <button
+                onClick={handleBilling}
+                disabled={billingLoading}
+                style={{
+                  ...styles.restartBtn,
+                  opacity: billingLoading ? 0.5 : 1,
+                }}
+              >
+                {billingLoading ? '⏳ Loading...' : '💳 Manage subscription'}
+              </button>
             </div>
 
             <div style={styles.settingsCard}>
