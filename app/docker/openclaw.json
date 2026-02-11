@@ -1,10 +1,11 @@
 {
+  "_note": "This is a reference config only. The entrypoint.sh generates the actual config from environment variables at container startup.",
   "gateway": {
     "port": 18789,
     "bind": "lan",
     "auth": {
       "mode": "token",
-      "token": "4a267d16-097c-47ae-bb07-d7ec0f384c34"
+      "token": "SET_VIA_GATEWAY_TOKEN_ENV_VAR"
     },
     "controlUi": {
       "enabled": true,
@@ -15,12 +16,12 @@
   "models": {
     "providers": {
       "google": {
-        "apiKey": "AIzaSyB9a-dt7CPOI-gTATj8WFTZBVgdsOpdGUQ",
+        "apiKey": "SET_VIA_GOOGLE_AI_KEY_ENV_VAR",
         "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
         "models": [{"id": "gemini-2.0-flash", "name": "Gemini 2.0 Flash"}]
       },
       "anthropic": {
-        "apiKey": "placeholder",
+        "apiKey": "SET_VIA_ANTHROPIC_API_KEY_ENV_VAR",
         "baseUrl": "https://api.anthropic.com",
         "models": [{"id": "claude-sonnet-4-20250514", "name": "Claude Sonnet 4"}]
       }

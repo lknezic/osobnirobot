@@ -14,7 +14,30 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const { assistantName, personality, workerType, workerConfig } = await request.json();
+    const body = await request.json();
+
+    // Sanitize inputs — strip HTML/script tags, enforce length limits
+    const sanitize = (s: string, max: number) =>
+      (s || '').replace(/<[^>]*>/g, '').trim().slice(0, max);
+
+    const assistantName = sanitize(body.assistantName, 30);
+    const personality = sanitize(body.personality, 200);
+    const workerType = sanitize(body.workerType, 50);
+    const workerConfig = body.workerConfig || {};
+
+    // Sanitize nested config values
+    if (workerConfig.niche) workerConfig.niche = sanitize(workerConfig.niche, 100);
+    if (workerConfig.brandDescription) workerConfig.brandDescription = sanitize(workerConfig.brandDescription, 500);
+    if (Array.isArray(workerConfig.targets)) {
+      workerConfig.targets = workerConfig.targets
+        .slice(0, 50) // max 50 targets
+        .map((t: string) => sanitize(t, 100));
+    }
+    if (Array.isArray(workerConfig.skills)) {
+      workerConfig.skills = workerConfig.skills
+        .slice(0, 15) // max 15 skills
+        .map((s: string) => sanitize(s, 50));
+    }
 
     if (!assistantName) {
       return NextResponse.json({ error: 'assistantName is required' }, { status: 400 });
@@ -47,7 +70,7 @@ export async function POST(request: Request) {
     const containerInfo = await response.json();
     console.log('PROVISION: container info', JSON.stringify(containerInfo));
 
-    // Save container info to Supabase profile
+    // Save container info + worker config to Supabase profile
     const { error: upsertError } = await supabase.from('profiles').update({
       assistant_name: assistantName,
       assistant_personality: personality || '',
@@ -58,6 +81,8 @@ export async function POST(request: Request) {
       plan_status: 'trial',
       trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       onboarding_completed: true,
+      selected_skills: workerConfig?.skills || [workerType || 'x-commenter'],
+      worker_config: workerConfig || {},
     }).eq('id', user.id);
 
     if (upsertError) {
