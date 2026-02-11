@@ -1,5 +1,5 @@
 # InstantWorker Container
-# Based on OpenClaw with Chrome, VNC, and noVNC for browser automation
+# Based on OpenClaw (open-source AI agent) with VNC for browser automation
 #
 # Build: docker build -t instantworker/worker:latest -f app/docker/Dockerfile .
 # Run:   docker run -d --name iw-test \
@@ -8,7 +8,7 @@
 #          -p 20000:18789 -p 21000:6080 \
 #          instantworker/worker:latest
 
-FROM ghcr.io/anthropics/openclaw:latest
+FROM alpine/openclaw:latest
 
 USER root
 
