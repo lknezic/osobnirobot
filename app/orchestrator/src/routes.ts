@@ -6,14 +6,17 @@ import path from 'path';
 
 const docker = new Docker({ socketPath: process.env.DOCKER_SOCKET || '/var/run/docker.sock' });
 
-const CONTAINER_IMAGE = process.env.CONTAINER_IMAGE || 'instantworker/worker:latest';
-const GOOGLE_AI_KEY = process.env.GOOGLE_AI_KEY || '';
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || '';
-const GATEWAY_PORT_START = parseInt(process.env.GATEWAY_PORT_START || '20000');
-const GATEWAY_PORT_END = parseInt(process.env.GATEWAY_PORT_END || '20999');
-const NOVNC_PORT_START = parseInt(process.env.NOVNC_PORT_START || '21000');
-const NOVNC_PORT_END = parseInt(process.env.NOVNC_PORT_END || '21999');
-const WORKER_TEMPLATES_PATH = process.env.WORKER_TEMPLATES_PATH || '/opt/osobnirobot/worker-templates';
+// Read env vars lazily (dotenv may not have loaded at import time)
+const env = () => ({
+  CONTAINER_IMAGE: process.env.CONTAINER_IMAGE || 'instantworker/worker:latest',
+  GOOGLE_AI_KEY: process.env.GOOGLE_AI_KEY || '',
+  ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || '',
+  GATEWAY_PORT_START: parseInt(process.env.GATEWAY_PORT_START || '20000'),
+  GATEWAY_PORT_END: parseInt(process.env.GATEWAY_PORT_END || '20999'),
+  NOVNC_PORT_START: parseInt(process.env.NOVNC_PORT_START || '21000'),
+  NOVNC_PORT_END: parseInt(process.env.NOVNC_PORT_END || '21999'),
+  WORKER_TEMPLATES_PATH: process.env.WORKER_TEMPLATES_PATH || '/opt/osobnirobot/worker-templates',
+});
 
 // Track allocated ports to avoid collisions
 const allocatedPorts = new Set<number>();
@@ -72,8 +75,8 @@ function buildWorkspace(
 
   // Determine primary skill template to use
   const primarySkill = workerType || 'x-commenter';
-  const templateDir = path.join(WORKER_TEMPLATES_PATH, primarySkill);
-  const sharedDir = path.join(WORKER_TEMPLATES_PATH, '_shared');
+  const templateDir = path.join(env().WORKER_TEMPLATES_PATH, primarySkill);
+  const sharedDir = path.join(env().WORKER_TEMPLATES_PATH, '_shared');
 
   // Copy SOUL.md from skill template (or shared fallback)
   let soulContent = '';
@@ -144,7 +147,7 @@ function buildWorkspace(
 
   const skillIds = workerConfig.skills || [primarySkill];
   for (const skillId of skillIds) {
-    const skillTemplateDir = path.join(WORKER_TEMPLATES_PATH, skillId);
+    const skillTemplateDir = path.join(env().WORKER_TEMPLATES_PATH, skillId);
     // Copy the skill's SOUL.md as a skill instruction file
     const skillSoulPath = path.join(skillTemplateDir, 'SOUL.md');
     if (fs.existsSync(skillSoulPath)) {
@@ -205,8 +208,8 @@ containerRoutes.post('/provision', async (req: Request, res: Response) => {
     }
 
     // Allocate ports
-    const gatewayPort = await findAvailablePort(GATEWAY_PORT_START, GATEWAY_PORT_END);
-    const novncPort = await findAvailablePort(NOVNC_PORT_START, NOVNC_PORT_END);
+    const gatewayPort = await findAvailablePort(env().GATEWAY_PORT_START, env().GATEWAY_PORT_END);
+    const novncPort = await findAvailablePort(env().NOVNC_PORT_START, env().NOVNC_PORT_END);
     const gatewayToken = randomUUID();
 
     // Build workspace from templates
@@ -221,14 +224,14 @@ containerRoutes.post('/provision', async (req: Request, res: Response) => {
 
     // Create container
     const container = await docker.createContainer({
-      Image: CONTAINER_IMAGE,
+      Image: env().CONTAINER_IMAGE,
       name,
       Env: [
         `GATEWAY_TOKEN=${gatewayToken}`,
         `OPENCLAW_GATEWAY_PORT=18789`,
         `NOVNC_PORT=6080`,
-        `GOOGLE_AI_KEY=${GOOGLE_AI_KEY}`,
-        `ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}`,
+        `GOOGLE_AI_KEY=${env().GOOGLE_AI_KEY}`,
+        `ANTHROPIC_API_KEY=${env().ANTHROPIC_API_KEY}`,
         `ASSISTANT_NAME=${assistantName || 'Worker'}`,
         `WORKER_TYPE=${workerType || 'general'}`,
       ],

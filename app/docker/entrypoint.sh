@@ -34,6 +34,10 @@ if [ ! -f "$CONFIG_FILE" ]; then
     "auth": {
       "mode": "token",
       "token": "${GATEWAY_TOKEN}"
+    },
+    "controlUi": {
+      "enabled": true,
+      "allowInsecureAuth": true
     }
   },
   "models": {
