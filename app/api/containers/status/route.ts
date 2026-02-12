@@ -51,7 +51,7 @@ export async function GET() {
 
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
-      .select('container_token, container_gateway_port, container_novnc_port, assistant_name, plan_status, selected_plan, trial_ends_at, stripe_subscription_id, worker_config')
+      .select('*')
       .eq('id', user.id)
       .single();
 
@@ -59,11 +59,17 @@ export async function GET() {
       console.error('Profile query error:', profileError);
     }
 
+    // Use gateway port/token from profile (DB) as primary source, orchestrator as fallback
+    const gatewayPort = profile?.container_gateway_port || data.gatewayPort;
+    const novncPort = profile?.container_novnc_port || data.novncPort;
+
     return NextResponse.json({
       ...data,
+      gatewayPort,
+      novncPort,
       gatewayToken: profile?.container_token,
       assistantName: profile?.assistant_name,
-      planStatus: profile?.plan_status,
+      planStatus: profile?.plan_status || (profile?.onboarding_completed ? 'trial' : undefined),
       selectedPlan: profile?.selected_plan,
       trialEndsAt: profile?.trial_ends_at,
       hasSubscription: !!profile?.stripe_subscription_id,

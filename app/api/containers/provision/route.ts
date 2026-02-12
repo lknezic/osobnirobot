@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { createClient } from '@supabase/supabase-js';
 import { sendEmail, welcomeEmail } from '@/lib/email';
 
 const ORCHESTRATOR_URL = process.env.ORCHESTRATOR_URL || 'http://localhost:3500';
@@ -77,8 +78,12 @@ export async function POST(request: Request) {
     const containerInfo = await response.json();
     console.log('PROVISION: container info', JSON.stringify(containerInfo));
 
-    // Save container info + worker config to Supabase profile
-    const { error: upsertError } = await supabase.from('profiles').update({
+    // Save container info + worker config to Supabase profile (service role bypasses RLS)
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+    const { error: upsertError } = await supabaseAdmin.from('profiles').update({
       assistant_name: assistantName,
       assistant_personality: personality || '',
       container_status: containerInfo.container.status,

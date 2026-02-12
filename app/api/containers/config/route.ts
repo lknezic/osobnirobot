@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
+import { createClient } from '@supabase/supabase-js';
 
 const ORCHESTRATOR_URL = process.env.ORCHESTRATOR_URL || 'http://localhost:3500';
 const ORCHESTRATOR_SECRET = process.env.ORCHESTRATOR_SECRET || '';
@@ -28,8 +29,14 @@ export async function PUT(request: Request) {
         .map((u: string) => sanitize(u, 200));
     }
 
+    // Use service role to bypass RLS for profile updates
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
     // Merge with existing config from DB
-    const { data: profile } = await supabase.from('profiles')
+    const { data: profile } = await supabaseAdmin.from('profiles')
       .select('worker_config')
       .eq('id', user.id)
       .single();
@@ -40,7 +47,7 @@ export async function PUT(request: Request) {
     };
 
     // Update Supabase profile
-    const { error: updateError } = await supabase.from('profiles')
+    const { error: updateError } = await supabaseAdmin.from('profiles')
       .update({ worker_config: mergedConfig })
       .eq('id', user.id);
 

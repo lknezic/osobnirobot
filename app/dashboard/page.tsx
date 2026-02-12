@@ -46,11 +46,20 @@ export default function Dashboard() {
   const fetchStatus = useCallback(async () => {
     try {
       const res = await fetch('/api/containers/status');
+      if (!res.ok) {
+        console.error('Status API returned', res.status);
+        return;
+      }
       const data = await res.json();
+      if (data.error) {
+        console.error('Status API error:', data.error);
+        return;
+      }
       setCs(data);
-      // Only redirect to onboarding if no container AND no active subscription
-      const hasPaid = data.planStatus === 'active' || data.planStatus === 'trial';
-      if ((!data.exists || data.status === 'none') && !hasPaid) {
+      // Only redirect to onboarding if no container AND no active plan
+      const hasPlan = data.planStatus === 'active' || data.planStatus === 'trial';
+      const hasContainer = data.exists && data.status !== 'none';
+      if (!hasContainer && !hasPlan) {
         router.push('/onboarding');
       }
     } catch (err) {
