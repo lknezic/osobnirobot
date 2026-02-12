@@ -1,5 +1,78 @@
 "use client";
 
+import { useState, useEffect } from 'react';
+
+function DemoAnimation() {
+  const [step, setStep] = useState(0);
+  const messages = [
+    { from: 'user', text: 'Find posts about AI automation in my niche and leave smart comments.' },
+    { from: 'worker', text: 'On it. Scanning X for posts about AI automation...' },
+    { from: 'worker', text: 'Found 12 relevant posts. Commenting on the top 5 with highest engagement potential.' },
+    { from: 'worker', text: 'Done. Left 5 comments. 2 already got likes. Here\'s a summary:' },
+    { from: 'worker', text: '• @techfounder: replied to their AI tools thread (842 views)\n• @startupguy: engaged with their automation take\n• @saasceo: commented on their hiring vs AI post' },
+  ];
+
+  useEffect(() => {
+    if (step >= messages.length) return;
+    const delay = step === 0 ? 1500 : 2000 + Math.random() * 1000;
+    const timer = setTimeout(() => setStep(s => s + 1), delay);
+    return () => clearTimeout(timer);
+  }, [step, messages.length]);
+
+  useEffect(() => {
+    if (step >= messages.length) {
+      const reset = setTimeout(() => setStep(0), 6000);
+      return () => clearTimeout(reset);
+    }
+  }, [step, messages.length]);
+
+  return (
+    <div style={{ maxWidth: 640, margin: '0 auto', padding: '0 20px' }}>
+      <div style={{ background: '#111', border: '1px solid #222', borderRadius: 12, overflow: 'hidden' }}>
+        {/* Mock header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderBottom: '1px solid #222', background: '#0d0d0d' }}>
+          <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: '#fff' }}>V</div>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Vega</div>
+            <div style={{ fontSize: 10, color: '#4ade80' }}>● Online</div>
+          </div>
+          <div style={{ marginLeft: 'auto', fontSize: 11, padding: '3px 8px', borderRadius: 4, background: '#1e3a5f', color: '#93c5fd' }}>X Commenter</div>
+        </div>
+        {/* Messages */}
+        <div style={{ padding: 16, minHeight: 220, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {messages.slice(0, step).map((msg, i) => (
+            <div key={i} style={{ display: 'flex', justifyContent: msg.from === 'user' ? 'flex-end' : 'flex-start' }}>
+              <div style={{
+                maxWidth: '80%',
+                padding: '8px 12px',
+                borderRadius: 10,
+                fontSize: 13,
+                lineHeight: '1.5',
+                whiteSpace: 'pre-line',
+                background: msg.from === 'user' ? '#7c6bf0' : '#1a1a1a',
+                color: msg.from === 'user' ? '#fff' : '#ccc',
+              }}>
+                {msg.text}
+              </div>
+            </div>
+          ))}
+          {step < messages.length && step > 0 && (
+            <div style={{ display: 'flex', gap: 4, paddingLeft: 4 }}>
+              {[0, 1, 2].map(d => (
+                <div key={d} style={{
+                  width: 6, height: 6, borderRadius: '50%', background: '#555',
+                  animation: `pulse 1s ease-in-out ${d * 0.2}s infinite`,
+                }} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+      <style>{`@keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }`}</style>
+    </div>
+  );
+}
+
 export default function Home() {
   const skills = [
     { id: "x-commenter", emoji: "💬", title: "X Commenter", desc: "Scrolls your feed, finds relevant posts, and leaves smart comments that get you noticed.", category: "X / Twitter" },
@@ -58,6 +131,12 @@ export default function Home() {
             No credit card · 7 days free · Ready in 60 seconds
           </p>
         </div>
+      </section>
+
+      {/* LIVE DEMO */}
+      <section className="pb-16 px-6">
+        <p className="text-center text-xs text-[var(--muted)] mb-6 uppercase tracking-widest">Live demo — this is what your worker looks like</p>
+        <DemoAnimation />
       </section>
 
       {/* HOW IT WORKS */}

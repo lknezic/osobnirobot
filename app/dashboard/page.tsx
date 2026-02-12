@@ -26,6 +26,7 @@ export default function Dashboard() {
   const [restarting, setRestarting] = useState(false);
   const [reprovisioning, setReprovisioning] = useState(false);
   const [billingLoading, setBillingLoading] = useState(false);
+  const [error, setError] = useState('');
   const router = useRouter();
 
   const HOST = process.env.NEXT_PUBLIC_CONTAINER_HOST || 'instantworker.ai';
@@ -49,9 +50,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchStatus();
-    const i = setInterval(() => {
-      if (cs.status === 'creating') fetchStatus();
-    }, 5000);
+    // Poll while creating, and also every 30s for running containers (detect crashes)
+    const interval = cs.status === 'creating' ? 5000 : 30000;
+    const i = setInterval(fetchStatus, interval);
     return () => clearInterval(i);
   }, [fetchStatus, cs.status]);
 
@@ -110,24 +111,29 @@ export default function Dashboard() {
 
   const handleBilling = async () => {
     setBillingLoading(true);
+    setError('');
     try {
       const res = await fetch('/api/stripe/portal', { method: 'POST' });
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
       } else {
-        console.error('No portal URL:', data.error);
+        setError(data.error || 'Could not open billing portal');
       }
     } catch (err) {
-      console.error('Billing error:', err);
+      setError('Failed to connect to billing');
     } finally {
       setBillingLoading(false);
     }
   };
 
   const handleLogout = async () => {
-    const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
-    await supabase.auth.signOut();
+    try {
+      const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+      await supabase.auth.signOut();
+    } catch {
+      // Sign out locally even if API fails
+    }
     router.push('/');
   };
 
@@ -409,6 +415,7 @@ export default function Dashboard() {
               >
                 {billingLoading ? '⏳ Loading...' : '💳 Manage subscription'}
               </button>
+              {error && <p style={{ color: '#ef4444', fontSize: 13, marginTop: 8 }}>{error}</p>}
             </div>
 
             <div style={styles.settingsCard}>
