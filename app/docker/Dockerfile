@@ -34,6 +34,11 @@ RUN mkdir -p /defaults/workspace/config /defaults/workspace/skills /defaults/wor
 COPY app/docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+# Custom UI overrides — inject InstantWorker branding into OpenClaw control UI
+COPY app/docker/custom-ui.css /app/dist/control-ui/assets/custom-ui.css
+RUN sed -i 's|</head>|<link rel="stylesheet" href="./assets/custom-ui.css"></head>|' /app/dist/control-ui/index.html \
+    && sed -i 's|<title>OpenClaw Control</title>|<title>InstantWorker</title>|' /app/dist/control-ui/index.html
+
 # Set display for Chrome
 ENV DISPLAY=:99
 

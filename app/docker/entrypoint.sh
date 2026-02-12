@@ -67,6 +67,12 @@ CONFIGEOF
     echo "♦ Config generated"
 fi
 
+# Customize UI with worker name
+if [ -n "$ASSISTANT_NAME" ] && [ -f /app/dist/control-ui/index.html ]; then
+    sed -i "s|__OPENCLAW_ASSISTANT_NAME__=\"Assistant\"|__OPENCLAW_ASSISTANT_NAME__=\"${ASSISTANT_NAME}\"|" /app/dist/control-ui/index.html
+    sed -i "s|__OPENCLAW_ASSISTANT_AVATAR__=\"A\"|__OPENCLAW_ASSISTANT_AVATAR__=\"${ASSISTANT_NAME:0:1}\"|" /app/dist/control-ui/index.html
+fi
+
 # Fix any config issues
 rm -f /tmp/.X99-lock
 openclaw doctor --fix 2>/dev/null || true
