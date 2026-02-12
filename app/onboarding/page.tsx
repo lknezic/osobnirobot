@@ -1,25 +1,24 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { createBrowserClient } from '@supabase/ssr';
+import { useState, Suspense } from 'react';
+import { useRouter } from 'next/navigation';
 
 const SKILLS = [
-  { id: 'x-commenter', emoji: '💬', title: 'X Commenter', category: 'X / Twitter' },
-  { id: 'x-article-writer', emoji: '📰', title: 'X Article Writer', category: 'X / Twitter' },
-  { id: 'x-thread-writer', emoji: '🧵', title: 'X Thread Writer', category: 'X / Twitter' },
-  { id: 'email-newsletter', emoji: '📨', title: 'Email Newsletter', category: 'Email' },
-  { id: 'email-flow', emoji: '⚡', title: 'Email Flow Writer', category: 'Email' },
-  { id: 'email-responder', emoji: '📧', title: 'Email Responder', category: 'Email' },
-  { id: 'yt-shorts-script', emoji: '🎬', title: 'YT Shorts Script', category: 'YouTube' },
-  { id: 'yt-long-script', emoji: '🎥', title: 'YT Long Script', category: 'YouTube' },
-  { id: 'yt-community', emoji: '📢', title: 'YT Community Post', category: 'YouTube' },
-  { id: 'reddit-commenter', emoji: '🤖', title: 'Reddit Commenter', category: 'Reddit' },
-  { id: 'discord-engagement', emoji: '🎮', title: 'Discord Engagement', category: 'Discord' },
-  { id: 'facebook-group', emoji: '👥', title: 'Facebook Group', category: 'Facebook' },
-  { id: 'instagram-content', emoji: '📸', title: 'Instagram Content', category: 'Instagram' },
-  { id: 'tiktok-content', emoji: '🎵', title: 'TikTok Content', category: 'TikTok' },
-  { id: 'seo-optimization', emoji: '🔍', title: 'SEO Optimization', category: 'SEO' },
+  { id: 'x-commenter', emoji: '💬', title: 'X Commenter', category: 'X / Twitter', available: false },
+  { id: 'x-article-writer', emoji: '📰', title: 'X Article Writer', category: 'X / Twitter', available: true },
+  { id: 'x-thread-writer', emoji: '🧵', title: 'X Thread Writer', category: 'X / Twitter', available: false },
+  { id: 'email-newsletter', emoji: '📨', title: 'Email Newsletter', category: 'Email', available: false },
+  { id: 'email-flow', emoji: '⚡', title: 'Email Flow Writer', category: 'Email', available: false },
+  { id: 'email-responder', emoji: '📧', title: 'Email Responder', category: 'Email', available: false },
+  { id: 'yt-shorts-script', emoji: '🎬', title: 'YT Shorts Script', category: 'YouTube', available: false },
+  { id: 'yt-long-script', emoji: '🎥', title: 'YT Long Script', category: 'YouTube', available: false },
+  { id: 'yt-community', emoji: '📢', title: 'YT Community Post', category: 'YouTube', available: false },
+  { id: 'reddit-commenter', emoji: '🤖', title: 'Reddit Commenter', category: 'Reddit', available: false },
+  { id: 'discord-engagement', emoji: '🎮', title: 'Discord Engagement', category: 'Discord', available: false },
+  { id: 'facebook-group', emoji: '👥', title: 'Facebook Group', category: 'Facebook', available: false },
+  { id: 'instagram-content', emoji: '📸', title: 'Instagram Content', category: 'Instagram', available: false },
+  { id: 'tiktok-content', emoji: '🎵', title: 'TikTok Content', category: 'TikTok', available: false },
+  { id: 'seo-optimization', emoji: '🔍', title: 'SEO Optimization', category: 'SEO', available: false },
 ];
 
 const PLANS = [
@@ -47,24 +46,6 @@ function getRandomName(): string {
   return WORKER_NAMES[Math.floor(Math.random() * WORKER_NAMES.length)];
 }
 
-// Store onboarding config in sessionStorage so it survives the Stripe redirect
-function saveConfig(config: Record<string, unknown>) {
-  sessionStorage.setItem('iw_onboarding', JSON.stringify(config));
-}
-
-function loadConfig(): Record<string, unknown> | null {
-  try {
-    const raw = sessionStorage.getItem('iw_onboarding');
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
-function clearConfig() {
-  sessionStorage.removeItem('iw_onboarding');
-}
-
 export default function OnboardingPage() {
   return (
     <Suspense fallback={
@@ -78,68 +59,24 @@ export default function OnboardingPage() {
 }
 
 function Onboarding() {
-  const searchParams = useSearchParams();
-  const urlStep = searchParams.get('step');
-
   const [step, setStep] = useState(1);
   const [plan, setPlan] = useState('simple');
-  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [selectedSkills, setSelectedSkills] = useState<string[]>(['x-article-writer']);
   const [name, setName] = useState(getRandomName);
-  const [niche, setNiche] = useState('');
+  const [companyUrl, setCompanyUrl] = useState('');
+  const [clientDesc, setClientDesc] = useState('');
+  const [competitorUrls, setCompetitorUrls] = useState('');
   const [tone, setTone] = useState('witty');
-  const [targets, setTargets] = useState('');
-  const [brandDesc, setBrandDesc] = useState('');
   const [launching, setLaunching] = useState(false);
-  const [provisioning, setProvisioning] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
 
   const currentPlan = PLANS.find(p => p.id === plan)!;
   const maxSkills = currentPlan.maxSkills;
 
-  // Handle return from Stripe checkout
-  useEffect(() => {
-    if (urlStep === 'provision') {
-      setProvisioning(true);
-      provisionWorker();
-    } else if (urlStep === 'cancelled') {
-      setError('Payment was cancelled. You can try again.');
-      setStep(4);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlStep]);
-
-  async function provisionWorker() {
-    const config = loadConfig();
-    if (!config) {
-      setError('Session expired. Please configure your worker again.');
-      setProvisioning(false);
-      setStep(3);
-      return;
-    }
-
-    try {
-      const res = await fetch('/api/containers/provision', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Failed to start worker');
-      }
-
-      clearConfig();
-      router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message);
-      setProvisioning(false);
-      setStep(4);
-    }
-  }
-
   const toggleSkill = (id: string) => {
+    const skill = SKILLS.find(s => s.id === id);
+    if (!skill?.available) return;
     if (plan === 'legend') return;
     if (selectedSkills.includes(id)) {
       setSelectedSkills(selectedSkills.filter(s => s !== id));
@@ -148,10 +85,6 @@ function Onboarding() {
     }
   };
 
-  const hasXSkill = plan === 'legend' || selectedSkills.some(s => s.startsWith('x-'));
-  const BROWSER_SKILLS = ['x-', 'reddit-', 'discord-', 'facebook-', 'instagram-', 'tiktok-'];
-  const hasBrowserSkill = plan === 'legend' || selectedSkills.some(s => BROWSER_SKILLS.some(prefix => s.startsWith(prefix)));
-
   const handleLaunch = async () => {
     if (!name.trim()) { setError('Give your worker a name'); return; }
 
@@ -159,82 +92,54 @@ function Onboarding() {
     setError('');
 
     try {
-      const targetList = targets.split('\n').map(t => t.trim()).filter(Boolean);
       const toneDesc = TONES.find(t => t.id === tone)?.desc || tone;
-      const skillIds = plan === 'legend' ? SKILLS.map(s => s.id) : selectedSkills;
+      const availableSkills = SKILLS.filter(s => s.available);
+      const skillIds = plan === 'legend'
+        ? availableSkills.map(s => s.id)
+        : selectedSkills;
 
-      // Save config to sessionStorage (survives Stripe redirect)
       const provisionConfig = {
         assistantName: name.trim(),
         personality: toneDesc,
-        workerType: skillIds[0] || 'x-commenter',
+        workerType: skillIds[0] || 'x-article-writer',
         workerConfig: {
           skills: skillIds,
           plan,
-          targets: targetList,
-          niche: niche.trim(),
-          brandDescription: brandDesc.trim(),
+          companyUrl: companyUrl.trim(),
+          clientDescription: clientDesc.trim(),
+          competitorUrls: competitorUrls.split('\n').map(u => u.trim()).filter(Boolean),
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         },
       };
-      saveConfig(provisionConfig);
 
-      // Get user ID for Stripe checkout
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      // Create Stripe checkout session
-      const res = await fetch('/api/stripe/checkout', {
+      // Provision container directly (no Stripe upfront)
+      const res = await fetch('/api/containers/provision', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, planId: plan }),
+        body: JSON.stringify(provisionConfig),
       });
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || 'Failed to create checkout session');
+        throw new Error(data.error || 'Failed to start worker');
       }
 
-      const { url } = await res.json();
-      if (!url) throw new Error('No checkout URL returned');
-
-      // Redirect to Stripe Checkout
-      window.location.href = url;
+      router.push('/dashboard');
     } catch (err: any) {
       setError(err.message);
       setLaunching(false);
     }
   };
 
-  // Provisioning screen (after Stripe success)
-  if (provisioning) {
-    const savedConfig = loadConfig();
-    const workerName = (savedConfig?.assistantName as string) || 'your worker';
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center max-w-md px-8">
-          <div className="w-12 h-12 border-3 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin mx-auto mb-6" />
-          <h2 className="text-2xl font-bold mb-3">Hiring {workerName}...</h2>
-          <p className="text-[var(--dim)] text-sm mb-2">Payment confirmed. Setting up your worker and researching your niche.</p>
-          <p className="text-[var(--muted)] text-xs">This takes about 30 seconds.</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Launching screen (redirecting to Stripe)
+  // Launching screen
   if (launching) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center max-w-md px-8">
           <div className="w-12 h-12 border-3 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin mx-auto mb-6" />
-          <h2 className="text-2xl font-bold mb-3">Redirecting to checkout...</h2>
-          <p className="text-[var(--dim)] text-sm mb-2">Setting up your 7-day free trial.</p>
-          <p className="text-[var(--muted)] text-xs">You won&apos;t be charged today.</p>
+          <h2 className="text-2xl font-bold mb-3">Hiring {name}...</h2>
+          <p className="text-[var(--dim)] text-sm mb-2">Setting up your AI employee and preparing research.</p>
+          <p className="text-[var(--muted)] text-xs">This takes about 30 seconds.</p>
         </div>
       </div>
     );
@@ -306,13 +211,14 @@ function Onboarding() {
                 <h3 className="text-xs font-semibold text-[var(--accent2)] mb-2">{category}</h3>
                 <div className="grid grid-cols-1 gap-2">
                   {SKILLS.filter(s => s.category === category).map(skill => {
-                    const isSelected = plan === 'legend' || selectedSkills.includes(skill.id);
-                    const isDisabled = plan !== 'legend' && !isSelected && selectedSkills.length >= maxSkills;
+                    const isAvailable = skill.available;
+                    const isSelected = isAvailable && (plan === 'legend' || selectedSkills.includes(skill.id));
+                    const isDisabled = !isAvailable || (plan !== 'legend' && !isSelected && selectedSkills.length >= maxSkills);
                     return (
                       <button
                         key={skill.id}
                         onClick={() => toggleSkill(skill.id)}
-                        disabled={plan === 'legend' || isDisabled}
+                        disabled={isDisabled}
                         className={`flex items-center gap-3 p-3 rounded-[var(--r2)] border text-left transition-all ${
                           isSelected
                             ? 'border-[var(--accent)]'
@@ -324,6 +230,9 @@ function Onboarding() {
                       >
                         <span className="text-lg">{skill.emoji}</span>
                         <span className="text-sm font-medium">{skill.title}</span>
+                        {!isAvailable && (
+                          <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full border border-[var(--border)] text-[var(--muted)]">Coming Soon</span>
+                        )}
                         {isSelected && <span className="ml-auto text-[var(--green)] text-xs">✓</span>}
                       </button>
                     );
@@ -358,9 +267,9 @@ function Onboarding() {
         {/* Step 3: Configure worker */}
         {step === 3 && (
           <>
-            <h1 className="text-2xl font-bold mb-2">Configure your worker</h1>
+            <h1 className="text-2xl font-bold mb-2">Tell us about your business</h1>
             <p className="text-[var(--dim)] text-sm mb-6">
-              Your worker will research your niche to understand your audience deeply.
+              Your worker will deeply research your company and competitors before writing.
             </p>
 
             <div className="mb-5">
@@ -383,35 +292,33 @@ function Onboarding() {
             </div>
 
             <div className="mb-5">
-              <label className="block text-sm text-[var(--dim)] mb-2">Your niche / industry</label>
-              <input type="text" value={niche} onChange={e => setNiche(e.target.value)}
-                placeholder="e.g. AI SaaS, fitness coaching, ecommerce..."
+              <label className="block text-sm text-[var(--dim)] mb-2">Your company URL</label>
+              <input type="url" value={companyUrl} onChange={e => setCompanyUrl(e.target.value)}
+                placeholder="https://yourcompany.com"
                 className="w-full px-4 py-3 rounded-[var(--r2)] border border-[var(--border)] text-sm focus:border-[var(--accent)] focus:outline-none transition-colors"
                 style={{ background: 'var(--bg2)', color: 'var(--text)' }} />
             </div>
 
             <div className="mb-5">
-              <label className="block text-sm text-[var(--dim)] mb-2">Tell us about your brand / business (optional)</label>
-              <textarea value={brandDesc} onChange={e => setBrandDesc(e.target.value)}
-                placeholder="What do you sell? Who's your audience? What makes you different?"
+              <label className="block text-sm text-[var(--dim)] mb-2">Who is your client / target audience?</label>
+              <textarea value={clientDesc} onChange={e => setClientDesc(e.target.value)}
+                placeholder="e.g. SaaS founders looking to scale from $1M to $10M ARR, struggling with customer acquisition..."
                 rows={3}
                 className="w-full px-4 py-3 rounded-[var(--r2)] border border-[var(--border)] text-sm focus:border-[var(--accent)] focus:outline-none transition-colors resize-none"
                 style={{ background: 'var(--bg2)', color: 'var(--text)' }} />
             </div>
 
-            {hasXSkill && (
-              <div className="mb-5">
-                <label className="block text-sm text-[var(--dim)] mb-2">X accounts to engage with (one per line)</label>
-                <textarea value={targets} onChange={e => setTargets(e.target.value)}
-                  placeholder={"@elonmusk\n@sama\n@paulg"}
-                  rows={4}
-                  className="w-full px-4 py-3 rounded-[var(--r2)] border border-[var(--border)] text-sm focus:border-[var(--accent)] focus:outline-none transition-colors resize-none"
-                  style={{ background: 'var(--bg2)', color: 'var(--text)' }} />
-              </div>
-            )}
+            <div className="mb-5">
+              <label className="block text-sm text-[var(--dim)] mb-2">Competitor websites (one per line)</label>
+              <textarea value={competitorUrls} onChange={e => setCompetitorUrls(e.target.value)}
+                placeholder={"https://competitor1.com\nhttps://competitor2.com\nhttps://competitor3.com"}
+                rows={3}
+                className="w-full px-4 py-3 rounded-[var(--r2)] border border-[var(--border)] text-sm focus:border-[var(--accent)] focus:outline-none transition-colors resize-none"
+                style={{ background: 'var(--bg2)', color: 'var(--text)' }} />
+            </div>
 
             <div className="mb-6">
-              <label className="block text-sm text-[var(--dim)] mb-2">Tone / personality</label>
+              <label className="block text-sm text-[var(--dim)] mb-2">Writing tone</label>
               <div className="grid grid-cols-2 gap-2">
                 {TONES.map(t => (
                   <button key={t.id} onClick={() => setTone(t.id)}
@@ -449,42 +356,38 @@ function Onboarding() {
         {step === 4 && (
           <>
             <h1 className="text-2xl font-bold mb-2">Ready to hire {name}?</h1>
-            <p className="text-[var(--dim)] text-sm mb-6">Your worker will research your niche before starting work.</p>
+            <p className="text-[var(--dim)] text-sm mb-6">Your worker will research your business before writing the first article.</p>
 
             <div className="p-5 rounded-[var(--r)] border border-[var(--border)] mb-4" style={{ background: 'var(--bg2)' }}>
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <div className="font-bold text-lg">{name}</div>
-                  <div className="text-xs text-[var(--dim)]">{currentPlan.title} plan · {currentPlan.price}/mo</div>
+                  <div className="text-xs text-[var(--dim)]">X Article Writer · {TONES.find(t => t.id === tone)?.label} tone</div>
                 </div>
-                <div className="text-xs text-[var(--dim)]">{TONES.find(t => t.id === tone)?.label} tone</div>
+                <div className="text-xs text-[var(--dim)]">{currentPlan.title} plan</div>
               </div>
-              <div className="text-xs text-[var(--dim)] mb-2">Skills:</div>
-              <div className="flex flex-wrap gap-1.5">
-                {(plan === 'legend' ? SKILLS : SKILLS.filter(s => selectedSkills.includes(s.id))).map(s => (
-                  <span key={s.id} className="text-xs px-2 py-1 rounded-full border border-[var(--border)]" style={{ background: 'var(--bg3)' }}>
-                    {s.emoji} {s.title}
-                  </span>
-                ))}
-              </div>
-              {niche && (
-                <div className="mt-3 text-xs"><span className="text-[var(--dim)]">Niche:</span> {niche}</div>
+              {companyUrl && (
+                <div className="text-xs mb-2"><span className="text-[var(--dim)]">Company:</span> {companyUrl}</div>
+              )}
+              {clientDesc && (
+                <div className="text-xs mb-2"><span className="text-[var(--dim)]">Target audience:</span> {clientDesc.slice(0, 100)}{clientDesc.length > 100 ? '...' : ''}</div>
+              )}
+              {competitorUrls.trim() && (
+                <div className="text-xs"><span className="text-[var(--dim)]">Competitors:</span> {competitorUrls.split('\n').filter(Boolean).length} website{competitorUrls.split('\n').filter(Boolean).length !== 1 ? 's' : ''}</div>
               )}
             </div>
 
             <div className="p-4 rounded-[var(--r2)] border border-[var(--accent)] mb-4" style={{ background: 'rgba(124,107,240,0.06)' }}>
               <p className="text-sm text-[var(--accent2)]">
-                Your worker will first research your niche — checking Reddit, X, and competitor content to understand your audience&apos;s problems, desires, and language. Then it starts working.
+                {name} will first research your company, competitors, and target audience to build a content strategy. Then it starts writing.
               </p>
             </div>
 
-            {hasBrowserSkill && (
-              <div className="p-4 rounded-[var(--r2)] border border-[var(--green-b)] mb-4" style={{ background: 'var(--green-g)' }}>
-                <p className="text-sm text-[var(--green)]">
-                  After hiring, open the <strong>Browser tab</strong> on your dashboard and log into the platforms your worker needs (X, Reddit, Discord, etc.). Your worker needs access to engage.
-                </p>
-              </div>
-            )}
+            <div className="p-4 rounded-[var(--r2)] border border-[var(--green-b)] mb-4" style={{ background: 'var(--green-g)' }}>
+              <p className="text-sm text-[var(--green)]">
+                After hiring, open the <strong>Browser tab</strong> on your dashboard and log into X. Your worker needs access to publish articles.
+              </p>
+            </div>
 
             {error && (
               <div className="mb-4 p-3 rounded-[var(--r2)] text-red-400 text-sm border border-red-800/30" style={{ background: 'rgba(239,68,68,0.08)' }}>{error}</div>
@@ -501,7 +404,7 @@ function Onboarding() {
             </div>
 
             <p className="text-center text-[var(--muted)] text-xs mt-4">
-              7-day free trial · Cancel anytime · You won&apos;t be charged today
+              7-day free trial · No credit card required
             </p>
           </>
         )}

@@ -1,39 +1,74 @@
 /* InstantWorker custom overrides for OpenClaw Control UI */
+/* Uses multiple selector strategies for robustness */
 
-/* Hide the left navigation sidebar */
-aside.nav {
+/* === Hide navigation sidebar === */
+aside.nav,
+aside[class*="nav"],
+[class*="sidebar"],
+[class*="Sidebar"],
+nav[class*="nav"]:not([class*="tabbar"]) {
   display: none !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  overflow: hidden !important;
 }
 
-/* Collapse nav width in the shell grid */
-.shell {
+/* === Collapse nav from grid layout === */
+.shell,
+[class*="shell"],
+[class*="Shell"],
+[class*="layout"],
+[class*="Layout"] {
   --shell-nav-width: 0px !important;
-  grid-template-columns: 0px minmax(0, 1fr) !important;
+  grid-template-columns: 0px 1fr !important;
 }
 
-/* Hide OpenClaw brand logo and text */
-.brand {
+/* === Hide brand/logo === */
+.brand,
+[class*="brand"],
+[class*="Brand"],
+[class*="logo"]:not(img),
+[class*="Logo"]:not(img) {
   display: none !important;
 }
 
-/* Hide nav collapse toggle (no sidebar = no toggle) */
-.nav-collapse-toggle {
+/* === Hide nav toggle button === */
+.nav-collapse-toggle,
+[class*="nav-collapse"],
+[class*="NavCollapse"],
+[class*="sidebar-toggle"],
+[class*="SidebarToggle"],
+[class*="menu-toggle"] {
   display: none !important;
 }
 
-/* Hide Resources external links group */
-.nav-group--links {
+/* === Hide external links group === */
+.nav-group--links,
+[class*="nav-group--links"],
+[class*="external-links"] {
   display: none !important;
 }
 
-/* Make main content take full width */
-main.content {
+/* === Hide topbar nav elements (but keep the chat area) === */
+.topbar [class*="nav"],
+[class*="topbar"] [class*="brand"] {
+  display: none !important;
+}
+
+/* === Main content full width === */
+main.content,
+main[class*="content"],
+[class*="main-content"],
+[class*="MainContent"] {
   margin-left: 0 !important;
+  padding-left: 0 !important;
   width: 100% !important;
   max-width: 100% !important;
+  grid-column: 1 / -1 !important;
 }
 
-/* Accent color overrides to match InstantWorker purple */
+/* === Accent color overrides to match InstantWorker purple === */
 :root {
   --accent: #7c6bf0 !important;
   --accent-hover: #9b7bf7 !important;
@@ -46,7 +81,7 @@ main.content {
   --focus: #7c6bf0 !important;
 }
 
-/* Powered by badge at bottom */
+/* === Powered by badge === */
 body::after {
   content: "Powered by OpenClaw";
   position: fixed;

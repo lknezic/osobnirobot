@@ -65,6 +65,9 @@ function buildWorkspace(
     targets?: string[];
     brandDescription?: string;
     timezone?: string;
+    companyUrl?: string;
+    clientDescription?: string;
+    competitorUrls?: string[];
   },
   assistantName: string,
   personality: string
@@ -116,6 +119,15 @@ function buildWorkspace(
     niche: workerConfig.niche || '',
   };
   fs.writeFileSync(path.join(configDir, 'targets.json'), JSON.stringify(targetsJson, null, 2));
+
+  // company-config.json — company research data from onboarding
+  const companyConfig = {
+    companyUrl: workerConfig.companyUrl || '',
+    clientDescription: workerConfig.clientDescription || '',
+    competitorUrls: workerConfig.competitorUrls || [],
+    niche: workerConfig.niche || '',
+  };
+  fs.writeFileSync(path.join(configDir, 'company-config.json'), JSON.stringify(companyConfig, null, 2));
 
   // rules.md
   const rulesContent = [

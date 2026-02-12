@@ -38,6 +38,13 @@ export async function POST(request: Request) {
         .slice(0, 15) // max 15 skills
         .map((s: string) => sanitize(s, 50));
     }
+    if (workerConfig.companyUrl) workerConfig.companyUrl = sanitize(workerConfig.companyUrl, 200);
+    if (workerConfig.clientDescription) workerConfig.clientDescription = sanitize(workerConfig.clientDescription, 1000);
+    if (Array.isArray(workerConfig.competitorUrls)) {
+      workerConfig.competitorUrls = workerConfig.competitorUrls
+        .slice(0, 10) // max 10 competitors
+        .map((u: string) => sanitize(u, 200));
+    }
 
     if (!assistantName) {
       return NextResponse.json({ error: 'assistantName is required' }, { status: 400 });

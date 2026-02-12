@@ -42,8 +42,8 @@ export async function POST(request: Request) {
       customer: customerId,
       mode: "subscription",
       line_items: [{ price: plan.stripe_price_id, quantity: 1 }],
-      success_url: `${appUrl}/onboarding?step=provision&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${appUrl}/onboarding?step=cancelled`,
+      success_url: `${appUrl}/dashboard?payment=success`,
+      cancel_url: `${appUrl}/dashboard?payment=cancelled`,
       metadata: { userId, planId },
       subscription_data: { trial_period_days: 7, metadata: { userId, planId } },
     });

@@ -17,6 +17,8 @@ interface ContainerState {
   planStatus?: string;
   selectedPlan?: string;
   trialEndsAt?: string;
+  hasSubscription?: boolean;
+  workerConfig?: Record<string, unknown>;
 }
 
 export default function Dashboard() {
@@ -26,7 +28,17 @@ export default function Dashboard() {
   const [restarting, setRestarting] = useState(false);
   const [reprovisioning, setReprovisioning] = useState(false);
   const [billingLoading, setBillingLoading] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveProgress, setSaveProgress] = useState(0);
+  const [saveStage, setSaveStage] = useState('');
+  // Editable config fields
+  const [editCompanyUrl, setEditCompanyUrl] = useState('');
+  const [editClientDesc, setEditClientDesc] = useState('');
+  const [editCompetitorUrls, setEditCompetitorUrls] = useState('');
+  const [configLoaded, setConfigLoaded] = useState(false);
   const router = useRouter();
 
   const HOST = process.env.NEXT_PUBLIC_CONTAINER_HOST || 'instantworker.ai';
@@ -56,11 +68,30 @@ export default function Dashboard() {
     return () => clearInterval(i);
   }, [fetchStatus, cs.status]);
 
-  const chatUrl = cs.gatewayPort && cs.gatewayToken
-    ? `https://${cs.gatewayPort}.gw.${HOST}/?token=${cs.gatewayToken}`
-    : '';
+  // Populate editable config from status
+  useEffect(() => {
+    if (cs.workerConfig && !configLoaded) {
+      const wc = cs.workerConfig as Record<string, unknown>;
+      setEditCompanyUrl((wc.companyUrl as string) || '');
+      setEditClientDesc((wc.clientDescription as string) || '');
+      const urls = Array.isArray(wc.competitorUrls) ? (wc.competitorUrls as string[]).join('\n') : '';
+      setEditCompetitorUrls(urls);
+      setConfigLoaded(true);
+    }
+  }, [cs.workerConfig, configLoaded]);
 
-  const fullDashboardUrl = cs.gatewayPort && cs.gatewayToken
+  // Track chat tab views for trial paywall
+  useEffect(() => {
+    if (tab !== 'chat' || cs.hasSubscription || cs.planStatus !== 'trial') return;
+    const key = 'iw_chat_views';
+    const views = parseInt(localStorage.getItem(key) || '0', 10) + 1;
+    localStorage.setItem(key, String(views));
+    if (views > 3) {
+      setShowPaywall(true);
+    }
+  }, [tab, cs.hasSubscription, cs.planStatus]);
+
+  const chatUrl = cs.gatewayPort && cs.gatewayToken
     ? `https://${cs.gatewayPort}.gw.${HOST}/?token=${cs.gatewayToken}`
     : '';
 
@@ -124,6 +155,105 @@ export default function Dashboard() {
       setError('Failed to connect to billing');
     } finally {
       setBillingLoading(false);
+    }
+  };
+
+  const handleSaveConfig = async () => {
+    setSaving(true);
+    setSaveProgress(0);
+    setSaveStage('Saving configuration...');
+    setError('');
+
+    try {
+      // Stage 1: Save config (0-30%)
+      const progressTimer = setInterval(() => {
+        setSaveProgress(prev => {
+          if (prev < 25) return prev + 3;
+          if (prev < 50) return prev + 2;
+          if (prev < 80) return prev + 1;
+          return prev;
+        });
+      }, 500);
+
+      const res = await fetch('/api/containers/config', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          companyUrl: editCompanyUrl.trim(),
+          clientDescription: editClientDesc.trim(),
+          competitorUrls: editCompetitorUrls.split('\n').map(u => u.trim()).filter(Boolean),
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to save');
+      }
+
+      setSaveProgress(35);
+      setSaveStage('Restarting worker...');
+
+      // Stage 2: Wait for restart (35-85%)
+      await new Promise(resolve => setTimeout(resolve, 8000));
+      setSaveProgress(70);
+      setSaveStage('Almost ready...');
+
+      // Stage 3: Poll for running status
+      let attempts = 0;
+      while (attempts < 15) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        attempts++;
+        setSaveProgress(Math.min(70 + attempts * 2, 95));
+        try {
+          const statusRes = await fetch('/api/containers/status');
+          const statusData = await statusRes.json();
+          if (statusData.status === 'running') {
+            setSaveProgress(100);
+            setSaveStage('Ready!');
+            setCs(statusData);
+            break;
+          }
+        } catch {
+          // Keep polling
+        }
+      }
+
+      clearInterval(progressTimer);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+      setSaveProgress(0);
+      setSaveStage('');
+    }
+  };
+
+  const handleCheckout = async (planId: string) => {
+    setCheckoutLoading(true);
+    setError('');
+    try {
+      const supabase = createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, planId }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to create checkout');
+      }
+
+      const { url } = await res.json();
+      if (url) window.location.href = url;
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setCheckoutLoading(false);
     }
   };
 
@@ -317,12 +447,62 @@ export default function Dashboard() {
         {tab === 'chat' && (
           <div style={styles.iframeContainer}>
             {chatUrl ? (
-              <iframe
-                src={chatUrl}
-                style={styles.iframe}
-                allow="microphone; camera; clipboard-write; clipboard-read"
-                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-downloads"
-              />
+              <>
+                <iframe
+                  src={chatUrl}
+                  style={{
+                    ...styles.iframe,
+                    ...(showPaywall ? { filter: 'blur(6px)', pointerEvents: 'none' as const } : {}),
+                  }}
+                  allow="microphone; camera; clipboard-write; clipboard-read"
+                  sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-downloads"
+                />
+                {showPaywall && (
+                  <div style={styles.paywallOverlay}>
+                    <div style={styles.paywallCard}>
+                      <div style={{ fontSize: 40, marginBottom: 12 }}>🔒</div>
+                      <h2 style={{ fontSize: 22, fontWeight: 700, color: '#fff', marginBottom: 8 }}>
+                        Enjoying {cs.assistantName || 'your worker'}?
+                      </h2>
+                      <p style={{ fontSize: 14, color: '#999', marginBottom: 24, lineHeight: '1.6' }}>
+                        Subscribe to keep chatting and let your AI employee work 24/7.
+                      </p>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', maxWidth: 320 }}>
+                        {[
+                          { id: 'simple', title: 'Simple', price: '$99/mo', desc: '1 skill' },
+                          { id: 'expert', title: 'Expert', price: '$399/mo', desc: 'Up to 5 skills' },
+                          { id: 'legend', title: 'Legend', price: '$499/mo', desc: 'All skills' },
+                        ].map(p => (
+                          <button
+                            key={p.id}
+                            onClick={() => handleCheckout(p.id)}
+                            disabled={checkoutLoading}
+                            style={{
+                              padding: '14px 20px',
+                              borderRadius: 10,
+                              background: p.id === 'simple' ? 'linear-gradient(135deg, #7c6bf0, #9b7bf7)' : '#1a1a1a',
+                              border: p.id === 'simple' ? 'none' : '1px solid #333',
+                              color: '#fff',
+                              fontSize: 14,
+                              fontWeight: 600,
+                              cursor: checkoutLoading ? 'wait' : 'pointer',
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              opacity: checkoutLoading ? 0.6 : 1,
+                            }}
+                          >
+                            <span>{p.title} — {p.desc}</span>
+                            <span style={{ fontWeight: 700 }}>{p.price}</span>
+                          </button>
+                        ))}
+                      </div>
+                      {error && <p style={{ color: '#ef4444', fontSize: 13, marginTop: 12 }}>{error}</p>}
+                      <p style={{ fontSize: 12, color: '#666', marginTop: 16 }}>7-day free trial · Cancel anytime</p>
+                    </div>
+                  </div>
+                )}
+              </>
             ) : (
               <div style={styles.placeholder}>
                 <p>⏳ Connecting to your AI employee...</p>
@@ -358,6 +538,30 @@ export default function Dashboard() {
         {/* Settings Tab */}
         {tab === 'settings' && (
           <div style={styles.settingsPanel}>
+            {/* Save progress overlay */}
+            {saving && (
+              <div style={styles.saveOverlay}>
+                <div style={styles.saveCard}>
+                  <div style={styles.loadingSpinner} />
+                  <p style={{ color: '#fff', fontSize: 16, fontWeight: 600, margin: '16px 0 8px' }}>{saveStage}</p>
+                  <div style={{ width: '100%', maxWidth: 280, height: 6, borderRadius: 3, background: '#333', overflow: 'hidden' }}>
+                    <div style={{
+                      height: '100%',
+                      borderRadius: 3,
+                      background: 'linear-gradient(90deg, #7c6bf0, #9b7bf7)',
+                      width: `${saveProgress}%`,
+                      transition: 'width 0.5s ease',
+                    }} />
+                  </div>
+                  <p style={{ color: '#666', fontSize: 12, marginTop: 8 }}>
+                    {saveProgress < 35 ? 'Saving your changes...' :
+                     saveProgress < 70 ? 'Worker is restarting (~20s)...' :
+                     saveProgress < 95 ? 'Almost there...' : 'Done!'}
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div style={styles.settingsCard}>
               <h2 style={styles.settingsTitle}>AI Employee</h2>
               <div style={styles.settingRow}>
@@ -383,21 +587,58 @@ export default function Dashboard() {
             </div>
 
             <div style={styles.settingsCard}>
-              <h2 style={styles.settingsTitle}>Configuration</h2>
+              <h2 style={styles.settingsTitle}>Worker Configuration</h2>
               <p style={styles.settingHint}>
-                For advanced settings (skills, personality, memory), use the
-                Settings in the chat interface → the full dashboard link below.
+                Update your business details. Changes will restart the worker (~30 seconds).
               </p>
-              {fullDashboardUrl && (
-                <a
-                  href={fullDashboardUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={styles.linkBtn}
-                >
-                  Open full dashboard ↗
-                </a>
-              )}
+              <div style={{ marginBottom: 14 }}>
+                <label style={styles.inputLabel}>Company URL</label>
+                <input
+                  type="url"
+                  value={editCompanyUrl}
+                  onChange={e => setEditCompanyUrl(e.target.value)}
+                  placeholder="https://yourcompany.com"
+                  style={styles.input}
+                />
+              </div>
+              <div style={{ marginBottom: 14 }}>
+                <label style={styles.inputLabel}>Target Audience</label>
+                <textarea
+                  value={editClientDesc}
+                  onChange={e => setEditClientDesc(e.target.value)}
+                  placeholder="Who is your client?"
+                  rows={3}
+                  style={styles.textarea}
+                />
+              </div>
+              <div style={{ marginBottom: 14 }}>
+                <label style={styles.inputLabel}>Competitor Websites (one per line)</label>
+                <textarea
+                  value={editCompetitorUrls}
+                  onChange={e => setEditCompetitorUrls(e.target.value)}
+                  placeholder={"https://competitor1.com\nhttps://competitor2.com"}
+                  rows={3}
+                  style={styles.textarea}
+                />
+              </div>
+              <button
+                onClick={handleSaveConfig}
+                disabled={saving}
+                style={{
+                  padding: '10px 24px',
+                  borderRadius: 8,
+                  background: 'linear-gradient(135deg, #7c6bf0, #9b7bf7)',
+                  border: 'none',
+                  color: '#fff',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: saving ? 'wait' : 'pointer',
+                  opacity: saving ? 0.6 : 1,
+                }}
+              >
+                Save &amp; restart worker
+              </button>
+              {error && <p style={{ color: '#ef4444', fontSize: 13, marginTop: 8 }}>{error}</p>}
             </div>
 
             <div style={styles.settingsCard}>
@@ -415,7 +656,6 @@ export default function Dashboard() {
               >
                 {billingLoading ? '⏳ Loading...' : '💳 Manage subscription'}
               </button>
-              {error && <p style={{ color: '#ef4444', fontSize: 13, marginTop: 8 }}>{error}</p>}
             </div>
 
             <div style={styles.settingsCard}>
@@ -693,5 +933,80 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: '#dc2626',
     fontSize: 14,
     cursor: 'pointer',
+  },
+
+  // Settings inputs
+  inputLabel: {
+    display: 'block',
+    fontSize: 13,
+    color: '#888',
+    marginBottom: 6,
+  },
+  input: {
+    width: '100%',
+    padding: '10px 14px',
+    borderRadius: 8,
+    border: '1px solid #333',
+    background: '#0a0a0a',
+    color: '#e5e5e5',
+    fontSize: 14,
+    outline: 'none',
+    boxSizing: 'border-box' as const,
+  },
+  textarea: {
+    width: '100%',
+    padding: '10px 14px',
+    borderRadius: 8,
+    border: '1px solid #333',
+    background: '#0a0a0a',
+    color: '#e5e5e5',
+    fontSize: 14,
+    outline: 'none',
+    resize: 'vertical' as const,
+    boxSizing: 'border-box' as const,
+  },
+
+  // Save overlay
+  saveOverlay: {
+    position: 'fixed' as const,
+    inset: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'rgba(0, 0, 0, 0.85)',
+    backdropFilter: 'blur(4px)',
+    zIndex: 100,
+  },
+  saveCard: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center',
+    padding: '40px 32px',
+    maxWidth: 360,
+    width: '90%',
+  },
+
+  // Paywall
+  paywallOverlay: {
+    position: 'absolute',
+    inset: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'rgba(0, 0, 0, 0.75)',
+    backdropFilter: 'blur(4px)',
+    zIndex: 50,
+  },
+  paywallCard: {
+    background: '#111',
+    border: '1px solid #333',
+    borderRadius: 16,
+    padding: '40px 32px',
+    textAlign: 'center' as const,
+    maxWidth: 420,
+    width: '90%',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center',
   },
 };
