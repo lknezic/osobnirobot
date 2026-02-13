@@ -291,8 +291,8 @@ function buildWorkspace(
   return tmpDir;
 }
 
-// Container workspace path inside Docker
-const CONTAINER_WORKSPACE = '/home/user/.openclaw/workspace';
+// Container workspace path inside Docker (must match OPENCLAW_HOME in entrypoint.sh)
+const CONTAINER_WORKSPACE = '/home/node/.openclaw/workspace';
 
 // ─── POST /provision — Create a new container ───
 containerRoutes.post('/provision', async (req: Request, res: Response) => {
