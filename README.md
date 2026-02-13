@@ -1,59 +1,40 @@
-# OsobniRobot.com
+# InstantWorker
 
-Pre-launch landing page for OsobniRobot — one-click OpenClaw deployment for Croatian entrepreneurs.
+AI employee marketplace. Hire 24/7 AI workers that get their own computer, browser, and memory. Each worker focuses on one social media channel and runs all skills for that channel autonomously.
 
-## Quick Deploy (5 minutes)
+## Architecture
 
-### 1. Create GitHub repo & push
+- **Frontend**: Next.js 14 (App Router, TypeScript) on Vercel
+- **Backend**: Docker containers on Hetzner, managed by orchestrator service
+- **Database**: Supabase (auth + PostgreSQL)
+- **Payments**: Stripe ($199/worker/month)
+- **AI Runtime**: OpenClaw per container + LiteLLM proxy
 
-```bash
-cd osobnirobot
-git init
-git add .
-git commit -m "Initial: bilingual landing page + Supabase email collection"
-git remote add origin https://github.com/Lknezic/osobnirobot.git
-git push -u origin main
+## Current State
+
+- Live at instantworker.ai
+- 1 channel active: X/Twitter (4 skills: commenter, tweet-writer, thread-writer, article-writer)
+- Future channels: Reddit, YouTube, Instagram, TikTok, Email, Discord, LinkedIn
+
+## Project Structure
+
+```
+app/                    Next.js pages, API routes, dashboard components
+app/orchestrator/       Separate orchestrator service (Hetzner)
+app/docker/             Container Dockerfile + entrypoint
+lib/                    Shared libraries (DB, API, types, constants)
+worker-templates/       SOUL.md, SKILL.md, playbooks, docs, memory per skill
+infra/                  Caddy, LiteLLM, deploy scripts
+docs/                   Project documentation (archive/ for old docs)
 ```
 
-### 2. Create Supabase table
+## Key Docs
 
-Go to [Supabase SQL Editor](https://supabase.com/dashboard/project/dushtmeiznssbrissndm/sql) and run the contents of `supabase-migration.sql`.
+- `CLAUDE.md` — Project instructions for Claude sessions
+- `MEMORY.md` — Current project state and handoff
+- `PLAN.md` — Product roadmap and progress tracker
+- `OPERATIONS.md` — Owner operations guide
 
-### 3. Deploy to Vercel
+## Setup
 
-1. Go to [vercel.com/new](https://vercel.com/new)
-2. Import the `osobnirobot` repo from GitHub
-3. Add environment variables:
-   - `NEXT_PUBLIC_SUPABASE_URL` = `https://dushtmeiznssbrissndm.supabase.co`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = (your anon key)
-   - `SUPABASE_SERVICE_ROLE_KEY` = (your service role key)
-4. Deploy
-
-### 4. Connect domain
-
-1. In Vercel dashboard → Settings → Domains → Add `osobnirobot.com`
-2. In Cloudflare DNS → Add CNAME record pointing to `cname.vercel-dns.com`
-3. Wait 1-2 min for propagation
-
-### Done! 🎉
-
-Site is live at https://osobnirobot.com
-
-## Tech Stack
-
-- **Next.js 14** (App Router, TypeScript)
-- **Tailwind CSS**
-- **Supabase** (PostgreSQL + RLS)
-- **Vercel** (hosting)
-
-## Features
-
-- Bilingual (Croatian / English) with auto-detection
-- Model selection (Claude, GPT, Gemini)
-- Channel selection (Telegram, Discord coming soon, WhatsApp coming soon)
-- 4-tier pricing display (BYOK $5, Starter $19, Pro $39, Unlimited $79)
-- Pain point section with real quotes from OpenClaw users
-- Traditional vs OsobniRobot comparison
-- Marquee use cases
-- Email collection → Supabase with rate limiting
-- Responsive, dark theme, animated
+See `MEMORY.md` for environment variables and server commands.
