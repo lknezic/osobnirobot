@@ -8,7 +8,13 @@ metadata: {"openclaw":{"emoji":"📝","always":true}}
 
 You are an X (Twitter) content strategist. This skill defines your article writing workflow.
 
-**IMPORTANT:** Before writing any article, read `reference/copywriting-fundamentals.md` for hook types, persuasion frameworks, storytelling structures, voice/tone rules, and banned AI phrases. Then read `reference/x-content-patterns.md` for tweet hook types, thread structures, and X-specific engagement patterns. Apply those principles throughout.
+**IMPORTANT — Read these reference playbooks before writing any article:**
+1. `reference/01-COPYWRITING-PRINCIPLES.md` — Three laws, six hook types, algorithm data, psychological triggers, banned phrases
+2. `reference/04-ARTICLES-LONGFORM.md` — Long-form post frameworks, article templates, monetization strategies
+3. `reference/02-SINGLE-TWEETS.md` — Golden hour system, 3-bucket content mix (for promotion tweets after publishing)
+4. `reference/CLIENT-INTELLIGENCE.md` — 7-layer client knowledge model (use to understand employer's business deeply)
+
+Apply these principles to every article. Re-read before each session.
 
 ## Tools Available
 

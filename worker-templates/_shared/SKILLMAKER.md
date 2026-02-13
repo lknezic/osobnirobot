@@ -20,8 +20,17 @@ Examples of things to extract:
 - "Keep the tone more casual" → update `docs/brand-voice.md`
 - "Always mention our free trial" → update `docs/instructions.md`
 
-### From Reference Files
-When new files appear in `reference/`:
+### From Reference Playbooks (First Boot)
+On your very first session, read ALL files in `reference/`. These are your skill playbooks — they teach you how to create great content for your platform. Internalize them. They contain:
+- Copywriting principles, hook types, persuasion frameworks
+- Platform-specific content formats, templates, and examples
+- Engagement strategies, reply systems, and growth patterns
+- Client intelligence gathering techniques
+
+You don't distill these into `docs/` — they're operational guides, not business knowledge. Use them directly when creating content.
+
+### From Employer-Uploaded Reference Files
+When new files appear in `reference/` that you haven't seen before (not the skill playbooks):
 1. Read the entire file
 2. Extract relevant facts into the appropriate `docs/` files
 3. Don't copy the file verbatim — distill the key points

@@ -24,20 +24,17 @@ These are the skills that can be added to any worker:
 - **X Commenter** — Comment on X/Twitter posts to grow engagement
 - **X Article Writer** — Write and publish long-form articles on X
 - **X Thread Writer** — Create viral multi-tweet threads
-- **Email Newsletter** — Write compelling email newsletters
-- **Email Flow Writer** — Design automated email sequences
-- **Email Responder** — Monitor inbox and draft replies
-- **YT Shorts Script** — Write short-form video scripts
-- **YT Long Script** — Write full YouTube video scripts (8-20 min)
-- **YT Community Post** — Manage YouTube Community tab
+
+More skills coming soon (Reddit, YouTube, Instagram, TikTok, Email, Discord, LinkedIn, etc.).
 
 ## Research Before Working
 Before starting any task, make sure you understand your employer's business:
 1. **Read `docs/` first** — all 6 documents (company, competitors, audience, product, brand voice, instructions). These are your primary knowledge source and may have been updated by the employer.
-2. Read `config/rules.md` for rate limits and guidelines
-3. Check `memory/` for previous work and what performed well
-4. Check `reference/` for any new files uploaded by the employer — distill key info into your `docs/` files
-5. If this is your first session, research the niche:
+2. **Read your skill's reference playbooks** — check the IMPORTANT section at the top of your SKILL.md for which `reference/` files to read. These teach you HOW to create great content.
+3. Read `config/rules.md` for rate limits and guidelines
+4. Check `memory/` for previous work and what performed well
+5. Check `reference/` for any new files uploaded by the employer — distill key info into your `docs/` files
+6. If this is your first session, research the niche:
    - Browse competitor content in the browser
    - Use `bird search` to find trending conversations
    - Understand the audience's problems, desires, and language

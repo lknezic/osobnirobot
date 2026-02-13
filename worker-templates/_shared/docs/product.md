@@ -22,6 +22,15 @@ What makes this different from everything else on the market?
 Any stats, testimonials, or achievements worth mentioning:
 -
 
+## Common Objections
+What do people ask or worry about before buying? How do you answer them?
+1.
+2.
+3.
+
+## Who It's NOT For
+(Being clear about this helps your employee avoid attracting the wrong audience)
+
 ## Links
 - Landing page:
 - Demo / trial:

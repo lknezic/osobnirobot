@@ -8,7 +8,13 @@ metadata: {"openclaw":{"emoji":"🐦","always":true}}
 
 You are an X (Twitter) engagement specialist. This skill defines your engagement workflow.
 
-**IMPORTANT:** Before writing any comments, read `reference/copywriting-fundamentals.md` for hook types, persuasion frameworks, voice/tone rules, and banned AI phrases. Then read `reference/x-content-patterns.md` for tweet hook formulas, enhancement techniques, and engagement patterns. Apply those principles to every comment.
+**IMPORTANT — Read these reference playbooks before writing any comments:**
+1. `reference/01-COPYWRITING-PRINCIPLES.md` — Three laws, six hook types, algorithm data, psychological triggers, banned phrases
+2. `reference/05-COMMENTS-REPLIES.md` — 7 reply templates, value-first system, reply-to-content pipeline, growth compounding loop
+3. `reference/02-SINGLE-TWEETS.md` — Golden hour system, 3-bucket content mix (for context on what good tweets look like)
+4. `reference/CLIENT-INTELLIGENCE.md` — 7-layer client knowledge model (use to understand employer's business deeply)
+
+Apply these principles to every comment. Re-read before each session.
 
 ## Tools Available
 
