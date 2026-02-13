@@ -12,7 +12,7 @@
 | 4 | Multi-employee API (CRUD endpoints) | DONE |
 | 5 | Infrastructure (DNS, Caddy, orchestrator, Docker) | DONE |
 | 6 | Container hardening (cap_drop, pids, no-new-privileges) | DONE |
-| 7 | LiteLLM proxy code (needs server deploy) | DONE (code only) |
+| 7 | LiteLLM proxy code + server deploy | DONE |
 | 8 | Orchestrator (employeeId naming, file/memory routes) | DONE |
 | 9 | Onboarding wizard (localStorage, animations) | DONE |
 | 10 | Dashboard (TeamGrid, Workspace, HireModal, KnowledgeBase) | DONE |
@@ -38,8 +38,8 @@
 | 25 | Update Stripe checkout for new pricing | DONE |
 | 26 | Update landing page for new pricing | DONE (deployed) |
 | 27 | **Rebuild Docker image on Hetzner** (new templates) | NOT STARTED |
-| 28 | **Rebuild orchestrator on Hetzner** (flywheel + goals.md) | NOT STARTED |
-| 29 | **Deploy LiteLLM to Hetzner** | NOT STARTED |
+| 28 | **Rebuild orchestrator on Hetzner** (flywheel + goals.md) | DONE (restarted, env vars updated) |
+| 29 | **Deploy LiteLLM to Hetzner** | DONE (running on :4000) |
 | 30 | E2E testing (onboard flow, multi-employee, Stripe) | NOT STARTED |
 | 31 | Security audit | NOT STARTED |
 | 32 | Monitoring setup | NOT STARTED |
@@ -92,19 +92,19 @@
 ## Immediate Next Steps (Priority Order)
 
 ### Must-do before launch:
-1. **Update Stripe checkout** — Replace old plan names (simple/expert/legend) with new $199/worker pricing. Create new Stripe Price ID.
-2. **Update landing page** — Reflect $199/worker/channel model, show X/Twitter as first channel, remove old tiered pricing.
-3. **Deploy LiteLLM** — Containers currently use raw API keys. Deploy LiteLLM proxy on Hetzner :4000.
-4. **E2E testing** — Full onboarding flow, multi-employee, Stripe checkout, trial expiry.
-5. **Rebuild Docker image** — Current image on Hetzner doesn't have new worker templates. Need to rebuild.
+1. ~~**Update Stripe checkout**~~ — DONE
+2. ~~**Update landing page**~~ — DONE (deployed)
+3. ~~**Deploy LiteLLM**~~ — DONE (running on :4000)
+4. **Rebuild Docker image** — Current image on Hetzner doesn't have new worker templates. Need to rebuild.
+5. **E2E testing** — Full onboarding flow, multi-employee, Stripe checkout, trial expiry.
 6. **Security audit** — Container isolation, API auth, input sanitization review.
 7. **Monitoring** — Error tracking, container health, API spend via LiteLLM.
 
 ### Nice-to-have before launch:
 - Merge branch to main
 - Clean up old test containers on Hetzner
-- Fix "NaNKB" file size bug in reference files UI
-- Fix cron job `'creating'` status check
+- ~~Fix "NaNKB" file size bug in reference files UI~~ — DONE (85557eb)
+- ~~Fix cron job `'creating'` status check~~ — DONE (85557eb)
 
 ---
 
