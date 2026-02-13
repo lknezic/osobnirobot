@@ -90,22 +90,25 @@ async function ensureSharedVolume(userId: string): Promise<string> {
 async function readContainerFile(containerRef: Docker.Container, filePath: string): Promise<string | null> {
   try {
     const exec = await containerRef.exec({
-      Cmd: ['cat', filePath],
+      Cmd: ['sh', '-c', `cat "${filePath}" 2>/dev/null`],
       AttachStdout: true,
-      AttachStderr: true,
+      AttachStderr: false,
     });
     const stream = await exec.start({ Detach: false, Tty: false });
     return new Promise((resolve) => {
       let output = '';
       stream.on('data', (chunk: Buffer) => {
-        // Docker exec stream has 8-byte header per frame
-        // Skip header bytes for non-tty streams
         output += chunk.toString('utf-8');
       });
       stream.on('end', () => {
         // Clean up docker stream headers (first 8 bytes of each frame)
         const cleaned = output.replace(/[\x00-\x07]/g, '').trim();
-        resolve(cleaned || null);
+        // Return null for empty output or error messages that leaked through
+        if (!cleaned || cleaned.includes('No such file') || cleaned.includes('cat:')) {
+          resolve(null);
+          return;
+        }
+        resolve(cleaned);
       });
       stream.on('error', () => resolve(null));
     });
