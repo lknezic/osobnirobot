@@ -39,7 +39,7 @@ export async function GET(request: Request) {
             .from("employees")
             .select("id")
             .eq("user_id", profile.id)
-            .in("container_status", ["running", "creating"]);
+            .in("container_status", ["running", "provisioning"]);
 
           if (employees && employees.length > 0) {
             // Stop all containers in parallel

@@ -581,7 +581,30 @@ containerRoutes.get('/files/:id', async (req: Request, res: Response) => {
     const refDir = `${CONTAINER_WORKSPACE}/reference`;
     const files = await listContainerFiles(container, refDir);
 
-    const fileList = files.map(f => ({ name: f }));
+    // Get file sizes in parallel using stat
+    const fileList = await Promise.all(
+      files.map(async (f) => {
+        let size = 0;
+        try {
+          const exec = await container.exec({
+            Cmd: ['stat', '-c', '%s', `${refDir}/${f}`],
+            AttachStdout: true,
+            AttachStderr: false,
+          });
+          const stream = await exec.start({ Detach: false, Tty: false });
+          const sizeOutput = await new Promise<string>((resolve) => {
+            let out = '';
+            stream.on('data', (chunk: Buffer) => { out += chunk.toString('utf-8'); });
+            stream.on('end', () => resolve(out.replace(/[\x00-\x07]/g, '').trim()));
+            stream.on('error', () => resolve('0'));
+          });
+          size = parseInt(sizeOutput) || 0;
+        } catch {
+          // size stays 0
+        }
+        return { name: f, size };
+      })
+    );
     res.json(fileList);
   } catch (err: any) {
     if (err.statusCode === 404) {

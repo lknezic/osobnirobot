@@ -47,9 +47,9 @@ export interface Profile {
 
 export interface KnowledgeFile {
   name: string;
-  path: string;
+  path?: string;
   size: number;
-  modified: string;
+  modified?: string;
 }
 
 export interface EmployeeKnowledge {

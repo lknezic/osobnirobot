@@ -189,7 +189,7 @@ export function KnowledgeBase({ employee }: KnowledgeBaseProps) {
               <div key={file.name} className="flex items-center justify-between p-2.5 rounded border border-[var(--border)]" style={{ background: '#0a0a0a' }}>
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="text-xs truncate">{file.name}</span>
-                  <span className="text-[10px] text-[var(--muted)]">{(file.size / 1024).toFixed(1)}KB</span>
+                  {file.size > 0 && <span className="text-[10px] text-[var(--muted)]">{(file.size / 1024).toFixed(1)}KB</span>}
                 </div>
                 <button
                   onClick={() => handleDelete(file.name)}

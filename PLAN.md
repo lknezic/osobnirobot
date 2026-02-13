@@ -35,12 +35,14 @@
 | 22 | Pricing model ($199/worker/channel) | DONE (code) |
 | 23 | Channel-based onboarding | DONE |
 | 24 | Operations guide (OPERATIONS.md) | DONE |
-| 25 | **Update Stripe checkout for new pricing** | NOT STARTED |
-| 26 | **Update landing page for new pricing** | NOT STARTED |
-| 27 | **Deploy LiteLLM to Hetzner** | NOT STARTED |
-| 28 | E2E testing (onboard flow, multi-employee, Stripe) | NOT STARTED |
-| 29 | Security audit | NOT STARTED |
-| 30 | Monitoring setup | NOT STARTED |
+| 25 | Update Stripe checkout for new pricing | DONE |
+| 26 | Update landing page for new pricing | DONE (deployed) |
+| 27 | **Rebuild Docker image on Hetzner** (new templates) | NOT STARTED |
+| 28 | **Rebuild orchestrator on Hetzner** (flywheel + goals.md) | NOT STARTED |
+| 29 | **Deploy LiteLLM to Hetzner** | NOT STARTED |
+| 30 | E2E testing (onboard flow, multi-employee, Stripe) | NOT STARTED |
+| 31 | Security audit | NOT STARTED |
+| 32 | Monitoring setup | NOT STARTED |
 
 ### Phase C: Launch & Growth (Steps 8-10)
 
