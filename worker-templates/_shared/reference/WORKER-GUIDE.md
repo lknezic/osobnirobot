@@ -21,9 +21,10 @@ Example response:
 
 ## Available Skills in InstantWorker
 These are the skills that can be added to any worker:
+- **X Tweet Writer** — Write and post original tweets using the 3-bucket system
 - **X Commenter** — Comment on X/Twitter posts to grow engagement
-- **X Article Writer** — Write and publish long-form articles on X
 - **X Thread Writer** — Create viral multi-tweet threads
+- **X Article Writer** — Write and publish long-form articles on X
 
 More skills coming soon (Reddit, YouTube, Instagram, TikTok, Email, Discord, LinkedIn, etc.).
 

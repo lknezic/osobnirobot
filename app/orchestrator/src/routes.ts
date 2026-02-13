@@ -745,6 +745,7 @@ const DOC_TYPES: Record<string, { title: string; description: string }> = {
   'product.md': { title: 'Product / Service', description: 'What you sell, features, pricing, USP' },
   'brand-voice.md': { title: 'Brand Voice', description: 'Tone, style, dos and don\'ts for content' },
   'instructions.md': { title: 'Custom Instructions', description: 'Free-form instructions for your employee' },
+  'goals.md': { title: 'Goals & Expectations', description: 'Content goals, output targets, success metrics, platform limits' },
 };
 
 // ─── GET /docs/:id — Read all editable docs from container ───
@@ -823,6 +824,64 @@ containerRoutes.put('/docs/:id/:filename', async (req: Request, res: Response) =
     res.json({ success: true, filename: safeName });
   } catch (err: any) {
     console.error('Write doc error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── GET /improvements — Harvest improvement suggestions from ALL running containers ───
+// This is the flywheel: workers discover better approaches → we harvest → update playbooks → all workers improve
+containerRoutes.get('/improvements', async (_req: Request, res: Response) => {
+  try {
+    // List all running InstantWorker containers
+    const containers = await docker.listContainers({
+      filters: { label: ['instantworker=true'], status: ['running'] },
+    });
+
+    const results: Array<{
+      containerId: string;
+      containerName: string;
+      employeeId: string;
+      userId: string;
+      skill: string;
+      improvements: string | null;
+    }> = [];
+
+    // Read improvement-suggestions.md from each container in parallel
+    await Promise.all(
+      containers.map(async (info) => {
+        const container = docker.getContainer(info.Id);
+        const improvements = await readContainerFile(
+          container,
+          `${CONTAINER_WORKSPACE}/memory/improvement-suggestions.md`
+        );
+
+        // Only include containers that have actual suggestions (not just the empty template)
+        const hasContent = improvements && improvements.split('\n').length > 13;
+
+        results.push({
+          containerId: info.Id.slice(0, 12),
+          containerName: info.Names?.[0]?.replace('/', '') || 'unknown',
+          employeeId: info.Labels?.['instantworker.employee'] || '',
+          userId: info.Labels?.['instantworker.user'] || '',
+          skill: info.Labels?.['instantworker.skill'] || '',
+          improvements: hasContent ? improvements : null,
+        });
+      })
+    );
+
+    // Separate containers with suggestions from those without
+    const withSuggestions = results.filter(r => r.improvements !== null);
+    const totalContainers = results.length;
+
+    console.log(`♦ Flywheel harvest: ${withSuggestions.length}/${totalContainers} containers have suggestions`);
+
+    res.json({
+      totalContainers,
+      containersWithSuggestions: withSuggestions.length,
+      suggestions: withSuggestions,
+    });
+  } catch (err: any) {
+    console.error('Improvements harvest error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });

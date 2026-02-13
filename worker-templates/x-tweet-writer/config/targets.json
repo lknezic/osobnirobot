@@ -1,0 +1,9 @@
+{
+  "accounts": [
+    {{TARGETS}}
+  ],
+  "hashtags": [
+    {{HASHTAGS}}
+  ],
+  "niche": "{{NICHE}}"
+}

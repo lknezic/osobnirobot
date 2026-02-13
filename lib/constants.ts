@@ -35,6 +35,7 @@ export interface SkillDef {
 
 export const SKILLS: SkillDef[] = [
   { id: 'x-commenter', emoji: '💬', title: 'X Commenter', desc: 'Scrolls your feed, finds relevant posts, and leaves smart comments that get you noticed.', category: 'X / Twitter', available: false },
+  { id: 'x-tweet-writer', emoji: '✍️', title: 'X Tweet Writer', desc: 'Writes and posts original tweets using the 3-bucket system to grow your following.', category: 'X / Twitter', available: false },
   { id: 'x-article-writer', emoji: '📰', title: 'X Article Writer', desc: 'Writes long-form X articles that position you as a thought leader in your niche.', category: 'X / Twitter', available: true },
   { id: 'x-thread-writer', emoji: '🧵', title: 'X Thread Writer', desc: 'Crafts viral threads that break down ideas, tell stories, and build your following.', category: 'X / Twitter', available: false },
   { id: 'email-newsletter', emoji: '📨', title: 'Email Newsletter Writer', desc: 'Writes engaging newsletters that keep your subscribers hooked and clicking.', category: 'Email', available: false },
