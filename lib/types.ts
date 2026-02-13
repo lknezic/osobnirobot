@@ -57,6 +57,13 @@ export interface EmployeeKnowledge {
   suggestions: string | null;
 }
 
+export interface EmployeeDoc {
+  filename: string;
+  title: string;
+  description: string;
+  content: string;
+}
+
 export interface ApiError {
   error: string;
   code: string;

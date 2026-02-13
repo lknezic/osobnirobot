@@ -117,6 +117,37 @@ async function readContainerFile(containerRef: Docker.Container, filePath: strin
   }
 }
 
+// ─── Helper: write file to container via docker exec ───
+async function writeContainerFile(containerRef: Docker.Container, filePath: string, content: string): Promise<boolean> {
+  try {
+    // Ensure parent directory exists
+    const dir = filePath.substring(0, filePath.lastIndexOf('/'));
+    const mkdirExec = await containerRef.exec({
+      Cmd: ['mkdir', '-p', dir],
+      AttachStdout: true,
+      AttachStderr: true,
+    });
+    await mkdirExec.start({ Detach: false, Tty: false });
+
+    // Write file using tar archive (most reliable method for Docker)
+    const fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
+    const pack = tar.pack();
+    pack.entry({ name: fileName }, content);
+    pack.finalize();
+
+    const tarChunks: Buffer[] = [];
+    for await (const chunk of pack) {
+      tarChunks.push(chunk as Buffer);
+    }
+    const tarBuffer = Buffer.concat(tarChunks);
+
+    await containerRef.putArchive(Readable.from(tarBuffer), { path: dir });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // ─── Helper: list files in container directory via docker exec ───
 async function listContainerFiles(containerRef: Docker.Container, dirPath: string): Promise<string[]> {
   try {
@@ -188,6 +219,13 @@ function buildWorkspace(
   if (fs.existsSync(learningProtocolPath)) {
     const learningContent = fs.readFileSync(learningProtocolPath, 'utf-8');
     soulContent += '\n\n---\n\n' + learningContent;
+  }
+
+  // Append SKILLMAKER.md (hidden learning skill) to SOUL.md
+  const skillmakerPath = path.join(sharedDir, 'SKILLMAKER.md');
+  if (fs.existsSync(skillmakerPath)) {
+    const skillmakerContent = fs.readFileSync(skillmakerPath, 'utf-8');
+    soulContent += '\n\n---\n\n' + skillmakerContent;
   }
 
   fs.writeFileSync(path.join(tmpDir, 'SOUL.md'), soulContent);
@@ -273,6 +311,25 @@ function buildWorkspace(
     fs.mkdirSync(destRefDir, { recursive: true });
     for (const file of fs.readdirSync(refDir)) {
       fs.copyFileSync(path.join(refDir, file), path.join(destRefDir, file));
+    }
+  }
+
+  // Create docs directory with editable user documents
+  const docsDir = path.join(tmpDir, 'docs');
+  fs.mkdirSync(docsDir, { recursive: true });
+
+  // Seed doc templates from _shared/docs/ if they exist, otherwise use inline defaults
+  const sharedDocsDir = path.join(sharedDir, 'docs');
+  if (fs.existsSync(sharedDocsDir)) {
+    for (const file of fs.readdirSync(sharedDocsDir)) {
+      let content = fs.readFileSync(path.join(sharedDocsDir, file), 'utf-8');
+      // Replace template variables in doc templates
+      content = content
+        .replace(/\{\{COMPANY_URL\}\}/g, workerConfig.companyUrl || '')
+        .replace(/\{\{CLIENT_DESCRIPTION\}\}/g, workerConfig.clientDescription || '')
+        .replace(/\{\{NICHE\}\}/g, workerConfig.niche || '')
+        .replace(/\{\{COMPETITOR_URLS\}\}/g, (workerConfig.competitorUrls || []).join('\n- '));
+      fs.writeFileSync(path.join(docsDir, file), content);
     }
   }
 
@@ -673,6 +730,99 @@ containerRoutes.get('/memory/:id', async (req: Request, res: Response) => {
       });
     }
     console.error('Memory read error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── Editable docs directory inside container ───
+const DOCS_DIR = `${CONTAINER_WORKSPACE}/docs`;
+
+// List of known doc types (filename → metadata)
+const DOC_TYPES: Record<string, { title: string; description: string }> = {
+  'company.md': { title: 'About My Company', description: 'Company name, website, mission, key facts' },
+  'competitors.md': { title: 'Competitors', description: 'Competitor names, URLs, strengths, weaknesses' },
+  'audience.md': { title: 'Target Audience', description: 'Customer personas, pain points, demographics' },
+  'product.md': { title: 'Product / Service', description: 'What you sell, features, pricing, USP' },
+  'brand-voice.md': { title: 'Brand Voice', description: 'Tone, style, dos and don\'ts for content' },
+  'instructions.md': { title: 'Custom Instructions', description: 'Free-form instructions for your employee' },
+};
+
+// ─── GET /docs/:id — Read all editable docs from container ───
+containerRoutes.get('/docs/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const name = containerName(id);
+    const container = docker.getContainer(name);
+
+    // Read all doc files in parallel
+    const entries = await Promise.all(
+      Object.entries(DOC_TYPES).map(async ([filename, meta]) => {
+        const content = await readContainerFile(container, `${DOCS_DIR}/${filename}`);
+        return { filename, ...meta, content: content || '' };
+      })
+    );
+
+    res.json(entries);
+  } catch (err: any) {
+    if (err.statusCode === 404) {
+      return res.json([]);
+    }
+    console.error('List docs error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── GET /docs/:id/:filename — Read single doc ───
+containerRoutes.get('/docs/:id/:filename', async (req: Request, res: Response) => {
+  try {
+    const { id, filename } = req.params;
+    const safeName = path.basename(filename);
+    if (!DOC_TYPES[safeName]) {
+      return res.status(400).json({ error: 'Unknown document type' });
+    }
+
+    const name = containerName(id);
+    const container = docker.getContainer(name);
+    const content = await readContainerFile(container, `${DOCS_DIR}/${safeName}`);
+
+    res.json({ filename: safeName, ...DOC_TYPES[safeName], content: content || '' });
+  } catch (err: any) {
+    console.error('Read doc error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── PUT /docs/:id/:filename — Write/update single doc ───
+containerRoutes.put('/docs/:id/:filename', async (req: Request, res: Response) => {
+  try {
+    const { id, filename } = req.params;
+    const safeName = path.basename(filename);
+    if (!DOC_TYPES[safeName]) {
+      return res.status(400).json({ error: 'Unknown document type' });
+    }
+
+    const { content } = req.body;
+    if (typeof content !== 'string') {
+      return res.status(400).json({ error: 'content (string) is required' });
+    }
+
+    // Limit doc size to 50KB
+    if (content.length > 50 * 1024) {
+      return res.status(400).json({ error: 'Document too large. Max 50KB.' });
+    }
+
+    const name = containerName(id);
+    const container = docker.getContainer(name);
+    const success = await writeContainerFile(container, `${DOCS_DIR}/${safeName}`, content);
+
+    if (!success) {
+      return res.status(500).json({ error: 'Failed to write document' });
+    }
+
+    console.log(`♦ Updated doc ${safeName} in ${name}`);
+    res.json({ success: true, filename: safeName });
+  } catch (err: any) {
+    console.error('Write doc error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });

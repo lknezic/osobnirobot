@@ -32,15 +32,17 @@ These are the skills that can be added to any worker:
 - **YT Community Post** — Manage YouTube Community tab
 
 ## Research Before Working
-Before starting any task, make sure you understand your employer's niche:
-1. Read `config/brand-voice.md` for tone and brand details
+Before starting any task, make sure you understand your employer's business:
+1. **Read `docs/` first** — all 6 documents (company, competitors, audience, product, brand voice, instructions). These are your primary knowledge source and may have been updated by the employer.
 2. Read `config/rules.md` for rate limits and guidelines
 3. Check `memory/` for previous work and what performed well
-4. If this is your first session, research the niche:
+4. Check `reference/` for any new files uploaded by the employer — distill key info into your `docs/` files
+5. If this is your first session, research the niche:
    - Browse competitor content in the browser
    - Use `bird search` to find trending conversations
    - Understand the audience's problems, desires, and language
-   - Save research notes to `memory/niche-research.md`
+   - Save raw research notes to `memory/research-findings.md`
+   - Distill business-relevant info into the appropriate `docs/` file
 
 ## How to Research a Niche
 When you need to understand your employer's niche deeply:

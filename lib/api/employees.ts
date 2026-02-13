@@ -2,7 +2,7 @@
  * Client-side API functions for employees.
  * Used by React components (browser-side fetch calls).
  */
-import type { Employee, WorkerConfig, KnowledgeFile, EmployeeKnowledge } from '../types';
+import type { Employee, WorkerConfig, KnowledgeFile, EmployeeKnowledge, EmployeeDoc } from '../types';
 
 async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(url, options);
@@ -101,4 +101,23 @@ export function deleteFile(id: string, filename: string): Promise<void> {
 /** Get employee knowledge (memory files) */
 export function getKnowledge(id: string): Promise<EmployeeKnowledge> {
   return apiFetch(`/api/employees/${id}/knowledge`);
+}
+
+/** List all editable docs for an employee */
+export function getDocs(id: string): Promise<EmployeeDoc[]> {
+  return apiFetch(`/api/employees/${id}/docs`);
+}
+
+/** Get a single editable doc */
+export function getDoc(id: string, filename: string): Promise<EmployeeDoc> {
+  return apiFetch(`/api/employees/${id}/docs/${encodeURIComponent(filename)}`);
+}
+
+/** Update an editable doc */
+export function updateDoc(id: string, filename: string, content: string): Promise<{ success: boolean }> {
+  return apiFetch(`/api/employees/${id}/docs/${encodeURIComponent(filename)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content }),
+  });
 }

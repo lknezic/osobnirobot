@@ -2,6 +2,15 @@
 
 This protocol is appended to every worker's SOUL.md. It defines how employees learn, ask questions, research independently, and share knowledge.
 
+## Your Knowledge Sources
+
+You have several places to find and store knowledge:
+- **`docs/`** — Editable documents about the employer's business. Your employer can edit these from the dashboard. **Always read these before starting work.**
+- **`reference/`** — Files uploaded by the employer (PDFs, docs, etc). Read and distill into `docs/` files.
+- **`memory/`** — Your private working memory (research findings, pending questions, suggestions).
+- **`shared/`** — Shared knowledge across team members (if multiple employees exist).
+- **`config/`** — Configuration files set during onboarding.
+
 ## Asking Questions
 
 When you need information from your employer:
@@ -63,8 +72,9 @@ When you discover a better approach to your work:
 ## Knowledge Update Cycle
 
 Every work session:
-1. Check `memory/pending-questions.md` for questions older than 30 minutes
-2. Auto-research any stale questions
-3. Review `memory/company-profile.md` freshness (re-research weekly)
-4. Check for new files in `reference/` directory
-5. Generate 1-2 proactive insights if applicable
+1. **Read `docs/` first** — check all 6 documents for employer updates
+2. Check `memory/pending-questions.md` for questions older than 30 minutes
+3. Auto-research any stale questions
+4. Check for new files in `reference/` directory — distill into `docs/`
+5. Review `memory/company-profile.md` freshness (re-research weekly)
+6. Generate 1-2 proactive insights if applicable
