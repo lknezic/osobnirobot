@@ -4,8 +4,9 @@ import { createSupabaseAdmin } from '@/lib/supabase-admin';
 import { listEmployees, createEmployee, countEmployees, getMaxEmployees } from '@/lib/db/employees';
 import { unauthorized, badRequest, planLimitReached, serverError } from '@/lib/api-error';
 import { sanitize, sanitizeArray } from '@/lib/validate';
-import { ORCHESTRATOR_URL, ORCHESTRATOR_SECRET } from '@/lib/constants';
+import { ORCHESTRATOR_URL, ORCHESTRATOR_SECRET, PLAN_LIMITS, TRIAL_DURATION_DAYS } from '@/lib/constants';
 import { updateEmployeeContainer } from '@/lib/db/employees';
+import type { PlanTier } from '@/lib/types';
 
 /** GET /api/employees - list all employees + plan info for current user */
 export async function GET() {
@@ -42,14 +43,27 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return unauthorized();
 
-    // Check plan limits
-    const [current, max] = await Promise.all([
-      countEmployees(user.id),
-      getMaxEmployees(user.id),
-    ]);
-    if (current >= max) return planLimitReached();
-
     const body = await request.json();
+
+    // If this is onboarding (first employee), set up the profile
+    const currentCount = await countEmployees(user.id);
+    if (currentCount === 0 && body.workerConfig?.plan) {
+      const plan = body.workerConfig.plan as PlanTier;
+      const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.junior;
+      const admin = createSupabaseAdmin();
+      const trialEndsAt = new Date(Date.now() + TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000).toISOString();
+      await admin.from('profiles').update({
+        onboarding_completed: true,
+        selected_plan: plan,
+        max_employees: limits.maxEmployees,
+        plan_status: 'trial',
+        trial_ends_at: trialEndsAt,
+      }).eq('id', user.id);
+    }
+
+    // Check plan limits
+    const max = await getMaxEmployees(user.id);
+    if (currentCount >= max) return planLimitReached();
 
     const name = sanitize(body.name, 30);
     if (!name) return badRequest('Name is required');
