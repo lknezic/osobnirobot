@@ -26,7 +26,49 @@ fi
 # Generate config from environment if no config exists
 if [ ! -f "$CONFIG_FILE" ]; then
     echo "♦♦  Generating openclaw.json from environment..."
-    cat > "$CONFIG_FILE" << CONFIGEOF
+
+    if [ -n "${LITELLM_URL:-}" ] && [ -n "${LITELLM_KEY:-}" ]; then
+        # LiteLLM proxy mode — containers never see real API keys
+        echo "♦ Using LiteLLM proxy at ${LITELLM_URL}"
+        cat > "$CONFIG_FILE" << CONFIGEOF
+{
+  "gateway": {
+    "port": ${OPENCLAW_GATEWAY_PORT:-18789},
+    "bind": "lan",
+    "auth": {
+      "mode": "token",
+      "token": "${GATEWAY_TOKEN}"
+    },
+    "controlUi": {
+      "enabled": true,
+      "allowInsecureAuth": true
+    }
+  },
+  "models": {
+    "providers": {
+      "openai": {
+        "apiKey": "${LITELLM_KEY}",
+        "baseUrl": "${LITELLM_URL}/v1",
+        "models": [
+          {"id": "gemini-2.0-flash", "name": "Gemini 2.0 Flash"},
+          {"id": "claude-sonnet-4", "name": "Claude Sonnet 4"}
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "workspace": "${OPENCLAW_HOME}/workspace"
+    }
+  },
+  "messages": {
+    "responsePrefix": "auto"
+  }
+}
+CONFIGEOF
+    else
+        # Direct API key mode (fallback — not recommended for production)
+        cat > "$CONFIG_FILE" << CONFIGEOF
 {
   "gateway": {
     "port": ${OPENCLAW_GATEWAY_PORT:-18789},
@@ -64,6 +106,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
   }
 }
 CONFIGEOF
+    fi
     echo "♦ Config generated"
 fi
 

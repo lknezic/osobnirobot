@@ -1,0 +1,32 @@
+[Unit]
+Description=InstantWorker LiteLLM Proxy
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=root
+
+# Stop and remove old container before starting
+ExecStartPre=-/usr/bin/docker stop litellm
+ExecStartPre=-/usr/bin/docker rm litellm
+
+ExecStart=/usr/bin/docker run --rm --name litellm \
+    -p 4000:4000 \
+    -v /opt/instantworker/infra/litellm_config.yaml:/app/config.yaml \
+    --env-file /opt/instantworker/infra/litellm.env \
+    ghcr.io/berriai/litellm:main-latest \
+    --config /app/config.yaml --port 4000
+
+ExecStop=/usr/bin/docker stop litellm
+
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=iw-litellm
+
+[Install]
+WantedBy=multi-user.target

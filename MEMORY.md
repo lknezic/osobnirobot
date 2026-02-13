@@ -39,30 +39,14 @@
 
 ## Roadmap Position
 
-### Original Development Plan (from docs/Development_Plan.md)
-The original 11-phase plan was aspirational and assumed Mastra/Nanobot/LangChain stack. The actual implementation pivoted to OpenClaw-based containers with a simpler architecture.
+**Phase A (Build) is COMPLETE. See PLAN.md for full plan and progress tracker.**
 
-### What's Actually Built (mapped to original phases)
-- **Phase 0 (Foundation)**: DONE — project setup, Supabase, Stripe deps installed
-- **Phase 2 (Onboarding)**: DONE — multi-step wizard, plan selection, employee creation
-- **Phase 4 (Dashboard)**: DONE — employee grid, chat/browser/settings tabs, knowledge base viewer
-- **Phase 6 (Billing)**: PARTIAL — Stripe checkout + webhook routes exist, trial system works, but webhook handler mostly empty
-- **Phase 8 (Landing Page)**: DONE — hero, skills, pricing, i18n
-- **Phase 9 (Security)**: PARTIAL — container isolation, TLS via Caddy, auth middleware, but no gVisor/anomaly detection
-
-### What's NOT Built
-- Phase 1 (LLM Smart Router) — not started, using OpenClaw's built-in model directly
-- Phase 3 (Agent Core with Mastra) — not started, using OpenClaw agent runtime instead
-- Phase 5 (Channel Integrations) — not started, only web chat via OpenClaw gateway
-- Phase 7 (Autonomy & Self-Healing) — basic health checks exist in orchestrator, no supervisor agent
-
-### Immediate Next Steps (Infrastructure — Step 4)
-1. ~~Fix orchestrator crash loop~~ DONE
-2. ~~Fix silent provisioning failure~~ DONE
-3. Clean up old test container on Hetzner
-4. Re-provision "Pulse" employee (use new provision endpoint or manual curl)
-5. Verify end-to-end: onboard → provision → chat iframe loads → browser iframe loads
-6. Harden: add fetch timeout to orchestrator calls, consider provision retry logic
+### Immediate Next Steps (Phase B: Pre-launch)
+1. Deploy LiteLLM to Hetzner server (code ready, needs server setup)
+2. Clean up old test container on Hetzner
+3. Re-provision "Pulse" employee (use dashboard "Start container" button)
+4. Verify end-to-end: onboard → provision → chat iframe loads → browser iframe loads
+5. Run through Step 5 test checklist (in PLAN.md)
 
 ## Architecture Quick Reference
 
@@ -97,7 +81,7 @@ Vercel (Frontend)           Hetzner (Backend)
 - `lib/constants.ts` — Plan limits, skills, config
 - `lib/types.ts` — TypeScript types
 - `app/orchestrator/` — Separate service (excluded from tsconfig)
-- `infra/` — Caddyfile, systemd service, deploy script
+- `infra/` — Caddyfile, systemd services, deploy script, LiteLLM config
 - `worker-templates/` — SOUL.md, SKILL.md per worker type
 
 ## Environment Variables (Required)

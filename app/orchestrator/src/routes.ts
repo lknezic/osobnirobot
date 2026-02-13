@@ -13,6 +13,9 @@ const env = () => ({
   CONTAINER_IMAGE: process.env.CONTAINER_IMAGE || 'instantworker/worker:latest',
   GOOGLE_AI_KEY: process.env.GOOGLE_AI_KEY || '',
   ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || '',
+  // LiteLLM proxy — when set, containers call LiteLLM instead of real APIs
+  LITELLM_URL: process.env.LITELLM_URL || '', // e.g. http://172.17.0.1:4000
+  LITELLM_KEY: process.env.LITELLM_KEY || '', // proxy master key
   GATEWAY_PORT_START: parseInt(process.env.GATEWAY_PORT_START || '20000'),
   GATEWAY_PORT_END: parseInt(process.env.GATEWAY_PORT_END || '21999'),
   NOVNC_PORT_START: parseInt(process.env.NOVNC_PORT_START || '22000'),
@@ -337,19 +340,32 @@ containerRoutes.post('/provision', async (req: Request, res: Response) => {
 
     console.log(`♦ Provisioning container ${name}: gateway=${gatewayPort}, novnc=${novncPort}`);
 
+    // Build container env vars — use LiteLLM proxy when available
+    const useLiteLLM = !!(env().LITELLM_URL && env().LITELLM_KEY);
+    const containerEnv = [
+      `GATEWAY_TOKEN=${gatewayToken}`,
+      `OPENCLAW_GATEWAY_PORT=18789`,
+      `NOVNC_PORT=6080`,
+      `ASSISTANT_NAME=${assistantName || 'Worker'}`,
+      `WORKER_TYPE=${workerType || 'general'}`,
+    ];
+
+    if (useLiteLLM) {
+      // Containers get proxy URL + key, never see real API keys
+      containerEnv.push(`LITELLM_URL=${env().LITELLM_URL}`);
+      containerEnv.push(`LITELLM_KEY=${env().LITELLM_KEY}`);
+      console.log(`♦ Using LiteLLM proxy at ${env().LITELLM_URL}`);
+    } else {
+      // Fallback: pass real API keys directly (not recommended for production)
+      containerEnv.push(`GOOGLE_AI_KEY=${env().GOOGLE_AI_KEY}`);
+      containerEnv.push(`ANTHROPIC_API_KEY=${env().ANTHROPIC_API_KEY}`);
+    }
+
     // Create container
     const container = await docker.createContainer({
       Image: env().CONTAINER_IMAGE,
       name,
-      Env: [
-        `GATEWAY_TOKEN=${gatewayToken}`,
-        `OPENCLAW_GATEWAY_PORT=18789`,
-        `NOVNC_PORT=6080`,
-        `GOOGLE_AI_KEY=${env().GOOGLE_AI_KEY}`,
-        `ANTHROPIC_API_KEY=${env().ANTHROPIC_API_KEY}`,
-        `ASSISTANT_NAME=${assistantName || 'Worker'}`,
-        `WORKER_TYPE=${workerType || 'general'}`,
-      ],
+      Env: containerEnv,
       HostConfig: {
         PortBindings: {
           '18789/tcp': [{ HostPort: String(gatewayPort) }],
