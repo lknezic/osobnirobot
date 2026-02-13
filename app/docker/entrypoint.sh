@@ -19,7 +19,7 @@ mkdir -p "$OPENCLAW_HOME/workspace"
 
 # Copy default workspace files if empty
 if [ ! -f "$OPENCLAW_HOME/workspace/SOUL.md" ] && [ -d /defaults/workspace ]; then
-    cp -n /defaults/workspace/* "$OPENCLAW_HOME/workspace/" 2>/dev/null || true
+    cp -rn /defaults/workspace/* "$OPENCLAW_HOME/workspace/" 2>/dev/null || true
     echo "♦ Default workspace files copied"
 fi
 
