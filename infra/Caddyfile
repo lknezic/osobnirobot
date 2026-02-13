@@ -16,9 +16,14 @@
 		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
 	}
 
-	# Extract port from subdomain
-	@valid_port host_regexp port ^(\d+)\.gw\.instantworker\.ai$
-	handle @valid_port {
+	# Extract port number from subdomain using map
+	map {labels.2} {gw_port} {
+		~^(\d+)$ "${1}"
+	}
+
+	# Only proxy if port was extracted
+	@has_port expression `{gw_port} != ""`
+	handle @has_port {
 		# Remove X-Frame-Options to allow iframe embedding on Vercel
 		header -X-Frame-Options
 		header -Content-Security-Policy
@@ -27,7 +32,7 @@
 		header Access-Control-Allow-Headers "Content-Type, Authorization"
 		header Access-Control-Allow-Credentials "true"
 
-		reverse_proxy localhost:{re.port.1} {
+		reverse_proxy localhost:{gw_port} {
 			# WebSocket support for chat
 			header_up Connection {>Connection}
 			header_up Upgrade {>Upgrade}
@@ -46,8 +51,12 @@
 		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
 	}
 
-	@valid_port host_regexp port ^(\d+)\.vnc\.instantworker\.ai$
-	handle @valid_port {
+	map {labels.2} {vnc_port} {
+		~^(\d+)$ "${1}"
+	}
+
+	@has_port expression `{vnc_port} != ""`
+	handle @has_port {
 		header -X-Frame-Options
 		header -Content-Security-Policy
 		header Access-Control-Allow-Origin "https://instantworker.ai"
@@ -55,7 +64,7 @@
 		header Access-Control-Allow-Headers "Content-Type, Authorization"
 		header Access-Control-Allow-Credentials "true"
 
-		reverse_proxy localhost:{re.port.1} {
+		reverse_proxy localhost:{vnc_port} {
 			header_up Connection {>Connection}
 			header_up Upgrade {>Upgrade}
 		}
