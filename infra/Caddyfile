@@ -17,7 +17,7 @@
 	}
 
 	# Extract port from subdomain
-	@valid_port expression {labels.2} matches "^[0-9]+$"
+	@valid_port host_regexp port ^(\d+)\.gw\.instantworker\.ai$
 	handle @valid_port {
 		# Remove X-Frame-Options to allow iframe embedding on Vercel
 		header -X-Frame-Options
@@ -27,7 +27,7 @@
 		header Access-Control-Allow-Headers "Content-Type, Authorization"
 		header Access-Control-Allow-Credentials "true"
 
-		reverse_proxy localhost:{labels.2} {
+		reverse_proxy localhost:{re.port.1} {
 			# WebSocket support for chat
 			header_up Connection {>Connection}
 			header_up Upgrade {>Upgrade}
@@ -46,7 +46,7 @@
 		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
 	}
 
-	@valid_port expression {labels.2} matches "^[0-9]+$"
+	@valid_port host_regexp port ^(\d+)\.vnc\.instantworker\.ai$
 	handle @valid_port {
 		header -X-Frame-Options
 		header -Content-Security-Policy
@@ -55,7 +55,7 @@
 		header Access-Control-Allow-Headers "Content-Type, Authorization"
 		header Access-Control-Allow-Credentials "true"
 
-		reverse_proxy localhost:{labels.2} {
+		reverse_proxy localhost:{re.port.1} {
 			header_up Connection {>Connection}
 			header_up Upgrade {>Upgrade}
 		}
