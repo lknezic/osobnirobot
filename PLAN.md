@@ -21,12 +21,14 @@
 | 13 | Learning loop templates (LEARNING-PROTOCOL.md) | Step 3G | DONE |
 | 14 | Stripe changes (max_employees on checkout) | Step 3H | DONE |
 | 15 | Container re-provisioning + error handling | Bug fix | DONE |
+| 15b | Caddy wildcard proxy fix ({labels.3} port extraction) | Bug fix | DONE |
+| 15c | Knowledge base cat error suppression | Bug fix | DONE |
 
-### Phase B: Pre-launch (Steps 5-7) — NEXT
+### Phase B: Pre-launch (Steps 5-7) — IN PROGRESS
 
 | # | Item | Step | Status |
 |---|------|------|--------|
-| 16 | End-to-end testing | Step 5 | NOT STARTED |
+| 16 | End-to-end testing | Step 5 | IN PROGRESS (server setup done, testing next) |
 | 17 | Security audit | Step 6 | NOT STARTED |
 | 18 | Monitoring setup | Step 7 | NOT STARTED |
 
