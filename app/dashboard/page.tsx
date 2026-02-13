@@ -179,6 +179,7 @@ function Dashboard() {
           employee={activeEmployee}
           onBack={handleBack}
           onCheckout={handleCheckout}
+          onRefresh={fetchData}
           planStatus={state.planStatus}
           trialEndsAt={state.trialEndsAt}
           hasSubscription={state.hasSubscription}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import type { Employee } from '@/lib/types';
-import { restartEmployee } from '@/lib/api/employees';
+import { restartEmployee, provisionEmployee } from '@/lib/api/employees';
 import { KnowledgeBase } from './KnowledgeBase';
 
 type Tab = 'chat' | 'browser' | 'settings';
@@ -11,14 +11,17 @@ interface EmployeeWorkspaceProps {
   employee: Employee;
   onBack: () => void;
   onCheckout: (planId: string) => void;
+  onRefresh?: () => void;
   planStatus?: string;
   trialEndsAt?: string;
   hasSubscription?: boolean;
 }
 
-export function EmployeeWorkspace({ employee, onBack, onCheckout, planStatus, trialEndsAt, hasSubscription }: EmployeeWorkspaceProps) {
+export function EmployeeWorkspace({ employee, onBack, onCheckout, onRefresh, planStatus, trialEndsAt, hasSubscription }: EmployeeWorkspaceProps) {
   const [tab, setTab] = useState<Tab>('chat');
   const [restarting, setRestarting] = useState(false);
+  const [provisioning, setProvisioning] = useState(false);
+  const [provisionError, setProvisionError] = useState('');
   const [showPaywall, setShowPaywall] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [error, setError] = useState('');
@@ -57,6 +60,23 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, planStatus, tr
       setRestarting(false);
     }
   };
+
+  const handleProvision = async () => {
+    setProvisioning(true);
+    setProvisionError('');
+    try {
+      await provisionEmployee(employee.id);
+      // Refresh dashboard data after successful provision
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      setProvisionError(err instanceof Error ? err.message : 'Provisioning failed');
+    } finally {
+      setProvisioning(false);
+    }
+  };
+
+  const needsProvision = employee.container_status === 'none' || employee.container_status === 'error';
+  const isProvisioning = employee.container_status === 'provisioning' || provisioning;
 
   const handleCheckout = async (planId: string) => {
     setCheckoutLoading(true);
@@ -175,6 +195,38 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, planStatus, tr
                   </div>
                 )}
               </>
+            ) : needsProvision ? (
+              <div className="flex flex-col items-center justify-center h-full text-center px-6 gap-4">
+                <div className="text-4xl">{employee.container_status === 'error' ? '⚠️' : '🔌'}</div>
+                <div>
+                  <h2 className="text-base font-semibold mb-1">
+                    {employee.container_status === 'error' ? 'Container failed to start' : 'Container not provisioned'}
+                  </h2>
+                  <p className="text-sm text-[var(--muted)]">
+                    {employee.container_status === 'error'
+                      ? 'The last provisioning attempt failed. Try again.'
+                      : `${employee.name} needs a container to start working.`}
+                  </p>
+                </div>
+                <button
+                  onClick={handleProvision}
+                  disabled={provisioning}
+                  className="px-6 py-2.5 rounded-lg font-semibold text-sm text-white"
+                  style={{
+                    background: provisioning ? '#333' : 'linear-gradient(135deg, #7c6bf0, #9b7bf7)',
+                    opacity: provisioning ? 0.6 : 1,
+                    cursor: provisioning ? 'wait' : 'pointer',
+                  }}
+                >
+                  {provisioning ? 'Provisioning...' : 'Start container'}
+                </button>
+                {provisionError && <p className="text-red-400 text-sm">{provisionError}</p>}
+              </div>
+            ) : isProvisioning ? (
+              <div className="flex flex-col items-center justify-center h-full text-center gap-3">
+                <div className="w-8 h-8 border-3 border-[#333] border-t-[#3b82f6] rounded-full animate-spin" />
+                <p className="text-sm text-[var(--muted)]">Setting up {employee.name}&apos;s workspace...</p>
+              </div>
             ) : (
               <div className="flex items-center justify-center h-full text-[var(--muted)] text-sm">
                 Connecting to {employee.name}...
@@ -220,7 +272,13 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, planStatus, tr
               </div>
               <div className="flex justify-between py-2 text-sm">
                 <span className="text-[var(--muted)]">Status</span>
-                <span>{isOnline ? '🟢 Online' : '🔴 Offline'}</span>
+                <span>
+                  {isOnline ? '🟢 Online' :
+                   isProvisioning ? '🟡 Provisioning...' :
+                   employee.container_status === 'error' ? '🔴 Error' :
+                   employee.container_status === 'none' ? '⚪ Not provisioned' :
+                   '🔴 Offline'}
+                </span>
               </div>
             </div>
 
@@ -228,15 +286,38 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, planStatus, tr
 
             <div className="p-5 rounded-[10px] border border-[var(--border)]" style={{ background: '#151515' }}>
               <h2 className="text-sm font-semibold mb-3">Management</h2>
-              <button
-                onClick={handleRestart}
-                disabled={restarting}
-                className="px-4 py-2.5 rounded-lg text-sm border border-[var(--border)] text-white"
-                style={{ background: '#1a1a1a', opacity: restarting ? 0.5 : 1, cursor: restarting ? 'wait' : 'pointer' }}
-              >
-                {restarting ? 'Restarting...' : '🔄 Restart employee'}
-              </button>
-              <p className="text-xs text-[var(--muted)] mt-2">Restart will temporarily interrupt the conversation (~30 seconds).</p>
+              <div className="flex flex-col gap-2">
+                {needsProvision && (
+                  <>
+                    <button
+                      onClick={handleProvision}
+                      disabled={provisioning}
+                      className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white"
+                      style={{
+                        background: provisioning ? '#333' : 'linear-gradient(135deg, #7c6bf0, #9b7bf7)',
+                        opacity: provisioning ? 0.6 : 1,
+                        cursor: provisioning ? 'wait' : 'pointer',
+                      }}
+                    >
+                      {provisioning ? 'Provisioning...' : '🚀 Start container'}
+                    </button>
+                    {provisionError && <p className="text-xs text-red-400">{provisionError}</p>}
+                  </>
+                )}
+                <button
+                  onClick={handleRestart}
+                  disabled={restarting || needsProvision}
+                  className="px-4 py-2.5 rounded-lg text-sm border border-[var(--border)] text-white"
+                  style={{ background: '#1a1a1a', opacity: (restarting || needsProvision) ? 0.5 : 1, cursor: (restarting || needsProvision) ? 'not-allowed' : 'pointer' }}
+                >
+                  {restarting ? 'Restarting...' : '🔄 Restart employee'}
+                </button>
+              </div>
+              <p className="text-xs text-[var(--muted)] mt-2">
+                {needsProvision
+                  ? 'Container needs to be started before use.'
+                  : 'Restart will temporarily interrupt the conversation (~30 seconds).'}
+              </p>
             </div>
           </div>
         )}

@@ -71,6 +71,11 @@ export function restartEmployee(id: string): Promise<{ success: boolean }> {
   return apiFetch(`/api/employees/${id}/restart`, { method: 'POST' });
 }
 
+/** Provision or re-provision employee's container */
+export function provisionEmployee(id: string): Promise<{ success: boolean }> {
+  return apiFetch(`/api/employees/${id}/provision`, { method: 'POST' });
+}
+
 /** List reference files for an employee */
 export function listFiles(id: string): Promise<KnowledgeFile[]> {
   return apiFetch(`/api/employees/${id}/files`);

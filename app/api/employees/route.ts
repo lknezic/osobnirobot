@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseServer } from '@/lib/supabase-server';
 import { createSupabaseAdmin } from '@/lib/supabase-admin';
-import { listEmployees, createEmployee, countEmployees, getMaxEmployees } from '@/lib/db/employees';
+import { listEmployees, createEmployee, countEmployees, getMaxEmployees, getEmployee } from '@/lib/db/employees';
 import { unauthorized, badRequest, planLimitReached, serverError } from '@/lib/api-error';
 import { sanitize, sanitizeArray } from '@/lib/validate';
 import { ORCHESTRATOR_URL, ORCHESTRATOR_SECRET, PLAN_LIMITS, TRIAL_DURATION_DAYS } from '@/lib/constants';
@@ -92,6 +92,14 @@ export async function POST(request: Request) {
 
     // Provision container via orchestrator
     try {
+      // Mark as provisioning before calling orchestrator
+      await updateEmployeeContainer(employee.id, {
+        status: 'provisioning',
+        gatewayPort: 0,
+        novncPort: 0,
+        token: '',
+      });
+
       const res = await fetch(`${ORCHESTRATOR_URL}/api/containers/provision`, {
         method: 'POST',
         headers: {
@@ -117,13 +125,28 @@ export async function POST(request: Request) {
           token: containerInfo.container.gatewayToken,
         });
       } else {
-        console.error('Orchestrator provision failed:', await res.text());
+        const errText = await res.text();
+        console.error('Orchestrator provision failed:', errText);
+        await updateEmployeeContainer(employee.id, {
+          status: 'error',
+          gatewayPort: 0,
+          novncPort: 0,
+          token: '',
+        });
       }
     } catch (orchErr) {
       console.error('Orchestrator unreachable:', orchErr);
+      await updateEmployeeContainer(employee.id, {
+        status: 'error',
+        gatewayPort: 0,
+        novncPort: 0,
+        token: '',
+      });
     }
 
-    return NextResponse.json(employee, { status: 201 });
+    // Re-fetch to get updated container status
+    const updated = await getEmployee(employee.id);
+    return NextResponse.json(updated || employee, { status: 201 });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     const stack = err instanceof Error ? err.stack : '';
