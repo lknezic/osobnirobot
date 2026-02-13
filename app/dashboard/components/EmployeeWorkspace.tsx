@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { Employee } from '@/lib/types';
 import { restartEmployee, provisionEmployee } from '@/lib/api/employees';
 import { KnowledgeBase } from './KnowledgeBase';
@@ -22,9 +22,6 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, onRefresh, pla
   const [restarting, setRestarting] = useState(false);
   const [provisioning, setProvisioning] = useState(false);
   const [provisionError, setProvisionError] = useState('');
-  const [showPaywall, setShowPaywall] = useState(false);
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const HOST = process.env.NEXT_PUBLIC_CONTAINER_HOST || 'instantworker.ai';
   const isOnline = employee.container_status === 'running';
@@ -40,15 +37,6 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, onRefresh, pla
   const daysLeft = trialEndsAt
     ? Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86400000))
     : 0;
-
-  // Chat tab paywall for trial users
-  useEffect(() => {
-    if (tab !== 'chat' || hasSubscription || planStatus !== 'trial') return;
-    const key = `iw_chat_views_${employee.id}`;
-    const views = parseInt(localStorage.getItem(key) || '0', 10) + 1;
-    localStorage.setItem(key, String(views));
-    if (views > 3) setShowPaywall(true);
-  }, [tab, hasSubscription, planStatus, employee.id]);
 
   const handleRestart = async () => {
     setRestarting(true);
@@ -77,18 +65,6 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, onRefresh, pla
 
   const needsProvision = employee.container_status === 'none' || employee.container_status === 'error';
   const isProvisioning = employee.container_status === 'provisioning' || provisioning;
-
-  const handleCheckout = async (planId: string) => {
-    setCheckoutLoading(true);
-    setError('');
-    try {
-      onCheckout(planId);
-    } catch {
-      setError('Failed to start checkout');
-    } finally {
-      setCheckoutLoading(false);
-    }
-  };
 
   const skillLabel = employee.worker_type === 'x-article-writer' ? 'X Article Writer' :
     employee.worker_type.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
@@ -149,44 +125,13 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, onRefresh, pla
         {tab === 'chat' && (
           <div className="w-full h-full flex flex-col">
             {chatUrl ? (
-              <>
-                <iframe
-                  src={chatUrl}
-                  className="flex-1 w-full border-none"
-                  style={{
-                    background: '#111',
-                    ...(showPaywall ? { filter: 'blur(6px)', pointerEvents: 'none' as const } : {}),
-                  }}
-                  allow="microphone; camera; clipboard-write; clipboard-read"
-                  sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-downloads"
-                />
-                {showPaywall && (
-                  <div className="absolute inset-0 flex items-center justify-center z-50" style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)' }}>
-                    <div className="text-center p-8 rounded-2xl border border-[var(--border)] max-w-[420px] w-[90%]" style={{ background: '#111' }}>
-                      <div className="text-[40px] mb-3">🔒</div>
-                      <h2 className="text-xl font-bold mb-2">Enjoying {employee.name}?</h2>
-                      <p className="text-sm text-[var(--dim)] mb-6">Subscribe to keep chatting and let your team work 24/7.</p>
-                      <div className="flex flex-col gap-2.5 w-full max-w-[320px] mx-auto">
-                        <button
-                          onClick={() => handleCheckout('worker')}
-                          disabled={checkoutLoading}
-                          className="flex justify-between items-center p-3.5 rounded-[10px] text-sm font-semibold text-white"
-                          style={{
-                            background: 'linear-gradient(135deg, #7c6bf0, #9b7bf7)',
-                            opacity: checkoutLoading ? 0.6 : 1,
-                            cursor: checkoutLoading ? 'wait' : 'pointer',
-                          }}
-                        >
-                          <span>1 worker, 1 channel, all skills</span>
-                          <span className="font-bold">$199/mo</span>
-                        </button>
-                      </div>
-                      {error && <p className="text-red-400 text-sm mt-3">{error}</p>}
-                      <p className="text-xs text-[var(--muted)] mt-4">7-day free trial · Cancel anytime</p>
-                    </div>
-                  </div>
-                )}
-              </>
+              <iframe
+                src={chatUrl}
+                className="flex-1 w-full border-none"
+                style={{ background: '#111' }}
+                allow="microphone; camera; clipboard-write; clipboard-read"
+                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-downloads"
+              />
             ) : needsProvision ? (
               <div className="flex flex-col items-center justify-center h-full text-center px-6 gap-4">
                 <div className="text-4xl">{employee.container_status === 'error' ? '⚠️' : '🔌'}</div>

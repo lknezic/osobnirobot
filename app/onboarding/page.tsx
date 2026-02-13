@@ -217,6 +217,16 @@ function Onboarding() {
                   </button>
                 );
               })}
+              {/* Other channels coming soon */}
+              <div className="p-4 rounded-[var(--r2)] border border-[var(--border)] opacity-40" style={{ background: 'var(--bg2)' }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="font-bold text-base">Other Channels</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full border border-[var(--border)] text-[var(--muted)]">Coming Soon</span>
+                </div>
+                <p className="text-xs text-[var(--muted)]">
+                  Instagram, YouTube, TikTok, LinkedIn, Email, Discord — each as a dedicated employee with all skills for that platform.
+                </p>
+              </div>
             </div>
             <button
               onClick={() => setStep(2)}

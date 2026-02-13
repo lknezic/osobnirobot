@@ -37,7 +37,7 @@ export function HireEmployeeModal({ onHire, onClose }: HireEmployeeModalProps) {
       style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)' }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="w-full max-w-md rounded-[var(--r)] border border-[var(--border)] mx-4 max-h-[90vh] flex flex-col" style={{ background: '#111' }}>
+      <div className="w-full max-w-md rounded-[var(--r)] border border-[var(--border)] mx-4 max-h-[90vh] min-h-0 flex flex-col" style={{ background: '#111' }}>
         {/* Header with close button */}
         <div className="flex items-center justify-between px-6 pt-5 pb-0 shrink-0">
           <h2 className="text-lg font-bold">
@@ -91,6 +91,13 @@ export function HireEmployeeModal({ onHire, onClose }: HireEmployeeModalProps) {
                     </button>
                   );
                 })}
+                <div className="p-3 rounded-[var(--r2)] border border-[var(--border)] opacity-40" style={{ background: 'var(--bg2)' }}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm font-medium">Other Channels</span>
+                    <span className="text-[10px] text-[var(--muted)]">Coming Soon</span>
+                  </div>
+                  <p className="text-[10px] text-[var(--muted)]">Instagram, YouTube, TikTok, LinkedIn, Email, Discord</p>
+                </div>
               </div>
               <div className="flex gap-3">
                 <button onClick={onClose} className="px-4 py-2.5 rounded-[var(--r2)] text-sm border border-[var(--border)] text-[var(--dim)]" style={{ background: 'var(--bg2)' }}>Cancel</button>
