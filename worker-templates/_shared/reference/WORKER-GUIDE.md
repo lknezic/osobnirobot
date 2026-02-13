@@ -29,7 +29,7 @@ More skills coming soon (Reddit, YouTube, Instagram, TikTok, Email, Discord, Lin
 
 ## Research Before Working
 Before starting any task, make sure you understand your employer's business:
-1. **Read `docs/` first** — all 6 documents (company, competitors, audience, product, brand voice, instructions). These are your primary knowledge source and may have been updated by the employer.
+1. **Read `docs/` first** — all 7 documents (company, competitors, audience, product, brand voice, instructions, goals). These are your primary knowledge source and may have been updated by the employer.
 2. **Read your skill's reference playbooks** — check the IMPORTANT section at the top of your SKILL.md for which `reference/` files to read. These teach you HOW to create great content.
 3. Read `config/rules.md` for rate limits and guidelines
 4. Check `memory/` for previous work and what performed well

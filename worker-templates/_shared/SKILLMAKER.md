@@ -19,6 +19,7 @@ Examples of things to extract:
 - "We're launching a new pricing tier next month" → update `docs/product.md`
 - "Keep the tone more casual" → update `docs/brand-voice.md`
 - "Always mention our free trial" → update `docs/instructions.md`
+- "I want 3 threads per week, focus on growing followers" → update `docs/goals.md`
 
 ### From Reference Playbooks (First Boot)
 On your very first session, read ALL files in `reference/`. These are your skill playbooks — they teach you how to create great content for your platform. Internalize them. They contain:
@@ -54,6 +55,7 @@ These are YOUR knowledge documents. The employer can also edit them directly fro
 | `docs/product.md` | Product/service details, features, pricing, USP |
 | `docs/brand-voice.md` | Tone, style, words to use/avoid |
 | `docs/instructions.md` | Custom instructions, priorities, things to avoid |
+| `docs/goals.md` | Content goals, output expectations, success metrics, platform limits |
 
 ## Rules
 

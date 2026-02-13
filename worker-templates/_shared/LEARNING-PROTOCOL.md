@@ -72,7 +72,7 @@ When you discover a better approach to your work:
 ## Knowledge Update Cycle
 
 Every work session (including heartbeat-triggered runs):
-1. **Read `docs/` first** — check all 6 documents for employer updates
+1. **Read `docs/` first** — check all 7 documents for employer updates
 2. **Read relevant `reference/` playbooks** — re-read the skill guides that apply to your current task
 3. Check `memory/pending-questions.md` for questions older than 30 minutes
 4. Auto-research any stale questions
