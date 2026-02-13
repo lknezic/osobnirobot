@@ -1,33 +1,27 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createSupabaseAdmin } from "@/lib/supabase-admin";
 import { sendEmail, trialExpiringEmail } from "@/lib/email";
+import { ORCHESTRATOR_URL, ORCHESTRATOR_SECRET } from "@/lib/constants";
 
-const ORCHESTRATOR_URL = process.env.ORCHESTRATOR_URL || "http://localhost:3500";
-const ORCHESTRATOR_SECRET = process.env.ORCHESTRATOR_SECRET || "";
 const CRON_SECRET = process.env.CRON_SECRET || "";
 
 export async function GET(request: Request) {
-  // Verify cron secret (Vercel sends this header)
   const authHeader = request.headers.get("authorization");
   if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const supabase = createSupabaseAdmin();
 
   try {
     const now = new Date();
 
-    // 1. Stop expired trials
+    // 1. Find expired trials
     const { data: expired, error: expError } = await supabase
       .from("profiles")
-      .select("id, assistant_name, plan_status, trial_ends_at, container_status")
+      .select("id, plan_status, trial_ends_at")
       .eq("plan_status", "trial")
-      .lt("trial_ends_at", now.toISOString())
-      .in("container_status", ["running", "creating"]);
+      .lt("trial_ends_at", now.toISOString());
 
     if (expError) {
       console.error("Expired query error:", expError);
@@ -40,55 +34,76 @@ export async function GET(request: Request) {
 
       for (const profile of expired) {
         try {
-          const res = await fetch(`${ORCHESTRATOR_URL}/api/containers/stop`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-orchestrator-secret": ORCHESTRATOR_SECRET,
-            },
-            body: JSON.stringify({ userId: profile.id }),
-          });
+          // Get all running employee containers for this user
+          const { data: employees } = await supabase
+            .from("employees")
+            .select("id")
+            .eq("user_id", profile.id)
+            .in("container_status", ["running", "creating"]);
 
-          if (res.ok) {
+          if (employees && employees.length > 0) {
+            // Stop all containers in parallel
+            await Promise.all(
+              employees.map(emp =>
+                fetch(`${ORCHESTRATOR_URL}/api/containers/stop`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "x-orchestrator-secret": ORCHESTRATOR_SECRET,
+                  },
+                  body: JSON.stringify({ employeeId: emp.id }),
+                }).catch(() => {})
+              )
+            );
+
+            // Batch update all employee statuses
+            const empIds = employees.map(e => e.id);
             await supabase
-              .from("profiles")
-              .update({ container_status: "stopped", plan_status: "expired" })
-              .eq("id", profile.id);
-            stopped++;
-            console.log(`Stopped container for ${profile.id.slice(0, 8)} (${profile.assistant_name})`);
+              .from("employees")
+              .update({ container_status: "stopped" })
+              .in("id", empIds);
           }
+
+          await supabase
+            .from("profiles")
+            .update({ plan_status: "expired" })
+            .eq("id", profile.id);
+          stopped++;
+          console.log(`Stopped containers for ${profile.id.slice(0, 8)}`);
         } catch (err) {
           console.error(`Error stopping ${profile.id.slice(0, 8)}:`, err);
         }
       }
     }
 
-    // 2. Send trial expiring emails (2 days before expiry)
+    // 2. Send trial expiring emails (2 days before expiry) in parallel
     const twoDaysFromNow = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000);
     const { data: expiring, error: warnError } = await supabase
       .from("profiles")
-      .select("id, email, assistant_name, trial_ends_at")
+      .select("id, email, trial_ends_at")
       .eq("plan_status", "trial")
       .gt("trial_ends_at", now.toISOString())
       .lt("trial_ends_at", twoDaysFromNow.toISOString());
 
     if (warnError) {
       console.error("Warning query error:", warnError);
-      // Non-fatal — still return success for the stop phase
     }
 
     let warned = 0;
     if (expiring && expiring.length > 0) {
-      for (const profile of expiring) {
-        if (!profile.email) continue;
-        const daysLeft = Math.max(1, Math.ceil(
-          (new Date(profile.trial_ends_at).getTime() - now.getTime()) / 86400000
-        ));
-        const { subject, html } = trialExpiringEmail(profile.assistant_name || "your worker", daysLeft);
-        const sent = await sendEmail({ to: profile.email, subject, html });
-        if (sent) warned++;
-      }
-      console.log(`Sent ${warned} trial expiring email(s)`);
+      const results = await Promise.all(
+        expiring
+          .filter(p => p.email)
+          .map(profile => {
+            const daysLeft = Math.max(1, Math.ceil(
+              (new Date(profile.trial_ends_at).getTime() - now.getTime()) / 86400000
+            ));
+            const { subject, html } = trialExpiringEmail("your team", daysLeft);
+            return sendEmail({ to: profile.email, subject, html });
+          })
+      );
+      warned = results.filter(Boolean).length;
+      if (warned > 0) console.log(`Sent ${warned} trial expiring email(s)`);
     }
 
     return NextResponse.json({
@@ -96,8 +111,9 @@ export async function GET(request: Request) {
       stopped,
       warned,
     });
-  } catch (err: any) {
-    console.error("Cron error:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    console.error("Cron error:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

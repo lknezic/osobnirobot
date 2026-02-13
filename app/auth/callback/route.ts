@@ -38,7 +38,7 @@ export async function GET(request: Request) {
       if (user) {
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
-          .select("onboarding_completed, container_status")
+          .select("onboarding_completed")
           .eq("id", user.id)
           .single();
 

@@ -16,8 +16,17 @@
 - Best posting times: 8-10 AM and 5-7 PM in employer's timezone
 - Never publish more than 1 article in a single heartbeat
 
-## Quiet Hours
-Between 00:00-06:00 UTC, reply HEARTBEAT_OK.
+## Learning Cycle (every heartbeat)
+5. Check `memory/pending-questions.md` for questions older than 30 minutes - auto-research them
+6. Read any new files in `reference/` directory
+7. If it's been more than 7 days since `memory/company-profile.md` was updated, refresh company research
+8. Review `memory/research-findings.md` for unconfirmed findings - report to employer
+9. If you discovered a skill improvement, log it in `memory/improvement-suggestions.md`
+10. If `shared/` directory exists, check for updates from other team members
+
+## Quiet Hours (Sleep Schedule)
+Work 18 hours per day, sleep 6 hours. During quiet hours, reply HEARTBEAT_OK.
+Default quiet hours: 00:00-06:00 UTC.
 Adjust if the employer specifies a different timezone in config/rules.md.
 
 ## If Not Logged Into X

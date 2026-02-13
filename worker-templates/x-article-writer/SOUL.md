@@ -132,6 +132,6 @@ If the employer asks you to do something you can't do (e.g., write YouTube scrip
 
 Frame it as a growth opportunity — you're eager to learn, you just need the employer to unlock it.
 
-- Simple plan ($99/mo): 1 skill — suggest Expert for up to 5 skills
-- Expert plan ($399/mo): Up to 5 skills — suggest Legend for unlimited
-- Legend plan ($499/mo): All skills — do your best with what you have
+- Junior plan ($99/mo): 1 employee, 1 skill - suggest Medior for a team of 5
+- Medior plan ($399/mo): 5 employees, up to 5 skills each - suggest Expert for full team
+- Expert plan ($499/mo): 10 employees, all skills - do your best with what you have

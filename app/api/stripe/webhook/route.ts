@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { createClient } from "@supabase/supabase-js";
+import { createSupabaseAdmin } from "@/lib/supabase-admin";
 import { sendEmail, paymentFailedEmail } from "@/lib/email";
+import { PLAN_LIMITS } from "@/lib/constants";
+import type { PlanTier } from "@/lib/types";
 
 function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -9,7 +11,7 @@ function getStripe() {
 
 export async function POST(request: Request) {
   const stripe = getStripe();
-  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+  const supabase = createSupabaseAdmin();
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
   const body = await request.text();
   const sig = request.headers.get("stripe-signature")!;
@@ -35,10 +37,15 @@ export async function POST(request: Request) {
           const isTrial = sub?.status === "trialing";
           const trialEnd = sub?.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null;
 
+          // Set max_employees based on plan tier
+          const planLimits = PLAN_LIMITS[planId as PlanTier];
+          const maxEmployees = planLimits?.maxEmployees || 1;
+
           await supabase.from("profiles").update({
             plan_status: isTrial ? "trial" : "active",
             selected_plan: planId,
             stripe_subscription_id: subId,
+            max_employees: maxEmployees,
             ...(trialEnd ? { trial_ends_at: trialEnd } : {}),
           }).eq("id", userId);
         }
@@ -72,7 +79,6 @@ export async function POST(request: Request) {
         if (userId) {
           await supabase.from("profiles").update({
             plan_status: "cancelled",
-            container_status: "stopped",
           }).eq("id", userId);
         }
         break;
@@ -80,13 +86,13 @@ export async function POST(request: Request) {
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice;
         const customerId = invoice.customer as string;
-        const { data: profile } = await supabase.from("profiles").select("id, assistant_name").eq("stripe_customer_id", customerId).single();
+        const { data: profile } = await supabase.from("profiles").select("id").eq("stripe_customer_id", customerId).single();
         if (profile) {
           await supabase.from("profiles").update({ plan_status: "past_due" }).eq("id", profile.id);
           // Send payment failed email
           const customerEmail = typeof invoice.customer_email === "string" ? invoice.customer_email : null;
           if (customerEmail) {
-            const { subject, html } = paymentFailedEmail(profile.assistant_name || "your worker");
+            const { subject, html } = paymentFailedEmail("your team");
             sendEmail({ to: customerEmail, subject, html }).catch(() => {});
           }
         }

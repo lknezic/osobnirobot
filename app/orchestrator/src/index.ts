@@ -19,7 +19,13 @@ if (!API_SECRET) {
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+// Skip JSON parsing for file upload routes (they use multipart/form-data)
+app.use((req, res, next) => {
+  if (req.method === 'POST' && req.path.match(/^\/api\/containers\/files\//)) {
+    return next();
+  }
+  express.json()(req, res, next);
+});
 
 // Health endpoint (no auth needed) - MUST be before auth middleware
 app.get('/health', (_req, res) => {

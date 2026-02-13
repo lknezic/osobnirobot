@@ -1,49 +1,55 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
-
-const SKILLS = [
-  { id: 'x-commenter', emoji: '💬', title: 'X Commenter', category: 'X / Twitter', available: false },
-  { id: 'x-article-writer', emoji: '📰', title: 'X Article Writer', category: 'X / Twitter', available: true },
-  { id: 'x-thread-writer', emoji: '🧵', title: 'X Thread Writer', category: 'X / Twitter', available: false },
-  { id: 'email-newsletter', emoji: '📨', title: 'Email Newsletter', category: 'Email', available: false },
-  { id: 'email-flow', emoji: '⚡', title: 'Email Flow Writer', category: 'Email', available: false },
-  { id: 'email-responder', emoji: '📧', title: 'Email Responder', category: 'Email', available: false },
-  { id: 'yt-shorts-script', emoji: '🎬', title: 'YT Shorts Script', category: 'YouTube', available: false },
-  { id: 'yt-long-script', emoji: '🎥', title: 'YT Long Script', category: 'YouTube', available: false },
-  { id: 'yt-community', emoji: '📢', title: 'YT Community Post', category: 'YouTube', available: false },
-  { id: 'reddit-commenter', emoji: '🤖', title: 'Reddit Commenter', category: 'Reddit', available: false },
-  { id: 'discord-engagement', emoji: '🎮', title: 'Discord Engagement', category: 'Discord', available: false },
-  { id: 'facebook-group', emoji: '👥', title: 'Facebook Group', category: 'Facebook', available: false },
-  { id: 'instagram-content', emoji: '📸', title: 'Instagram Content', category: 'Instagram', available: false },
-  { id: 'tiktok-content', emoji: '🎵', title: 'TikTok Content', category: 'TikTok', available: false },
-  { id: 'seo-optimization', emoji: '🔍', title: 'SEO Optimization', category: 'SEO', available: false },
-];
-
-const PLANS = [
-  { id: 'simple', title: 'Simple', price: '$99', desc: '1 skill, 24/7', maxSkills: 1 },
-  { id: 'expert', title: 'Expert', price: '$399', desc: 'Up to 5 skills, 24/7', maxSkills: 5 },
-  { id: 'legend', title: 'Legend', price: '$499', desc: 'All skills, 24/7', maxSkills: 15 },
-];
-
-const TONES = [
-  { id: 'witty', emoji: '😏', label: 'Witty', desc: 'Sharp, clever, a bit edgy' },
-  { id: 'professional', emoji: '💼', label: 'Professional', desc: 'Polished and authoritative' },
-  { id: 'friendly', emoji: '😊', label: 'Friendly', desc: 'Warm and approachable' },
-  { id: 'provocative', emoji: '🔥', label: 'Provocative', desc: 'Bold takes, strong opinions' },
-];
-
-const WORKER_NAMES = [
-  'Atlas', 'Nova', 'Scout', 'Echo', 'Vega', 'Orion', 'Pixel', 'Sage',
-  'Blaze', 'Ridge', 'Lux', 'Drift', 'Ember', 'Flux', 'Haze', 'Jett',
-  'Koda', 'Maven', 'Nyx', 'Onyx', 'Pulse', 'Quinn', 'Raze', 'Slate',
-  'Thorn', 'Volt', 'Wren', 'Zara', 'Axel', 'Cleo', 'Dash', 'Fern',
-  'Grit', 'Hawk', 'Ivy', 'Jade', 'Knox', 'Luna', 'Milo', 'Nero',
-];
+import { SKILLS, PLANS, TONES, WORKER_NAMES } from '@/lib/constants';
 
 function getRandomName(): string {
   return WORKER_NAMES[Math.floor(Math.random() * WORKER_NAMES.length)];
+}
+
+const LAUNCH_STEPS = [
+  'Setting up workspace...',
+  'Researching your company...',
+  'Analyzing competitors...',
+  'Building knowledge base...',
+  'Ready! Entering your office.',
+];
+
+function LaunchAnimation({ name }: { name: string }) {
+  const [activeStep, setActiveStep] = useState(0);
+
+  useEffect(() => {
+    if (activeStep >= LAUNCH_STEPS.length) return;
+    const delay = activeStep === 0 ? 2000 : 3000 + Math.random() * 2000;
+    const timer = setTimeout(() => setActiveStep(s => s + 1), delay);
+    return () => clearTimeout(timer);
+  }, [activeStep]);
+
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center max-w-md px-8">
+        <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-6 text-xl font-bold text-white" style={{ background: 'linear-gradient(135deg, var(--accent), #9b7bf7)' }}>
+          {name[0]}
+        </div>
+        <h2 className="text-2xl font-bold mb-6">{name} is getting ready...</h2>
+        <div className="space-y-3 text-left max-w-xs mx-auto">
+          {LAUNCH_STEPS.map((text, i) => (
+            <div key={i} className="flex items-center gap-3">
+              {i < activeStep ? (
+                <span className="text-[var(--green)] text-sm">✓</span>
+              ) : i === activeStep ? (
+                <div className="w-4 h-4 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <span className="w-4 h-4 rounded-full border border-[var(--border)]" />
+              )}
+              <span className={`text-sm ${i <= activeStep ? 'text-[var(--text)]' : 'text-[var(--muted)]'}`}>{text}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function OnboardingPage() {
@@ -60,7 +66,7 @@ export default function OnboardingPage() {
 
 function Onboarding() {
   const [step, setStep] = useState(1);
-  const [plan, setPlan] = useState('simple');
+  const [plan, setPlan] = useState('junior');
   const [selectedSkills, setSelectedSkills] = useState<string[]>(['x-article-writer']);
   const [name, setName] = useState(getRandomName);
   const [companyUrl, setCompanyUrl] = useState('');
@@ -77,7 +83,7 @@ function Onboarding() {
   const toggleSkill = (id: string) => {
     const skill = SKILLS.find(s => s.id === id);
     if (!skill?.available) return;
-    if (plan === 'legend') return;
+    if (plan === 'expert') return;
     if (selectedSkills.includes(id)) {
       setSelectedSkills(selectedSkills.filter(s => s !== id));
     } else if (selectedSkills.length < maxSkills) {
@@ -86,7 +92,7 @@ function Onboarding() {
   };
 
   const handleLaunch = async () => {
-    if (!name.trim()) { setError('Give your worker a name'); return; }
+    if (!name.trim()) { setError('Give your employee a name'); return; }
 
     setLaunching(true);
     setError('');
@@ -94,55 +100,46 @@ function Onboarding() {
     try {
       const toneDesc = TONES.find(t => t.id === tone)?.desc || tone;
       const availableSkills = SKILLS.filter(s => s.available);
-      const skillIds = plan === 'legend'
+      const skillIds = plan === 'expert'
         ? availableSkills.map(s => s.id)
         : selectedSkills;
 
-      const provisionConfig = {
-        assistantName: name.trim(),
-        personality: toneDesc,
-        workerType: skillIds[0] || 'x-article-writer',
-        workerConfig: {
-          skills: skillIds,
-          plan,
-          companyUrl: companyUrl.trim(),
-          clientDescription: clientDesc.trim(),
-          competitorUrls: competitorUrls.split('\n').map(u => u.trim()).filter(Boolean),
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        },
-      };
-
-      // Provision container directly (no Stripe upfront)
-      const res = await fetch('/api/containers/provision', {
+      const res = await fetch('/api/employees', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(provisionConfig),
+        body: JSON.stringify({
+          name: name.trim(),
+          personality: toneDesc,
+          workerType: skillIds[0] || 'x-article-writer',
+          skills: skillIds,
+          workerConfig: {
+            skills: skillIds,
+            plan,
+            companyUrl: companyUrl.trim(),
+            clientDescription: clientDesc.trim(),
+            competitorUrls: competitorUrls.split('\n').map(u => u.trim()).filter(Boolean),
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          },
+        }),
       });
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || 'Failed to start worker');
+        throw new Error(data.error || 'Failed to hire employee');
       }
 
+      // Wait for animation to feel complete, then redirect
+      await new Promise(resolve => setTimeout(resolve, 12000));
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Something went wrong';
+      setError(message);
       setLaunching(false);
     }
   };
 
-  // Launching screen
   if (launching) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center max-w-md px-8">
-          <div className="w-12 h-12 border-3 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin mx-auto mb-6" />
-          <h2 className="text-2xl font-bold mb-3">Hiring {name}...</h2>
-          <p className="text-[var(--dim)] text-sm mb-2">Setting up your AI employee and preparing research.</p>
-          <p className="text-[var(--muted)] text-xs">This takes about 30 seconds.</p>
-        </div>
-      </div>
-    );
+    return <LaunchAnimation name={name} />;
   }
 
   return (
@@ -160,7 +157,7 @@ function Onboarding() {
         {step === 1 && (
           <>
             <h1 className="text-2xl font-bold mb-2">Choose your plan</h1>
-            <p className="text-[var(--dim)] text-sm mb-6">All plans run 24/7. Pick based on how many skills you need.</p>
+            <p className="text-[var(--dim)] text-sm mb-6">Start with one employee or build a team. All plans run 24/7.</p>
             <div className="space-y-3 mb-6">
               {PLANS.map(p => (
                 <button
@@ -188,7 +185,7 @@ function Onboarding() {
               className="w-full py-3.5 rounded-[var(--r2)] font-semibold text-sm text-white transition-all hover:brightness-110"
               style={{ background: 'linear-gradient(135deg, var(--accent), #9b7bf7)' }}
             >
-              Next →
+              Next
             </button>
             <p className="text-center text-[var(--muted)] text-xs mt-3">7-day free trial on all plans</p>
           </>
@@ -198,11 +195,11 @@ function Onboarding() {
         {step === 2 && (
           <>
             <h1 className="text-2xl font-bold mb-2">
-              {plan === 'legend' ? 'Your skills (all included)' : `Pick your skill${maxSkills > 1 ? 's' : ''}`}
+              {plan === 'expert' ? 'Your skills (all included)' : `Pick your skill${maxSkills > 1 ? 's' : ''}`}
             </h1>
             <p className="text-[var(--dim)] text-sm mb-6">
-              {plan === 'legend'
-                ? `Legend plan includes all ${SKILLS.length} skills.`
+              {plan === 'expert'
+                ? `Expert plan includes all ${SKILLS.length} skills for each employee.`
                 : `${currentPlan.title} plan: choose ${maxSkills === 1 ? '1 skill' : `up to ${maxSkills} skills`}. ${selectedSkills.length}/${maxSkills} selected.`}
             </p>
 
@@ -212,8 +209,8 @@ function Onboarding() {
                 <div className="grid grid-cols-1 gap-2">
                   {SKILLS.filter(s => s.category === category).map(skill => {
                     const isAvailable = skill.available;
-                    const isSelected = isAvailable && (plan === 'legend' || selectedSkills.includes(skill.id));
-                    const isDisabled = !isAvailable || (plan !== 'legend' && !isSelected && selectedSkills.length >= maxSkills);
+                    const isSelected = isAvailable && (plan === 'expert' || selectedSkills.includes(skill.id));
+                    const isDisabled = !isAvailable || (plan !== 'expert' && !isSelected && selectedSkills.length >= maxSkills);
                     return (
                       <button
                         key={skill.id}
@@ -251,32 +248,32 @@ function Onboarding() {
               <button onClick={() => setStep(1)} className="px-6 py-3.5 rounded-[var(--r2)] text-sm border border-[var(--border)] text-[var(--dim)] hover:text-[var(--text)] transition-colors" style={{ background: 'var(--bg2)' }}>Back</button>
               <button
                 onClick={() => {
-                  if (plan !== 'legend' && selectedSkills.length === 0) { setError('Pick at least one skill'); return; }
+                  if (plan !== 'expert' && selectedSkills.length === 0) { setError('Pick at least one skill'); return; }
                   setError('');
                   setStep(3);
                 }}
                 className="flex-1 py-3.5 rounded-[var(--r2)] font-semibold text-sm text-white transition-all hover:brightness-110"
                 style={{ background: 'linear-gradient(135deg, var(--accent), #9b7bf7)' }}
               >
-                Next →
+                Next
               </button>
             </div>
           </>
         )}
 
-        {/* Step 3: Configure worker */}
+        {/* Step 3: Educate your first employee */}
         {step === 3 && (
           <>
-            <h1 className="text-2xl font-bold mb-2">Tell us about your business</h1>
+            <h1 className="text-2xl font-bold mb-2">Educate your first employee</h1>
             <p className="text-[var(--dim)] text-sm mb-6">
-              Your worker will deeply research your company and competitors before writing.
+              The more you share, the smarter your employee starts. They will deeply research your company, competitors, and audience.
             </p>
 
             <div className="mb-5">
-              <label className="block text-sm text-[var(--dim)] mb-2">Worker name</label>
+              <label className="block text-sm text-[var(--dim)] mb-2">Employee name</label>
               <div className="flex gap-2">
                 <input type="text" value={name} onChange={e => { setName(e.target.value); setError(''); }}
-                  placeholder="e.g. Atlas, Scout, Echo..." maxLength={30} autoFocus
+                  placeholder="e.g. Axel, Nova, Scout..." maxLength={30} autoFocus
                   className="flex-1 px-4 py-3 rounded-[var(--r2)] border border-[var(--border)] text-sm focus:border-[var(--accent)] focus:outline-none transition-colors"
                   style={{ background: 'var(--bg2)', color: 'var(--text)' }} />
                 <button
@@ -300,7 +297,7 @@ function Onboarding() {
             </div>
 
             <div className="mb-5">
-              <label className="block text-sm text-[var(--dim)] mb-2">Who is your client / target audience?</label>
+              <label className="block text-sm text-[var(--dim)] mb-2">Who is your target audience?</label>
               <textarea value={clientDesc} onChange={e => setClientDesc(e.target.value)}
                 placeholder="e.g. SaaS founders looking to scale from $1M to $10M ARR, struggling with customer acquisition..."
                 rows={3}
@@ -342,11 +339,11 @@ function Onboarding() {
             <div className="flex gap-3">
               <button onClick={() => setStep(2)} className="px-6 py-3.5 rounded-[var(--r2)] text-sm border border-[var(--border)] text-[var(--dim)] hover:text-[var(--text)] transition-colors" style={{ background: 'var(--bg2)' }}>Back</button>
               <button
-                onClick={() => { if (!name.trim()) { setError('Give your worker a name'); return; } setError(''); setStep(4); }}
+                onClick={() => { if (!name.trim()) { setError('Give your employee a name'); return; } setError(''); setStep(4); }}
                 className="flex-1 py-3.5 rounded-[var(--r2)] font-semibold text-sm text-white transition-all hover:brightness-110"
                 style={{ background: 'linear-gradient(135deg, var(--accent), #9b7bf7)' }}
               >
-                Next →
+                Next
               </button>
             </div>
           </>
@@ -356,7 +353,7 @@ function Onboarding() {
         {step === 4 && (
           <>
             <h1 className="text-2xl font-bold mb-2">Ready to hire {name}?</h1>
-            <p className="text-[var(--dim)] text-sm mb-6">Your worker will research your business before writing the first article.</p>
+            <p className="text-[var(--dim)] text-sm mb-6">Your employee will research your business before starting work.</p>
 
             <div className="p-5 rounded-[var(--r)] border border-[var(--border)] mb-4" style={{ background: 'var(--bg2)' }}>
               <div className="flex items-center justify-between mb-4">
@@ -379,15 +376,19 @@ function Onboarding() {
 
             <div className="p-4 rounded-[var(--r2)] border border-[var(--accent)] mb-4" style={{ background: 'rgba(124,107,240,0.06)' }}>
               <p className="text-sm text-[var(--accent2)]">
-                {name} will first research your company, competitors, and target audience to build a content strategy. Then it starts writing.
+                {name} will first research your company, competitors, and target audience to build a content strategy. Then they start working.
               </p>
             </div>
 
             <div className="p-4 rounded-[var(--r2)] border border-[var(--green-b)] mb-4" style={{ background: 'var(--green-g)' }}>
               <p className="text-sm text-[var(--green)]">
-                After hiring, open the <strong>Browser tab</strong> on your dashboard and log into X. Your worker needs access to publish articles.
+                After hiring, open the <strong>Browser tab</strong> on your dashboard and log into X. Your employee needs access to publish articles.
               </p>
             </div>
+
+            <p className="text-xs text-[var(--muted)] mb-4">
+              This is your first employee. You can hire up to {currentPlan.maxEmployees} on the {currentPlan.title} plan.
+            </p>
 
             {error && (
               <div className="mb-4 p-3 rounded-[var(--r2)] text-red-400 text-sm border border-red-800/30" style={{ background: 'rgba(239,68,68,0.08)' }}>{error}</div>
@@ -399,7 +400,7 @@ function Onboarding() {
                 className="flex-1 py-3.5 rounded-[var(--r2)] font-bold text-sm text-white transition-all hover:brightness-110 hover:scale-[1.01]"
                 style={{ background: 'linear-gradient(135deg, var(--accent), #9b7bf7)' }}
               >
-                Start free trial →
+                Start free trial
               </button>
             </div>
 

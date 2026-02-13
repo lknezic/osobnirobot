@@ -1,0 +1,26 @@
+[Unit]
+Description=InstantWorker Orchestrator
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/instantworker/app/orchestrator
+ExecStart=/usr/bin/node dist/index.js
+Restart=always
+RestartSec=5
+
+# Environment file with secrets
+EnvironmentFile=/opt/instantworker/app/orchestrator/.env
+
+# Process limits
+LimitNOFILE=65536
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=iw-orchestrator
+
+[Install]
+WantedBy=multi-user.target

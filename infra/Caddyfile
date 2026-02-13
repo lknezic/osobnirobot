@@ -1,0 +1,67 @@
+# InstantWorker - Caddy Reverse Proxy
+# Wildcard TLS via Cloudflare DNS challenge
+#
+# Requires: CLOUDFLARE_API_TOKEN env var with Zone:DNS:Edit permissions
+# Install: sudo caddy add-package github.com/caddy-dns/cloudflare
+
+# Global options
+{
+	acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+}
+
+# Gateway subdomains: {port}.gw.instantworker.ai -> localhost:{port}
+# Container gateway (OpenClaw) runs on ports 20000-21999
+*.gw.instantworker.ai {
+	tls {
+		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+	}
+
+	# Extract port from subdomain
+	@valid_port expression {labels.2} matches "^[0-9]+$"
+	handle @valid_port {
+		# Remove X-Frame-Options to allow iframe embedding on Vercel
+		header -X-Frame-Options
+		header -Content-Security-Policy
+		header Access-Control-Allow-Origin "https://instantworker.ai"
+		header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+		header Access-Control-Allow-Headers "Content-Type, Authorization"
+		header Access-Control-Allow-Credentials "true"
+
+		reverse_proxy localhost:{labels.2} {
+			# WebSocket support for chat
+			header_up Connection {>Connection}
+			header_up Upgrade {>Upgrade}
+		}
+	}
+
+	handle {
+		respond "Invalid port" 400
+	}
+}
+
+# VNC subdomains: {port}.vnc.instantworker.ai -> localhost:{port}
+# Container noVNC runs on ports 22000-23999
+*.vnc.instantworker.ai {
+	tls {
+		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+	}
+
+	@valid_port expression {labels.2} matches "^[0-9]+$"
+	handle @valid_port {
+		header -X-Frame-Options
+		header -Content-Security-Policy
+		header Access-Control-Allow-Origin "https://instantworker.ai"
+		header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+		header Access-Control-Allow-Headers "Content-Type, Authorization"
+		header Access-Control-Allow-Credentials "true"
+
+		reverse_proxy localhost:{labels.2} {
+			header_up Connection {>Connection}
+			header_up Upgrade {>Upgrade}
+		}
+	}
+
+	handle {
+		respond "Invalid port" 400
+	}
+}
