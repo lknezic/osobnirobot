@@ -37,11 +37,11 @@
 | 24 | Operations guide (OPERATIONS.md) | DONE |
 | 25 | Update Stripe checkout for new pricing | DONE |
 | 26 | Update landing page for new pricing | DONE (deployed) |
-| 27 | **Rebuild Docker image on Hetzner** (new templates) | NOT STARTED |
+| 27 | **Rebuild Docker image on Hetzner** (new templates) | READY (Dockerfile updated, needs `docker build` on server) |
 | 28 | **Rebuild orchestrator on Hetzner** (flywheel + goals.md) | DONE (restarted, env vars updated) |
 | 29 | **Deploy LiteLLM to Hetzner** | DONE (running on :4000) |
 | 30 | E2E testing (onboard flow, multi-employee, Stripe) | NOT STARTED |
-| 31 | Security audit | NOT STARTED |
+| 31 | Security audit | DONE (code fixes applied — see 7540ff7) |
 | 32 | Monitoring setup | NOT STARTED |
 
 ### Phase C: Launch & Growth (Steps 8-10)
@@ -95,9 +95,9 @@
 1. ~~**Update Stripe checkout**~~ — DONE
 2. ~~**Update landing page**~~ — DONE (deployed)
 3. ~~**Deploy LiteLLM**~~ — DONE (running on :4000)
-4. **Rebuild Docker image** — Current image on Hetzner doesn't have new worker templates. Need to rebuild.
+4. **Rebuild Docker image** — Dockerfile updated with COPY for templates + WORKER_TYPE selection. Run `docker build` on Hetzner.
 5. **E2E testing** — Full onboarding flow, multi-employee, Stripe checkout, trial expiry.
-6. **Security audit** — Container isolation, API auth, input sanitization review.
+6. ~~**Security audit**~~ — DONE (7540ff7): auth bypass, open redirect, cron auth, webhook secret, email XSS, security headers.
 7. **Monitoring** — Error tracking, container health, API spend via LiteLLM.
 
 ### Nice-to-have before launch:
