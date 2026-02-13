@@ -64,6 +64,19 @@ export default function OnboardingPage() {
   );
 }
 
+const STORAGE_KEY = 'iw_onboarding';
+
+function loadSavedProgress(): Partial<{
+  step: number; plan: string; selectedSkills: string[];
+  name: string; companyUrl: string; clientDesc: string;
+  competitorUrls: string; tone: string;
+}> {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : {};
+  } catch { return {}; }
+}
+
 function Onboarding() {
   const [step, setStep] = useState(1);
   const [plan, setPlan] = useState('junior');
@@ -76,6 +89,29 @@ function Onboarding() {
   const [launching, setLaunching] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+
+  // Restore saved progress on mount
+  useEffect(() => {
+    const saved = loadSavedProgress();
+    if (saved.step) setStep(saved.step);
+    if (saved.plan) setPlan(saved.plan);
+    if (saved.selectedSkills) setSelectedSkills(saved.selectedSkills);
+    if (saved.name) setName(saved.name);
+    if (saved.companyUrl) setCompanyUrl(saved.companyUrl);
+    if (saved.clientDesc) setClientDesc(saved.clientDesc);
+    if (saved.competitorUrls) setCompetitorUrls(saved.competitorUrls);
+    if (saved.tone) setTone(saved.tone);
+  }, []);
+
+  // Save progress on every change
+  useEffect(() => {
+    if (launching) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        step, plan, selectedSkills, name, companyUrl, clientDesc, competitorUrls, tone,
+      }));
+    } catch { /* quota exceeded — ignore */ }
+  }, [step, plan, selectedSkills, name, companyUrl, clientDesc, competitorUrls, tone, launching]);
 
   const currentPlan = PLANS.find(p => p.id === plan)!;
   const maxSkills = currentPlan.maxSkills;
@@ -128,6 +164,8 @@ function Onboarding() {
         throw new Error(data.error || 'Failed to hire employee');
       }
 
+      // Clear saved progress on success
+      localStorage.removeItem(STORAGE_KEY);
       // Wait for animation to feel complete, then redirect
       await new Promise(resolve => setTimeout(resolve, 12000));
       router.push('/dashboard');

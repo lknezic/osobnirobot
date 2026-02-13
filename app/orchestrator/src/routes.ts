@@ -363,6 +363,11 @@ containerRoutes.post('/provision', async (req: Request, res: Response) => {
         Memory: 2 * 1024 * 1024 * 1024, // 2GB
         NanoCpus: 2000000000, // 2 CPU cores
         ShmSize: 256 * 1024 * 1024, // 256MB shared memory (needed for Chrome)
+        // Security hardening (Step 4.5)
+        CapDrop: ['ALL'],
+        CapAdd: ['SYS_ADMIN'], // needed for Chrome sandbox
+        SecurityOpt: ['no-new-privileges'],
+        PidsLimit: 512,
       },
       Labels: {
         'instantworker': 'true',
