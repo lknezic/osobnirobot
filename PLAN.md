@@ -42,7 +42,7 @@
 | 29 | **Deploy LiteLLM to Hetzner** | DONE (running on :4000) |
 | 30 | E2E testing (onboard flow, multi-employee, Stripe) | NOT STARTED |
 | 31 | Security audit | DONE (code fixes applied — see 7540ff7) |
-| 32 | Monitoring setup | NOT STARTED |
+| 32 | Monitoring setup | DONE (/api/health endpoint — Supabase, orchestrator, Stripe, env checks) |
 
 ### Phase C: Launch & Growth (Steps 8-10)
 
@@ -98,7 +98,7 @@
 4. **Rebuild Docker image** — Dockerfile updated with COPY for templates + WORKER_TYPE selection. Run `docker build` on Hetzner.
 5. **E2E testing** — Full onboarding flow, multi-employee, Stripe checkout, trial expiry.
 6. ~~**Security audit**~~ — DONE (7540ff7): auth bypass, open redirect, cron auth, webhook secret, email XSS, security headers.
-7. **Monitoring** — Error tracking, container health, API spend via LiteLLM.
+7. ~~**Monitoring**~~ — DONE (8430d9f): /api/health endpoint checks Supabase, orchestrator, Stripe, env vars. LiteLLM has built-in spend tracking.
 
 ### Nice-to-have before launch:
 - Merge branch to main
