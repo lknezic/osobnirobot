@@ -17,7 +17,8 @@
 	}
 
 	# Extract port number from subdomain using map
-	map {labels.2} {gw_port} {
+	# labels are 0-indexed from right: ai=0, instantworker=1, gw=2, PORT=3
+	map {labels.3} {gw_port} {
 		~^(\d+)$ "${1}"
 	}
 
@@ -51,7 +52,8 @@
 		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
 	}
 
-	map {labels.2} {vnc_port} {
+	# labels are 0-indexed from right: ai=0, instantworker=1, vnc=2, PORT=3
+	map {labels.3} {vnc_port} {
 		~^(\d+)$ "${1}"
 	}
 
