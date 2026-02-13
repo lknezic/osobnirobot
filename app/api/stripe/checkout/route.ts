@@ -2,10 +2,14 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
-const PLANS: Record<string, { stripe_price_id: string }> = {
-  simple: { stripe_price_id: process.env.STRIPE_SIMPLE_PRICE_ID || '' },
-  expert: { stripe_price_id: process.env.STRIPE_EXPERT_PRICE_ID || '' },
-  legend: { stripe_price_id: process.env.STRIPE_LEGEND_PRICE_ID || '' },
+// New pricing: single $199/worker plan
+// Legacy plan IDs supported for existing subscriptions
+const PRICE_IDS: Record<string, string> = {
+  worker: process.env.STRIPE_WORKER_PRICE_ID || '',
+  // Legacy (keep until all migrated, then remove)
+  simple: process.env.STRIPE_SIMPLE_PRICE_ID || '',
+  expert: process.env.STRIPE_EXPERT_PRICE_ID || '',
+  legend: process.env.STRIPE_LEGEND_PRICE_ID || '',
 };
 
 function getStripe() {
@@ -17,10 +21,12 @@ export async function POST(request: Request) {
     const stripe = getStripe();
     const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
     const { userId, planId } = await request.json();
-    if (!userId || !planId) return NextResponse.json({ error: "Missing params" }, { status: 400 });
+    if (!userId) return NextResponse.json({ error: "Missing userId" }, { status: 400 });
 
-    const plan = PLANS[planId];
-    if (!plan) return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
+    // Default to 'worker' plan if no planId provided
+    const resolvedPlanId = planId || 'worker';
+    const priceId = PRICE_IDS[resolvedPlanId];
+    if (!priceId) return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
 
     const { data: profile } = await supabase.from("profiles").select("*").eq("id", userId).single();
     if (!profile) return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -41,16 +47,17 @@ export async function POST(request: Request) {
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: "subscription",
-      line_items: [{ price: plan.stripe_price_id, quantity: 1 }],
+      line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${appUrl}/dashboard?payment=success`,
       cancel_url: `${appUrl}/dashboard?payment=cancelled`,
-      metadata: { userId, planId },
-      subscription_data: { trial_period_days: 7, metadata: { userId, planId } },
+      metadata: { userId, planId: resolvedPlanId },
+      subscription_data: { trial_period_days: 7, metadata: { userId, planId: resolvedPlanId } },
     });
 
     return NextResponse.json({ url: session.url });
-  } catch (err: any) {
-    console.error("Stripe checkout error:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    console.error("Stripe checkout error:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -43,22 +43,11 @@ export interface SkillDef {
 }
 
 export const SKILLS: SkillDef[] = [
-  { id: 'x-commenter', emoji: '💬', title: 'X Commenter', desc: 'Scrolls your feed, finds relevant posts, and leaves smart comments that get you noticed.', category: 'X / Twitter', available: false },
-  { id: 'x-tweet-writer', emoji: '✍️', title: 'X Tweet Writer', desc: 'Writes and posts original tweets using the 3-bucket system to grow your following.', category: 'X / Twitter', available: false },
+  // Active X/Twitter skills (templates built)
+  { id: 'x-commenter', emoji: '💬', title: 'X Commenter', desc: 'Finds relevant posts from target accounts and leaves smart comments that get you noticed.', category: 'X / Twitter', available: true },
+  { id: 'x-tweet-writer', emoji: '✍️', title: 'X Tweet Writer', desc: 'Writes and posts original tweets using the 3-bucket system to grow your following.', category: 'X / Twitter', available: true },
   { id: 'x-article-writer', emoji: '📰', title: 'X Article Writer', desc: 'Writes long-form X articles that position you as a thought leader in your niche.', category: 'X / Twitter', available: true },
-  { id: 'x-thread-writer', emoji: '🧵', title: 'X Thread Writer', desc: 'Crafts viral threads that break down ideas, tell stories, and build your following.', category: 'X / Twitter', available: false },
-  { id: 'email-newsletter', emoji: '📨', title: 'Email Newsletter Writer', desc: 'Writes engaging newsletters that keep your subscribers hooked and clicking.', category: 'Email', available: false },
-  { id: 'email-flow', emoji: '⚡', title: 'Email Flow Writer', desc: 'Creates automated email sequences for welcome, nurture, sales, re-engagement.', category: 'Email', available: false },
-  { id: 'email-responder', emoji: '📧', title: 'Email Responder', desc: 'Reads and replies to emails in your voice. Handles inbox on autopilot.', category: 'Email', available: false },
-  { id: 'yt-shorts-script', emoji: '🎬', title: 'YouTube Shorts Script', desc: 'Writes punchy, hook-driven scripts for vertical short-form videos.', category: 'YouTube', available: false },
-  { id: 'yt-long-script', emoji: '🎥', title: 'YouTube Long Script', desc: 'Full-length video scripts with hooks, structure, CTAs, and retention tricks.', category: 'YouTube', available: false },
-  { id: 'yt-community', emoji: '📢', title: 'YouTube Community Post', desc: 'Writes community tab posts that boost engagement and drive views.', category: 'YouTube', available: false },
-  { id: 'reddit-commenter', emoji: '🤖', title: 'Reddit Commenter', desc: 'Finds relevant threads in your niche subreddits and leaves helpful, authentic comments.', category: 'Reddit & Social', available: false },
-  { id: 'discord-engagement', emoji: '🎮', title: 'Discord Engagement', desc: 'Joins your target Discord servers and builds presence through genuine conversations.', category: 'Reddit & Social', available: false },
-  { id: 'facebook-group', emoji: '👥', title: 'Facebook Group', desc: 'Posts and comments in Facebook groups to build authority and drive traffic.', category: 'Reddit & Social', available: false },
-  { id: 'instagram-content', emoji: '📸', title: 'Instagram Content', desc: 'Creates captions, Reels scripts, carousel text, and hashtag strategies.', category: 'Content & SEO', available: false },
-  { id: 'tiktok-content', emoji: '🎵', title: 'TikTok Content', desc: 'Writes viral TikTok scripts, hooks, and trend-based content for your niche.', category: 'Content & SEO', available: false },
-  { id: 'seo-optimization', emoji: '🔍', title: 'SEO Optimization', desc: 'Runs SEO audits, keyword research, and writes optimized content briefs.', category: 'Content & SEO', available: false },
+  { id: 'x-thread-writer', emoji: '🧵', title: 'X Thread Writer', desc: 'Crafts viral threads that break down ideas, tell stories, and build your following.', category: 'X / Twitter', available: true },
 ];
 
 // New pricing: per-worker, per-channel. No tiers.

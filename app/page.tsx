@@ -131,7 +131,7 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
           {[
             { step: "1", title: "Enter your email", desc: "Sign up in seconds. No credit card needed." },
-            { step: "2", title: "Pick skills", desc: "Choose what your employee does. X articles, emails, YouTube scripts." },
+            { step: "2", title: "Pick a channel", desc: "Choose a platform for your worker. X/Twitter first, more channels coming." },
             { step: "3", title: "Tell us about your business", desc: "Share your niche, competitors, and audience. Your employee researches everything." },
             { step: "4", title: "They start working", desc: "Your employee starts working, asks questions, learns, and improves with time." },
           ].map((s) => (
@@ -144,109 +144,59 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SKILLS — grouped by platform */}
+      {/* WHAT YOUR WORKER DOES */}
       <section className="max-w-[960px] mx-auto px-5 py-16">
-        <h2 className="text-center text-[clamp(22px,3.8vw,34px)] font-bold tracking-tight mb-3">15 skills. Expert-level from day one.</h2>
-        <p className="text-center text-[var(--dim)] text-sm mb-10">Every skill is pre-trained by our team. Your employee hits the ground running.</p>
+        <h2 className="text-center text-[clamp(22px,3.8vw,34px)] font-bold tracking-tight mb-3">One worker. Every X/Twitter skill.</h2>
+        <p className="text-center text-[var(--dim)] text-sm mb-10">Your worker runs all 4 skills automatically. Expert-level from day one.</p>
 
-        {[
-          { name: "X / Twitter", icon: "𝕏" },
-          { name: "Email", icon: "@" },
-          { name: "YouTube", icon: "▶" },
-          { name: "Reddit & Social", icon: "💬" },
-          { name: "Content & SEO", icon: "📈" },
-        ].map((cat, i) => (
-          <div key={cat.name} className={i < 4 ? "mb-8" : ""}>
-            <h3 className="text-sm font-semibold text-[var(--accent2)] mb-3 flex items-center gap-2">
-              <span className="w-5 h-5 rounded flex items-center justify-center text-xs" style={{ background: "rgba(124,107,240,0.15)" }}>{cat.icon}</span>
-              {cat.name}
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {skills.filter(s => s.category === cat.name).map(skill => (
-                <div key={skill.id} className="p-5 rounded-[var(--r)] border border-[var(--border)] hover:border-[var(--border-h)] transition-all" style={{ background: "var(--bg2)" }}>
-                  <div className="text-2xl mb-2">{skill.emoji}</div>
-                  <h4 className="font-bold text-sm mb-1">{skill.title}</h4>
-                  <p className="text-xs text-[var(--dim)] leading-relaxed">{skill.desc}</p>
-                </div>
-              ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {skills.filter(s => s.category === 'X / Twitter').map(skill => (
+            <div key={skill.id} className="p-5 rounded-[var(--r)] border border-[var(--border)] hover:border-[var(--border-h)] transition-all" style={{ background: "var(--bg2)" }}>
+              <div className="text-2xl mb-2">{skill.emoji}</div>
+              <h4 className="font-bold text-sm mb-1">{skill.title}</h4>
+              <p className="text-xs text-[var(--dim)] leading-relaxed">{skill.desc}</p>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        <div className="mt-8 p-5 rounded-[var(--r)] border border-[var(--border)] text-center" style={{ background: "var(--bg2)" }}>
+          <p className="text-sm text-[var(--dim)]">
+            <span className="text-[var(--accent2)] font-semibold">Coming soon:</span> Reddit, YouTube, Instagram, TikTok, Email, Discord, LinkedIn channels.
+            Each channel = one worker with all skills for that platform.
+          </p>
+        </div>
       </section>
 
       {/* PRICING */}
-      <section className="max-w-[960px] mx-auto px-5 py-16">
+      <section className="max-w-[640px] mx-auto px-5 py-16">
         <h2 className="text-center text-[clamp(22px,3.8vw,34px)] font-bold tracking-tight mb-3">Simple pricing</h2>
-        <p className="text-center text-[var(--dim)] text-sm mb-10">Every plan runs 24/7. No API bills. No surprises.</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* JUNIOR */}
-          <div className="p-6 rounded-[var(--r)] border border-[var(--border)]" style={{ background: "var(--bg2)" }}>
-            <h3 className="font-bold text-lg mb-1">Junior</h3>
-            <p className="text-xs text-[var(--dim)] mb-4">1 AI employee, 1 skill</p>
-            <div className="mb-4">
-              <span className="text-3xl font-extrabold">$99</span>
-              <span className="text-sm text-[var(--dim)]">/mo</span>
-            </div>
-            <ul className="space-y-2 text-sm text-[var(--dim)] mb-6">
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>1 AI employee</li>
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>1 skill of your choice</li>
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Learns your business</li>
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Own computer + browser</li>
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Chat with your employee</li>
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Watch them work live</li>
-            </ul>
-            <a href="/auth/login" className="block text-center py-2.5 rounded-[var(--r2)] text-sm font-semibold border border-[var(--border)] text-[var(--text)] hover:border-[var(--accent)] transition-colors">
-              Start free trial →
-            </a>
-          </div>
+        <p className="text-center text-[var(--dim)] text-sm mb-10">One price. Everything included. No API bills.</p>
 
-          {/* MEDIOR */}
-          <div className="p-6 rounded-[var(--r)] border border-[var(--accent)] relative" style={{ background: "rgba(124,107,240,0.06)" }}>
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-bold px-3 py-1 rounded-full text-white" style={{ background: "linear-gradient(135deg, var(--accent), #9b7bf7)" }}>Best value</span>
-            <h3 className="font-bold text-lg mb-1">Medior</h3>
-            <p className="text-xs text-[var(--dim)] mb-4">5 AI employees, up to 5 skills each</p>
-            <div className="mb-4">
-              <span className="text-3xl font-extrabold">$399</span>
-              <span className="text-sm text-[var(--dim)]">/mo</span>
-            </div>
-            <ul className="space-y-2 text-sm text-[var(--text)] mb-6">
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>5 AI employees</li>
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Up to 5 skills each</li>
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Employees share knowledge</li>
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Deep business research on setup</li>
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Own computer + browser each</li>
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Chat and watch them work</li>
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Priority support</li>
-            </ul>
-            <a href="/auth/login" className="block text-center py-2.5 rounded-[var(--r2)] text-sm font-bold text-white transition-all hover:brightness-110" style={{ background: "linear-gradient(135deg, var(--accent), #9b7bf7)" }}>
-              Start free trial →
-            </a>
+        <div className="p-8 rounded-[var(--r)] border border-[var(--accent)] relative" style={{ background: "rgba(124,107,240,0.06)" }}>
+          <div className="text-center mb-6">
+            <h3 className="font-bold text-xl mb-1">AI Worker</h3>
+            <p className="text-sm text-[var(--dim)]">1 worker, 1 channel, all skills included</p>
           </div>
-
-          {/* EXPERT */}
-          <div className="p-6 rounded-[var(--r)] border border-[var(--border)]" style={{ background: "var(--bg2)" }}>
-            <h3 className="font-bold text-lg mb-1">Expert</h3>
-            <p className="text-xs text-[var(--dim)] mb-4">10 AI employees, all skills</p>
-            <div className="mb-4">
-              <span className="text-3xl font-extrabold">$499</span>
-              <span className="text-sm text-[var(--dim)]">/mo</span>
-            </div>
-            <ul className="space-y-2 text-sm text-[var(--dim)] mb-6">
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>10 AI employees</li>
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>All 15 skills</li>
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Employees share knowledge</li>
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Deep business research on setup</li>
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Custom skill requests</li>
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Own computer + browser each</li>
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Chat and watch them work</li>
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Priority support</li>
-            </ul>
-            <a href="/auth/login" className="block text-center py-2.5 rounded-[var(--r2)] text-sm font-semibold border border-[var(--border)] text-[var(--text)] hover:border-[var(--accent)] transition-colors">
-              Start free trial →
-            </a>
+          <div className="text-center mb-6">
+            <span className="text-5xl font-extrabold">$199</span>
+            <span className="text-lg text-[var(--dim)]">/mo per worker</span>
           </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 mb-8 max-w-[440px] mx-auto">
+            <div className="flex gap-2 text-sm"><span className="text-[var(--green)]">✓</span><span className="text-[var(--text)]">All skills for the channel</span></div>
+            <div className="flex gap-2 text-sm"><span className="text-[var(--green)]">✓</span><span className="text-[var(--text)]">Own computer + browser</span></div>
+            <div className="flex gap-2 text-sm"><span className="text-[var(--green)]">✓</span><span className="text-[var(--text)]">Learns your business deeply</span></div>
+            <div className="flex gap-2 text-sm"><span className="text-[var(--green)]">✓</span><span className="text-[var(--text)]">Chat with your worker</span></div>
+            <div className="flex gap-2 text-sm"><span className="text-[var(--green)]">✓</span><span className="text-[var(--text)]">Watch them work live</span></div>
+            <div className="flex gap-2 text-sm"><span className="text-[var(--green)]">✓</span><span className="text-[var(--text)]">Workers share knowledge</span></div>
+            <div className="flex gap-2 text-sm"><span className="text-[var(--green)]">✓</span><span className="text-[var(--text)]">Works 18h/day, rests 6h</span></div>
+            <div className="flex gap-2 text-sm"><span className="text-[var(--green)]">✓</span><span className="text-[var(--text)]">Ready in 60 seconds</span></div>
+          </div>
+          <a href="/auth/login" className="block text-center py-3.5 rounded-[var(--r2)] text-sm font-bold text-white transition-all hover:brightness-110 max-w-[320px] mx-auto" style={{ background: "linear-gradient(135deg, var(--accent), #9b7bf7)" }}>
+            Start 7-day free trial →
+          </a>
+          <p className="text-center text-xs text-[var(--muted)] mt-4">Need more channels? Hire more workers. Each covers a full platform.</p>
         </div>
-        <p className="text-center text-xs text-[var(--muted)] mt-6">All plans include 7-day free trial. No credit card required. Cancel anytime.</p>
+        <p className="text-center text-xs text-[var(--muted)] mt-6">No credit card required. Cancel anytime.</p>
       </section>
 
       {/* VS FREELANCER */}
@@ -266,7 +216,7 @@ export default function Home() {
           <div className="p-6 rounded-[var(--r)] border border-[var(--accent)]" style={{ background: "rgba(124,107,240,0.06)" }}>
             <h3 className="font-bold text-lg mb-4 text-[var(--green)]">AI team</h3>
             <ul className="space-y-3 text-sm text-[var(--text)]">
-              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>From $99/month for your first hire</li>
+              <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>$199/month for a full-channel worker</li>
               <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Works 18 hours/day, rests 6 to stay natural</li>
               <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Ready in 60 seconds</li>
               <li className="flex gap-2"><span className="text-[var(--green)]">✓</span>Employees share knowledge with each other</li>
@@ -283,19 +233,19 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
             {
-              name: "Axel", initial: "A", color: "#3b82f6", skill: "X Article Writer",
-              desc: "Researches your niche, studies competitors, and writes thought-leadership articles in your voice. Knows copywriting fundamentals, X algorithm patterns, and engagement hooks.",
-              learns: "Company positioning, competitor gaps, audience pain points, trending topics"
+              name: "Axel", initial: "A", color: "#3b82f6", skill: "X Tweet Writer",
+              desc: "Writes scroll-stopping tweets using the 3-bucket system: authority, personality, and shareable content. Knows the X algorithm inside out.",
+              learns: "Your voice, niche trending topics, what hooks work, audience pain points"
             },
             {
-              name: "Nova", initial: "N", color: "#f59e0b", skill: "Email Newsletter Writer",
-              desc: "Crafts engaging newsletters that keep subscribers hooked. Understands email psychology, subject line patterns, and nurture sequences.",
-              learns: "Subscriber segments, content pillars, brand tone, past performance data"
+              name: "Nova", initial: "N", color: "#f59e0b", skill: "X Thread Writer",
+              desc: "Crafts viral threads that break down complex ideas into engaging multi-tweet stories. Builds your authority and gets bookmarked.",
+              learns: "Your expertise, competitor gaps, audience questions, what formats get engagement"
             },
             {
-              name: "Scout", initial: "S", color: "#10b981", skill: "Reddit Commenter",
-              desc: "Finds relevant threads in your niche subreddits and builds authentic presence through helpful, genuine comments.",
-              learns: "Subreddit rules, community tone, product positioning, competitor mentions"
+              name: "Scout", initial: "S", color: "#10b981", skill: "X Commenter",
+              desc: "Finds relevant posts from target accounts in your niche and leaves smart, value-adding comments that get you noticed and followed.",
+              learns: "Target accounts, community tone, your positioning, conversation style"
             },
           ].map((worker) => (
             <div key={worker.name} className="p-6 rounded-[var(--r)] border border-[var(--border)]" style={{ background: "var(--bg2)" }}>
@@ -343,8 +293,8 @@ export default function Home() {
       {/* FINAL CTA */}
       <section className="max-w-[520px] mx-auto px-5 py-16">
         <div className="text-center p-8 rounded-[var(--r)] border border-[var(--border)]" style={{ background: "var(--bg2)" }}>
-          <h2 className="text-2xl font-bold mb-3">Ready to build your AI team?</h2>
-          <p className="text-sm text-[var(--dim)] mb-6">Start with one employee. Scale to ten. 7 days free.</p>
+          <h2 className="text-2xl font-bold mb-3">Ready to hire your AI worker?</h2>
+          <p className="text-sm text-[var(--dim)] mb-6">$199/mo. All X/Twitter skills included. 7 days free.</p>
           <a
             href="/auth/login"
             className="inline-block text-center px-8 py-3.5 rounded-[var(--r2)] font-bold text-sm text-white transition-all hover:brightness-110"
