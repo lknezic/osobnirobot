@@ -33,11 +33,10 @@
 		header Access-Control-Allow-Headers "Content-Type, Authorization"
 		header Access-Control-Allow-Credentials "true"
 
-		reverse_proxy localhost:{gw_port} {
-			# WebSocket support for chat
-			header_up Connection {>Connection}
-			header_up Upgrade {>Upgrade}
-		}
+		# Caddy v2 handles WebSocket upgrades automatically.
+		# Do NOT set header_up Connection/Upgrade — they resolve to empty
+		# strings over HTTP/2 and break WebSocket.
+		reverse_proxy localhost:{gw_port}
 	}
 
 	handle {
@@ -66,10 +65,8 @@
 		header Access-Control-Allow-Headers "Content-Type, Authorization"
 		header Access-Control-Allow-Credentials "true"
 
-		reverse_proxy localhost:{vnc_port} {
-			header_up Connection {>Connection}
-			header_up Upgrade {>Upgrade}
-		}
+		# Caddy v2 handles WebSocket upgrades automatically.
+		reverse_proxy localhost:{vnc_port}
 	}
 
 	handle {
