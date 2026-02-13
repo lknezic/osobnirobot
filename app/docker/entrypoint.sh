@@ -19,8 +19,18 @@ mkdir -p "$OPENCLAW_HOME/workspace"
 
 # Copy default workspace files if empty
 if [ ! -f "$OPENCLAW_HOME/workspace/SOUL.md" ] && [ -d /defaults/workspace ]; then
+    # 1. Copy shared files (reference, docs, memory, learning protocol, etc.)
     cp -rn /defaults/workspace/* "$OPENCLAW_HOME/workspace/" 2>/dev/null || true
-    echo "♦ Default workspace files copied"
+    echo "♦ Shared workspace files copied"
+
+    # 2. Copy worker-type-specific files (SOUL.md, HEARTBEAT.md, skills/, config/)
+    WORKER_TYPE="${WORKER_TYPE:-x-commenter}"
+    if [ -d "/defaults/templates/${WORKER_TYPE}" ]; then
+        cp -rn "/defaults/templates/${WORKER_TYPE}/"* "$OPENCLAW_HOME/workspace/" 2>/dev/null || true
+        echo "♦ Worker template '${WORKER_TYPE}' applied"
+    else
+        echo "♦ WARNING: No template found for worker type '${WORKER_TYPE}', using shared defaults only"
+    fi
 fi
 
 # Generate config from environment if no config exists

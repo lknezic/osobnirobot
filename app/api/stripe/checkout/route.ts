@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { createSupabaseServer } from "@/lib/supabase-server";
 import { createClient } from "@supabase/supabase-js";
 
 // New pricing: single $199/worker plan
@@ -19,9 +20,16 @@ function getStripe() {
 export async function POST(request: Request) {
   try {
     const stripe = getStripe();
+
+    // Verify the authenticated user matches the requested userId
+    const authSupabase = createSupabaseServer();
+    const { data: { user } } = await authSupabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
     const { userId, planId } = await request.json();
     if (!userId) return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+    if (userId !== user.id) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     // Default to 'worker' plan if no planId provided
     const resolvedPlanId = planId || 'worker';

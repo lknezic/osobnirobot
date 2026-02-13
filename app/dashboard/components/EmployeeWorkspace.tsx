@@ -167,27 +167,19 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, onRefresh, pla
                       <h2 className="text-xl font-bold mb-2">Enjoying {employee.name}?</h2>
                       <p className="text-sm text-[var(--dim)] mb-6">Subscribe to keep chatting and let your team work 24/7.</p>
                       <div className="flex flex-col gap-2.5 w-full max-w-[320px] mx-auto">
-                        {[
-                          { id: 'junior', title: 'Junior', price: '$99/mo', desc: '1 employee' },
-                          { id: 'medior', title: 'Medior', price: '$399/mo', desc: '5 employees' },
-                          { id: 'expert', title: 'Expert', price: '$499/mo', desc: '10 employees' },
-                        ].map(p => (
-                          <button
-                            key={p.id}
-                            onClick={() => handleCheckout(p.id)}
-                            disabled={checkoutLoading}
-                            className="flex justify-between items-center p-3.5 rounded-[10px] text-sm font-semibold text-white"
-                            style={{
-                              background: p.id === 'junior' ? 'linear-gradient(135deg, #7c6bf0, #9b7bf7)' : '#1a1a1a',
-                              border: p.id === 'junior' ? 'none' : '1px solid #333',
-                              opacity: checkoutLoading ? 0.6 : 1,
-                              cursor: checkoutLoading ? 'wait' : 'pointer',
-                            }}
-                          >
-                            <span>{p.title} - {p.desc}</span>
-                            <span className="font-bold">{p.price}</span>
-                          </button>
-                        ))}
+                        <button
+                          onClick={() => handleCheckout('worker')}
+                          disabled={checkoutLoading}
+                          className="flex justify-between items-center p-3.5 rounded-[10px] text-sm font-semibold text-white"
+                          style={{
+                            background: 'linear-gradient(135deg, #7c6bf0, #9b7bf7)',
+                            opacity: checkoutLoading ? 0.6 : 1,
+                            cursor: checkoutLoading ? 'wait' : 'pointer',
+                          }}
+                        >
+                          <span>1 worker, 1 channel, all skills</span>
+                          <span className="font-bold">$199/mo</span>
+                        </button>
                       </div>
                       {error && <p className="text-red-400 text-sm mt-3">{error}</p>}
                       <p className="text-xs text-[var(--muted)] mt-4">7-day free trial · Cancel anytime</p>

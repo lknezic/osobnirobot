@@ -3,11 +3,15 @@ import { createSupabaseAdmin } from "@/lib/supabase-admin";
 import { sendEmail, trialExpiringEmail } from "@/lib/email";
 import { ORCHESTRATOR_URL, ORCHESTRATOR_SECRET } from "@/lib/constants";
 
-const CRON_SECRET = process.env.CRON_SECRET || "";
+const CRON_SECRET = process.env.CRON_SECRET;
 
 export async function GET(request: Request) {
+  if (!CRON_SECRET) {
+    console.error("CRON_SECRET not configured");
+    return NextResponse.json({ error: "Not configured" }, { status: 500 });
+  }
   const authHeader = request.headers.get("authorization");
-  if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+  if (authHeader !== `Bearer ${CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -11,7 +11,11 @@ function getStripe() {
 export async function POST(request: Request) {
   const stripe = getStripe();
   const supabase = createSupabaseAdmin();
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    console.error("STRIPE_WEBHOOK_SECRET not configured");
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+  }
   const body = await request.text();
   const sig = request.headers.get("stripe-signature")!;
 
