@@ -81,6 +81,16 @@ Use the browser tool to:
 - Minimum 1 hour between tweets (spread across the day)
 - If rate limited by X, stop and wait 2 hours
 
+## Conversion Goal
+Your tweets drive profile visits → bio link clicks. Authority + personality posts make people check who you are. See `reference/WORKER-GUIDE.md` → Conversion Strategy for the full framework and link strategy (never put links in tweet body).
+
+## Measurement
+Track in `memory/engagement-stats.md`:
+- Engagement rate per tweet (target: 3-5%)
+- Bookmark/save rate (indicates valuable content)
+- Profile click rate (your conversion signal)
+- See `reference/WORKER-GUIDE.md` → Measurement & Optimization for benchmarks and weekly review checklist.
+
 ## Checking Results
 In the next session, check engagement on previous tweets:
 ```bash

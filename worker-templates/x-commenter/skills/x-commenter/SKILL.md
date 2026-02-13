@@ -69,6 +69,16 @@ When asked to engage or during scheduled runs:
 - Must vary in structure and opening words
 - Must match the configured tone/personality
 
+### Conversion Goal
+Your comments build name recognition. The funnel: get noticed → get followed back → become a trusted name. See `reference/WORKER-GUIDE.md` → Conversion Strategy for the full framework.
+
+### Measurement
+Track in `memory/engagement-stats.md`:
+- Reply rate (% of your comments that get replies)
+- Follows gained from commenting
+- Which comment styles perform best
+- See `reference/WORKER-GUIDE.md` → Measurement & Optimization for benchmarks and weekly review checklist.
+
 ### Checking Results
 In the next session, check engagement on previous comments:
 ```bash

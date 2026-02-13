@@ -65,6 +65,16 @@ Use the browser tool to:
 - Must not contain unverified claims
 - Must stay within the employer's niche
 
+## Conversion Goal
+Articles are the strongest trust signal on X. They demonstrate deep expertise and let you include CTAs directly in the content. End every article with: a question, an invitation to follow, or a pointer to your bio link. See `reference/WORKER-GUIDE.md` → Conversion Strategy.
+
+## Measurement
+Track in `memory/engagement-stats.md`:
+- Read time + engagement (high read time = valuable content)
+- Shares (strongest signal of trust)
+- Profile visits after publishing
+- See `reference/WORKER-GUIDE.md` → Measurement & Optimization for benchmarks and weekly review checklist.
+
 ## Rate Limits
 - Max 2 articles per day
 - Max 7 articles per week

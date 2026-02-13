@@ -1,6 +1,15 @@
 import type { PlanTier } from './types';
 
+// New model: $199/worker/month. Each worker = 1 channel, all skills for that channel.
+// No tiers. Want more channels? Hire more workers.
+export const WORKER_PRICE = 199;
+
 export const PLAN_LIMITS: Record<PlanTier, { maxEmployees: number; maxSkills: number; price: number }> = {
+  worker: { maxEmployees: 99, maxSkills: 99, price: WORKER_PRICE },
+};
+
+// Legacy limits for existing subscriptions (deprecated — remove once all migrated)
+export const LEGACY_PLAN_LIMITS: Record<string, { maxEmployees: number; maxSkills: number; price: number }> = {
   junior: { maxEmployees: 1, maxSkills: 1, price: 99 },
   medior: { maxEmployees: 5, maxSkills: 5, price: 399 },
   expert: { maxEmployees: 10, maxSkills: 15, price: 499 },
@@ -52,10 +61,23 @@ export const SKILLS: SkillDef[] = [
   { id: 'seo-optimization', emoji: '🔍', title: 'SEO Optimization', desc: 'Runs SEO audits, keyword research, and writes optimized content briefs.', category: 'Content & SEO', available: false },
 ];
 
+// New pricing: per-worker, per-channel. No tiers.
 export const PLANS = [
-  { id: 'junior' as const, title: 'Junior', price: '$99', desc: '1 employee, 1 skill', maxSkills: 1, maxEmployees: 1 },
-  { id: 'medior' as const, title: 'Medior', price: '$399', desc: '5 employees, 5 skills each', maxSkills: 5, maxEmployees: 5 },
-  { id: 'expert' as const, title: 'Expert', price: '$499', desc: '10 employees, all skills', maxSkills: 15, maxEmployees: 10 },
+  { id: 'worker' as const, title: 'Worker', price: '$199', desc: '1 worker, 1 channel, all skills', maxSkills: 99, maxEmployees: 99 },
+];
+
+// Channel definitions — each worker is assigned to one channel and gets ALL skills for it
+export const CHANNELS: { id: string; title: string; skills: string[] }[] = [
+  { id: 'x-twitter', title: 'X / Twitter', skills: ['x-commenter', 'x-tweet-writer', 'x-thread-writer', 'x-article-writer'] },
+  // Future channels (skills not yet built):
+  // { id: 'instagram', title: 'Instagram', skills: ['instagram-content'] },
+  // { id: 'youtube', title: 'YouTube', skills: ['yt-shorts-script', 'yt-long-script', 'yt-community'] },
+  // { id: 'reddit', title: 'Reddit', skills: ['reddit-commenter'] },
+  // { id: 'email', title: 'Email', skills: ['email-newsletter', 'email-flow', 'email-responder'] },
+  // { id: 'tiktok', title: 'TikTok', skills: ['tiktok-content'] },
+  // { id: 'discord', title: 'Discord', skills: ['discord-engagement'] },
+  // { id: 'linkedin', title: 'LinkedIn', skills: [] },
+  // { id: 'facebook', title: 'Facebook', skills: ['facebook-group'] },
 ];
 
 export const TONES = [

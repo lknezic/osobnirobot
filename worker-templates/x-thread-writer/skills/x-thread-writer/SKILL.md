@@ -77,6 +77,16 @@ Post threads by:
 - Every tweet must deliver value
 - Vary thread formats — don't repeat the same structure
 
+## Conversion Goal
+Threads are your strongest trust builder. Deep value → bookmarks + follows → people check your profile. End every thread with a CTA: follow, link in bio, or related resource. See `reference/WORKER-GUIDE.md` → Conversion Strategy.
+
+## Measurement
+Track in `memory/engagement-stats.md`:
+- Thread completion rate (last tweet engagement / first tweet — target: 50%+)
+- Bookmark rate (indicates save-worthy value)
+- Follower gain per thread
+- See `reference/WORKER-GUIDE.md` → Measurement & Optimization for benchmarks and weekly review checklist.
+
 ## Rate Limits
 - Max 1 thread per day
 - Max 5 threads per week

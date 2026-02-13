@@ -4,9 +4,8 @@ import { createSupabaseAdmin } from '@/lib/supabase-admin';
 import { listEmployees, createEmployee, countEmployees, getMaxEmployees, getEmployee } from '@/lib/db/employees';
 import { unauthorized, badRequest, planLimitReached, serverError } from '@/lib/api-error';
 import { sanitize, sanitizeArray } from '@/lib/validate';
-import { ORCHESTRATOR_URL, ORCHESTRATOR_SECRET, PLAN_LIMITS, TRIAL_DURATION_DAYS } from '@/lib/constants';
+import { ORCHESTRATOR_URL, ORCHESTRATOR_SECRET, PLAN_LIMITS, LEGACY_PLAN_LIMITS, TRIAL_DURATION_DAYS } from '@/lib/constants';
 import { updateEmployeeContainer } from '@/lib/db/employees';
-import type { PlanTier } from '@/lib/types';
 
 /** GET /api/employees - list all employees + plan info for current user */
 export async function GET() {
@@ -48,8 +47,8 @@ export async function POST(request: Request) {
     // If this is onboarding (first employee), set up the profile
     const currentCount = await countEmployees(user.id);
     if (currentCount === 0 && body.workerConfig?.plan) {
-      const plan = body.workerConfig.plan as PlanTier;
-      const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.junior;
+      const plan = body.workerConfig.plan;
+      const limits = PLAN_LIMITS.worker ?? LEGACY_PLAN_LIMITS[plan] ?? PLAN_LIMITS.worker;
       const admin = createSupabaseAdmin();
       const trialEndsAt = new Date(Date.now() + TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000).toISOString();
       await admin.from('profiles').update({

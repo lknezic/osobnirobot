@@ -1,6 +1,8 @@
 // Shared types for InstantWorker
 
-export type PlanTier = 'junior' | 'medior' | 'expert';
+export type PlanTier = 'worker';
+// Legacy tiers kept for backward compat with existing subscriptions
+export type LegacyPlanTier = 'junior' | 'medior' | 'expert';
 export type PlanStatus = 'trial' | 'active' | 'past_due' | 'cancelled';
 export type ContainerStatus = 'none' | 'provisioning' | 'running' | 'stopped' | 'error';
 
