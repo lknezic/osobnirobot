@@ -23,12 +23,15 @@
 | 15 | Container re-provisioning + error handling | Bug fix | DONE |
 | 15b | Caddy wildcard proxy fix ({labels.3} port extraction) | Bug fix | DONE |
 | 15c | Knowledge base cat error suppression | Bug fix | DONE |
+| 15d | Caddy WebSocket fix (remove header_up for HTTP/2) | Bug fix | DONE |
+| 15e | Container workspace path fix (/home/user → /home/node) | Bug fix | DONE |
+| 15f | Orchestrator crash fix (disable old conflicting service) | Bug fix | DONE |
 
 ### Phase B: Pre-launch (Steps 5-7) — IN PROGRESS
 
 | # | Item | Step | Status |
 |---|------|------|--------|
-| 16 | End-to-end testing | Step 5 | IN PROGRESS (server setup done, testing next) |
+| 16 | End-to-end testing | Step 5 | IN PROGRESS (chat ✓, browser ✓, settings ✓ — remaining: onboard flow, multi-employee, Stripe) |
 | 17 | Security audit | Step 6 | NOT STARTED |
 | 18 | Monitoring setup | Step 7 | NOT STARTED |
 
