@@ -48,6 +48,9 @@ export const SKILLS: SkillDef[] = [
   { id: 'x-tweet-writer', emoji: '✍️', title: 'X Tweet Writer', desc: 'Writes and posts original tweets using the 3-bucket system to grow your following.', category: 'X / Twitter', available: true },
   { id: 'x-article-writer', emoji: '📰', title: 'X Article Writer', desc: 'Writes long-form X articles that position you as a thought leader in your niche.', category: 'X / Twitter', available: true },
   { id: 'x-thread-writer', emoji: '🧵', title: 'X Thread Writer', desc: 'Crafts viral threads that break down ideas, tell stories, and build your following.', category: 'X / Twitter', available: true },
+  // Reddit skills (coming soon)
+  { id: 'reddit-commenter', emoji: '💬', title: 'Reddit Commenter', desc: 'Finds relevant subreddits and leaves valuable, on-topic comments that build authority and drive traffic.', category: 'Reddit', available: false },
+  { id: 'reddit-poster', emoji: '📝', title: 'Reddit Poster', desc: 'Creates engaging Reddit posts that provide value, spark discussion, and grow your presence in target communities.', category: 'Reddit', available: false },
 ];
 
 // New pricing: per-worker, per-channel. No tiers.
@@ -58,10 +61,10 @@ export const PLANS = [
 // Channel definitions — each worker is assigned to one channel and gets ALL skills for it
 export const CHANNELS: { id: string; title: string; skills: string[] }[] = [
   { id: 'x-twitter', title: 'X / Twitter', skills: ['x-commenter', 'x-tweet-writer', 'x-thread-writer', 'x-article-writer'] },
+  { id: 'reddit', title: 'Reddit', skills: ['reddit-commenter', 'reddit-poster'] },
   // Future channels (skills not yet built):
   // { id: 'instagram', title: 'Instagram', skills: ['instagram-content'] },
   // { id: 'youtube', title: 'YouTube', skills: ['yt-shorts-script', 'yt-long-script', 'yt-community'] },
-  // { id: 'reddit', title: 'Reddit', skills: ['reddit-commenter'] },
   // { id: 'email', title: 'Email', skills: ['email-newsletter', 'email-flow', 'email-responder'] },
   // { id: 'tiktok', title: 'TikTok', skills: ['tiktok-content'] },
   // { id: 'discord', title: 'Discord', skills: ['discord-engagement'] },

@@ -215,13 +215,20 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, onRefresh, pla
                 {provisionError && <p className="text-red-400 text-sm">{provisionError}</p>}
               </div>
             ) : isProvisioning ? (
-              <div className="flex flex-col items-center justify-center h-full text-center gap-3">
+              <div className="flex flex-col items-center justify-center h-full text-center gap-3 px-6">
                 <div className="w-8 h-8 border-3 border-[#333] border-t-[#3b82f6] rounded-full animate-spin" />
                 <p className="text-sm text-[var(--muted)]">Setting up {employee.name}&apos;s workspace...</p>
+                <p className="text-xs text-[var(--muted)] max-w-[320px]">
+                  {employee.name} will introduce themselves and share what they learned about your business once ready.
+                </p>
               </div>
             ) : (
-              <div className="flex items-center justify-center h-full text-[var(--muted)] text-sm">
-                Connecting to {employee.name}...
+              <div className="flex flex-col items-center justify-center h-full text-center gap-3 px-6">
+                <div className="w-8 h-8 border-3 border-[#333] border-t-[#3b82f6] rounded-full animate-spin" />
+                <p className="text-sm text-[var(--muted)]">Connecting to {employee.name}...</p>
+                <p className="text-xs text-[var(--muted)] max-w-[320px]">
+                  Once connected, {employee.name} will introduce themselves and start researching your business.
+                </p>
               </div>
             )}
           </div>
@@ -242,9 +249,40 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, onRefresh, pla
                   sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
                 />
               </>
+            ) : needsProvision ? (
+              <div className="flex flex-col items-center justify-center h-full text-center px-6 gap-4">
+                <div className="text-4xl">🖥️</div>
+                <div>
+                  <h2 className="text-base font-semibold mb-1">Browser not available yet</h2>
+                  <p className="text-sm text-[var(--muted)]">
+                    {employee.name} needs a running container to use the browser. Start their container first.
+                  </p>
+                </div>
+                <button
+                  onClick={handleProvision}
+                  disabled={provisioning}
+                  className="px-6 py-2.5 rounded-lg font-semibold text-sm text-white"
+                  style={{
+                    background: provisioning ? '#333' : 'linear-gradient(135deg, #7c6bf0, #9b7bf7)',
+                    opacity: provisioning ? 0.6 : 1,
+                    cursor: provisioning ? 'wait' : 'pointer',
+                  }}
+                >
+                  {provisioning ? 'Provisioning...' : 'Start container'}
+                </button>
+                {provisionError && <p className="text-red-400 text-sm">{provisionError}</p>}
+              </div>
+            ) : isProvisioning ? (
+              <div className="flex flex-col items-center justify-center h-full text-center gap-3">
+                <div className="w-8 h-8 border-3 border-[#333] border-t-[#3b82f6] rounded-full animate-spin" />
+                <p className="text-sm text-[var(--muted)]">Setting up {employee.name}&apos;s browser...</p>
+              </div>
             ) : (
-              <div className="flex items-center justify-center h-full text-[var(--muted)] text-sm">
-                Browser not available
+              <div className="flex flex-col items-center justify-center h-full text-center px-6 gap-3">
+                <div className="text-4xl">🖥️</div>
+                <p className="text-sm text-[var(--muted)]">
+                  Waiting for {employee.name}&apos;s browser to come online...
+                </p>
               </div>
             )}
           </div>
