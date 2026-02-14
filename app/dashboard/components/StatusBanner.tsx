@@ -10,12 +10,14 @@ interface StatusDetail {
   hasQuestions: boolean;
   startedAt: string | null;
   containerState: string;
+  dbCorrected?: boolean;
 }
 
 interface StatusBannerProps {
   employeeId: string;
   employeeName: string;
   containerStatus: string;
+  onRefresh?: () => void;
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; hint?: string }> = {
@@ -27,7 +29,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
   'unknown': { label: 'Starting up...', color: '#93c5fd', bg: '#0c1929', hint: 'Gateway is loading. This may take a minute.' },
 };
 
-export function StatusBanner({ employeeId, employeeName, containerStatus }: StatusBannerProps) {
+export function StatusBanner({ employeeId, employeeName, containerStatus, onRefresh }: StatusBannerProps) {
   const [detail, setDetail] = useState<StatusDetail | null>(null);
 
   useEffect(() => {
@@ -38,7 +40,12 @@ export function StatusBanner({ employeeId, employeeName, containerStatus }: Stat
       try {
         const res = await fetch(`/api/employees/${employeeId}/status-detail`);
         if (res.ok && !cancelled) {
-          setDetail(await res.json());
+          const data = await res.json();
+          setDetail(data);
+          // If the API auto-corrected the DB (container was removed externally), refresh
+          if (data.dbCorrected && onRefresh) {
+            onRefresh();
+          }
         }
       } catch { /* ignore */ }
     };
@@ -46,7 +53,7 @@ export function StatusBanner({ employeeId, employeeName, containerStatus }: Stat
     fetchStatus();
     const interval = setInterval(fetchStatus, 30000);
     return () => { cancelled = true; clearInterval(interval); };
-  }, [employeeId, containerStatus]);
+  }, [employeeId, containerStatus, onRefresh]);
 
   // Don't show banner for offline containers (already shown in header)
   if (containerStatus !== 'running') return null;

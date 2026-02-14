@@ -130,7 +130,7 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, onFire, onRefr
       </header>
 
       {/* Status Banner */}
-      <StatusBanner employeeId={employee.id} employeeName={employee.name} containerStatus={employee.container_status} />
+      <StatusBanner employeeId={employee.id} employeeName={employee.name} containerStatus={employee.container_status} onRefresh={onRefresh} />
 
       {/* Tabs */}
       <nav className="flex border-b border-[var(--border)] shrink-0 pl-5" style={{ background: '#111' }}>
@@ -186,9 +186,27 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, onFire, onRefr
                         <p className="text-xs text-[#fb923c] mb-2">
                           Chat is taking longer than expected.
                         </p>
-                        <p className="text-xs text-[var(--muted)]">
-                          The gateway may still be starting up. Try restarting from the Settings tab if this persists.
+                        <p className="text-xs text-[var(--muted)] mb-3">
+                          The gateway may still be starting up. Try restarting or re-provisioning if this persists.
                         </p>
+                        <div className="flex gap-2 justify-center">
+                          <button
+                            onClick={handleRestart}
+                            disabled={restarting}
+                            className="px-4 py-1.5 rounded text-xs font-medium"
+                            style={{ background: '#1a1a1a', border: '1px solid #333', color: '#ccc' }}
+                          >
+                            {restarting ? 'Restarting...' : 'Restart'}
+                          </button>
+                          <button
+                            onClick={handleProvision}
+                            disabled={provisioning}
+                            className="px-4 py-1.5 rounded text-xs font-medium"
+                            style={{ background: '#7c6bf0', color: '#fff' }}
+                          >
+                            {provisioning ? 'Provisioning...' : 'Re-provision'}
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
