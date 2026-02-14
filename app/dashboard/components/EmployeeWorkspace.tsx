@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Employee } from '@/lib/types';
 import { restartEmployee, provisionEmployee, fireEmployee } from '@/lib/api/employees';
 import { KnowledgeBase } from './KnowledgeBase';
@@ -30,6 +30,8 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, onFire, onRefr
   const [provisionError, setProvisionError] = useState('');
   const [firing, setFiring] = useState(false);
   const [showFireConfirm, setShowFireConfirm] = useState(false);
+  const [chatLoading, setChatLoading] = useState(true);
+  const [chatSlow, setChatSlow] = useState(false);
 
   const HOST = process.env.NEXT_PUBLIC_CONTAINER_HOST || 'instantworker.ai';
   const isOnline = employee.container_status === 'running';
@@ -45,6 +47,15 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, onFire, onRefr
   const daysLeft = trialEndsAt
     ? Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86400000))
     : 0;
+
+  // Reset chat loading state when chatUrl changes; show warning after 15s
+  useEffect(() => {
+    if (!chatUrl) return;
+    setChatLoading(true);
+    setChatSlow(false);
+    const timer = setTimeout(() => setChatSlow(true), 15000);
+    return () => clearTimeout(timer);
+  }, [chatUrl]);
 
   const handleRestart = async () => {
     setRestarting(true);
@@ -82,8 +93,8 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, onFire, onRefr
     }
   };
 
-  const needsProvision = employee.container_status === 'none' || employee.container_status === 'error';
   const isProvisioning = employee.container_status === 'provisioning' || provisioning;
+  const needsProvision = !isOnline && !isProvisioning;
 
   const skillLabel = employee.worker_type === 'x-article-writer' ? 'X Article Writer' :
     employee.worker_type.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
@@ -157,24 +168,47 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, onFire, onRefr
         {tab === 'chat' && (
           <div className="w-full h-full flex flex-col">
             {chatUrl ? (
-              <iframe
-                src={chatUrl}
-                className="flex-1 w-full border-none"
-                style={{ background: '#111' }}
-                allow="microphone; camera; clipboard-write; clipboard-read"
-                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-downloads"
-              />
+              <div className="flex-1 w-full relative">
+                <iframe
+                  src={chatUrl}
+                  className="absolute inset-0 w-full h-full border-none"
+                  style={{ background: '#111' }}
+                  allow="microphone; camera; clipboard-write; clipboard-read"
+                  sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-downloads"
+                  onLoad={() => setChatLoading(false)}
+                />
+                {chatLoading && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3" style={{ background: '#111' }}>
+                    <div className="w-8 h-8 border-3 border-[#333] border-t-[#3b82f6] rounded-full animate-spin" />
+                    <p className="text-sm text-[var(--muted)]">Loading {employee.name}&apos;s chat...</p>
+                    {chatSlow && (
+                      <div className="text-center max-w-[320px]">
+                        <p className="text-xs text-[#fb923c] mb-2">
+                          Chat is taking longer than expected.
+                        </p>
+                        <p className="text-xs text-[var(--muted)]">
+                          The gateway may still be starting up. Try restarting from the Settings tab if this persists.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             ) : needsProvision ? (
               <div className="flex flex-col items-center justify-center h-full text-center px-6 gap-4">
-                <div className="text-4xl">{employee.container_status === 'error' ? '⚠️' : '🔌'}</div>
+                <div className="text-4xl">{employee.container_status === 'error' ? '⚠️' : employee.container_status === 'stopped' ? '⏸️' : '🔌'}</div>
                 <div>
                   <h2 className="text-base font-semibold mb-1">
-                    {employee.container_status === 'error' ? 'Container failed to start' : 'Container not provisioned'}
+                    {employee.container_status === 'error' ? 'Container failed to start'
+                      : employee.container_status === 'stopped' ? 'Container stopped'
+                      : 'Container not provisioned'}
                   </h2>
                   <p className="text-sm text-[var(--muted)]">
                     {employee.container_status === 'error'
                       ? 'The last provisioning attempt failed. Try again.'
-                      : `${employee.name} needs a container to start working.`}
+                      : employee.container_status === 'stopped'
+                        ? `${employee.name}'s container has stopped. Start it again to resume.`
+                        : `${employee.name} needs a container to start working.`}
                   </p>
                 </div>
                 <button

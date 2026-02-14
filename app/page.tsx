@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { createSupabaseBrowser } from '@/lib/supabase-browser';
 import { SKILLS } from '@/lib/constants';
 
 function DemoAnimation() {
@@ -37,7 +39,7 @@ function DemoAnimation() {
             <div style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Axel</div>
             <div style={{ fontSize: 10, color: '#4ade80' }}>● Online</div>
           </div>
-          <div style={{ marginLeft: 'auto', fontSize: 11, padding: '3px 8px', borderRadius: 4, background: '#1e3a5f', color: '#93c5fd' }}>X Article Writer</div>
+          <div style={{ marginLeft: 'auto', fontSize: 11, padding: '3px 8px', borderRadius: 4, background: '#1e3a5f', color: '#93c5fd' }}>X Expert</div>
         </div>
         {/* Messages */}
         <div style={{ padding: 16, minHeight: 220, display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -76,6 +78,30 @@ function DemoAnimation() {
 
 export default function Home() {
   const skills = SKILLS;
+  const [user, setUser] = useState<{ id: string } | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const supabase = createSupabaseBrowser();
+
+    // Check for existing session
+    supabase.auth.getUser().then(({ data: { user: u } }) => {
+      if (u) setUser(u);
+    });
+
+    // Handle OAuth callback: if Supabase redirected here with hash params,
+    // detect the new sign-in and redirect to dashboard
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        setUser(session.user);
+        router.push('/dashboard');
+      } else if (event === 'INITIAL_SESSION') {
+        setUser(session?.user ?? null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [router]);
 
   return (
     <main>
@@ -85,8 +111,14 @@ export default function Home() {
           Instant<span className="text-[var(--accent2)]">Worker</span>
         </div>
         <div className="flex items-center gap-4">
-          <a href="/auth/login" className="text-sm text-[var(--dim)] hover:text-[var(--text)] transition-colors">Log in</a>
-          <a href="/auth/login" className="text-sm font-medium text-white px-4 py-1.5 rounded-full transition-all hover:brightness-110" style={{ background: "linear-gradient(135deg, var(--accent), #9b7bf7)" }}>Start free trial</a>
+          {user ? (
+            <a href="/dashboard" className="text-sm font-medium text-white px-4 py-1.5 rounded-full transition-all hover:brightness-110" style={{ background: "linear-gradient(135deg, var(--accent), #9b7bf7)" }}>Dashboard</a>
+          ) : (
+            <>
+              <a href="/auth/login" className="text-sm text-[var(--dim)] hover:text-[var(--text)] transition-colors">Log in</a>
+              <a href="/auth/login" className="text-sm font-medium text-white px-4 py-1.5 rounded-full transition-all hover:brightness-110" style={{ background: "linear-gradient(135deg, var(--accent), #9b7bf7)" }}>Hire AI Worker</a>
+            </>
+          )}
         </div>
       </nav>
 
@@ -100,17 +132,17 @@ export default function Home() {
           Hire 24/7 AI employees<br />that work on your business.
         </h1>
         <p className="text-[clamp(15px,2.2vw,19px)] text-[var(--dim)] max-w-[540px] mx-auto leading-relaxed relative">
-          Each employee researches your company, learns your voice,
-          and works 24/7 with its own computer and browser.
+          Employees share what they know about your company,
+          and work for you 24/7 with their own computer and browser.
         </p>
 
         <div className="max-w-[440px] mx-auto mt-9 relative">
           <a
-            href="/auth/login"
+            href={user ? "/dashboard" : "/auth/login"}
             className="block text-center py-4 rounded-[var(--r2)] font-bold text-base text-white transition-all hover:brightness-110 hover:scale-[1.02] mb-3"
             style={{ background: "linear-gradient(135deg, var(--accent), #9b7bf7)" }}
           >
-            Hire your first worker →
+            Hire AI Worker →
           </a>
           <p className="text-xs text-[var(--muted)] text-center">
             No credit card · 7 days free · Ready in 60 seconds
@@ -146,7 +178,7 @@ export default function Home() {
 
       {/* WHAT YOUR WORKER DOES */}
       <section className="max-w-[960px] mx-auto px-5 py-16">
-        <h2 className="text-center text-[clamp(22px,3.8vw,34px)] font-bold tracking-tight mb-3">One Worker. One Channel.</h2>
+        <h2 className="text-center text-[clamp(22px,3.8vw,34px)] font-bold tracking-tight mb-3">One Worker. One Channel. Available 24/7.</h2>
         <p className="text-center text-[var(--dim)] text-sm mb-10">Each worker masters every skill for their platform. Expert-level from day one.</p>
 
         {/* X/Twitter Worker */}
@@ -206,8 +238,8 @@ export default function Home() {
             <div className="flex gap-2 text-sm"><span className="text-[var(--green)]">✓</span><span className="text-[var(--text)]">Works 18h/day, rests 6h</span></div>
             <div className="flex gap-2 text-sm"><span className="text-[var(--green)]">✓</span><span className="text-[var(--text)]">Ready in 60 seconds</span></div>
           </div>
-          <a href="/auth/login" className="block text-center py-3.5 rounded-[var(--r2)] text-sm font-bold text-white transition-all hover:brightness-110 max-w-[320px] mx-auto" style={{ background: "linear-gradient(135deg, var(--accent), #9b7bf7)" }}>
-            Start 7-day free trial →
+          <a href={user ? "/dashboard" : "/auth/login"} className="block text-center py-3.5 rounded-[var(--r2)] text-sm font-bold text-white transition-all hover:brightness-110 max-w-[320px] mx-auto" style={{ background: "linear-gradient(135deg, var(--accent), #9b7bf7)" }}>
+            Hire AI Worker →
           </a>
           <p className="text-center text-xs text-[var(--muted)] mt-4">Need more channels? Hire more workers. Each covers a full platform.</p>
         </div>
@@ -312,11 +344,11 @@ export default function Home() {
           <h2 className="text-2xl font-bold mb-3">Ready to hire your AI worker?</h2>
           <p className="text-sm text-[var(--dim)] mb-6">$199/mo per worker. All skills included. 7 days free.</p>
           <a
-            href="/auth/login"
+            href={user ? "/dashboard" : "/auth/login"}
             className="inline-block text-center px-8 py-3.5 rounded-[var(--r2)] font-bold text-sm text-white transition-all hover:brightness-110"
             style={{ background: "linear-gradient(135deg, var(--accent), #9b7bf7)" }}
           >
-            Start free trial →
+            Hire AI Worker →
           </a>
         </div>
       </section>
