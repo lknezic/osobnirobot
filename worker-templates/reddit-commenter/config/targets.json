@@ -1,0 +1,9 @@
+{
+  "subreddits": [
+    {{TARGETS}}
+  ],
+  "keywords": [
+    {{HASHTAGS}}
+  ],
+  "niche": "{{NICHE}}"
+}

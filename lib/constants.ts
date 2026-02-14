@@ -48,9 +48,9 @@ export const SKILLS: SkillDef[] = [
   { id: 'x-tweet-writer', emoji: '✍️', title: 'X Tweet Writer', desc: 'Writes and posts original tweets using the 3-bucket system to grow your following.', category: 'X / Twitter', available: true },
   { id: 'x-article-writer', emoji: '📰', title: 'X Article Writer', desc: 'Writes long-form X articles that position you as a thought leader in your niche.', category: 'X / Twitter', available: true },
   { id: 'x-thread-writer', emoji: '🧵', title: 'X Thread Writer', desc: 'Crafts viral threads that break down ideas, tell stories, and build your following.', category: 'X / Twitter', available: true },
-  // Reddit skills (coming soon)
-  { id: 'reddit-commenter', emoji: '💬', title: 'Reddit Commenter', desc: 'Finds relevant subreddits and leaves valuable, on-topic comments that build authority and drive traffic.', category: 'Reddit', available: false },
-  { id: 'reddit-poster', emoji: '📝', title: 'Reddit Poster', desc: 'Creates engaging Reddit posts that provide value, spark discussion, and grow your presence in target communities.', category: 'Reddit', available: false },
+  // Reddit skills
+  { id: 'reddit-commenter', emoji: '💬', title: 'Reddit Commenter', desc: 'Finds relevant subreddits and leaves valuable, on-topic comments that build authority and drive traffic.', category: 'Reddit', available: true },
+  { id: 'reddit-poster', emoji: '📝', title: 'Reddit Poster', desc: 'Creates engaging Reddit posts that provide value, spark discussion, and grow your presence in target communities.', category: 'Reddit', available: true },
   // Internal worker types (admin-only)
   { id: 'ops-monitor', emoji: '🔧', title: 'Ops Monitor', desc: 'Internal: monitors infrastructure, workers, and business metrics. Admin-only.', category: 'Internal', available: false },
 ];

@@ -421,6 +421,13 @@ containerRoutes.post('/provision', async (req: Request, res: Response) => {
       containerEnv.push(`ANTHROPIC_API_KEY=${env().ANTHROPIC_API_KEY}`);
     }
 
+    // Per-worker HTTP proxy for browser isolation (unique IP per worker)
+    const proxyUrl = workerConfig?.proxyUrl || process.env.DEFAULT_WORKER_PROXY || '';
+    if (proxyUrl) {
+      containerEnv.push(`WORKER_PROXY_URL=${proxyUrl}`);
+      console.log(`♦ Worker proxy configured: ${proxyUrl.replace(/:[^:@]*@/, ':***@')}`);
+    }
+
     // Create container
     const container = await docker.createContainer({
       Image: env().CONTAINER_IMAGE,

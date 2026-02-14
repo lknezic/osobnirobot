@@ -40,7 +40,10 @@ if [ ! -f "$CONFIG_FILE" ]; then
     if [ -n "${LITELLM_URL:-}" ] && [ -n "${LITELLM_KEY:-}" ]; then
         # LiteLLM proxy mode — containers never see real API keys
         echo "♦ Using LiteLLM proxy at ${LITELLM_URL}"
-        cat > "$CONFIG_FILE" << CONFIGEOF
+        # Sanitize ASSISTANT_NAME for JSON (escape quotes and backslashes)
+    SAFE_NAME=$(echo "${ASSISTANT_NAME:-Assistant}" | sed 's/\\/\\\\/g; s/"/\\"/g')
+
+    cat > "$CONFIG_FILE" << CONFIGEOF
 {
   "gateway": {
     "port": ${OPENCLAW_GATEWAY_PORT:-18789},
@@ -53,6 +56,9 @@ if [ ! -f "$CONFIG_FILE" ]; then
       "enabled": true,
       "allowInsecureAuth": true
     }
+  },
+  "identity": {
+    "name": "${SAFE_NAME}"
   },
   "models": {
     "providers": {
@@ -78,6 +84,8 @@ if [ ! -f "$CONFIG_FILE" ]; then
 CONFIGEOF
     else
         # Direct API key mode (fallback — not recommended for production)
+        SAFE_NAME=$(echo "${ASSISTANT_NAME:-Assistant}" | sed 's/\\/\\\\/g; s/"/\\"/g')
+
         cat > "$CONFIG_FILE" << CONFIGEOF
 {
   "gateway": {
@@ -91,6 +99,9 @@ CONFIGEOF
       "enabled": true,
       "allowInsecureAuth": true
     }
+  },
+  "identity": {
+    "name": "${SAFE_NAME}"
   },
   "models": {
     "providers": {
@@ -120,11 +131,8 @@ CONFIGEOF
     echo "♦ Config generated"
 fi
 
-# Customize UI with worker name
-if [ -n "$ASSISTANT_NAME" ] && [ -f /app/dist/control-ui/index.html ]; then
-    sed -i "s|__OPENCLAW_ASSISTANT_NAME__=\"Assistant\"|__OPENCLAW_ASSISTANT_NAME__=\"${ASSISTANT_NAME}\"|" /app/dist/control-ui/index.html
-    sed -i "s|__OPENCLAW_ASSISTANT_AVATAR__=\"A\"|__OPENCLAW_ASSISTANT_AVATAR__=\"${ASSISTANT_NAME:0:1}\"|" /app/dist/control-ui/index.html
-fi
+# Note: Worker name is set via identity.name in openclaw.json (generated above).
+# The OpenClaw control UI reads the name from the gateway config automatically.
 
 # Inject CSS + JS as backup (in case not injected at build time)
 if [ -f /app/dist/control-ui/index.html ]; then
@@ -132,6 +140,28 @@ if [ -f /app/dist/control-ui/index.html ]; then
     sed -i 's|</head>|<link rel="stylesheet" href="./assets/custom-ui.css"></head>|' /app/dist/control-ui/index.html
     grep -q "iw-customize.js" /app/dist/control-ui/index.html || \
     sed -i 's|</head>|<script src="./assets/iw-customize.js" defer></script></head>|' /app/dist/control-ui/index.html
+fi
+
+# ————————————————————————————————
+# 1b. Configure HTTP proxy for browser isolation
+# ————————————————————————————————
+if [ -n "${WORKER_PROXY_URL:-}" ]; then
+    echo "♦ Configuring browser proxy: ${WORKER_PROXY_URL%%@*}@***"
+    export HTTP_PROXY="$WORKER_PROXY_URL"
+    export HTTPS_PROXY="$WORKER_PROXY_URL"
+    export http_proxy="$WORKER_PROXY_URL"
+    export https_proxy="$WORKER_PROXY_URL"
+    # Don't proxy local traffic (OpenClaw gateway, VNC, localhost)
+    export NO_PROXY="localhost,127.0.0.1,0.0.0.0"
+    export no_proxy="localhost,127.0.0.1,0.0.0.0"
+
+    # Write Chromium proxy flags so OpenClaw's browser uses the proxy
+    mkdir -p "$OPENCLAW_HOME/browser"
+    cat > "$OPENCLAW_HOME/browser/chromium-flags.conf" << EOF
+--proxy-server=${WORKER_PROXY_URL}
+EOF
+    # Set CHROMIUM_FLAGS for any Chromium launch
+    export CHROMIUM_FLAGS="--proxy-server=${WORKER_PROXY_URL}"
 fi
 
 # Fix any config issues

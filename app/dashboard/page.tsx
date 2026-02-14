@@ -35,6 +35,7 @@ function Dashboard() {
   const [activeEmployee, setActiveEmployee] = useState<Employee | null>(null);
   const [showHireModal, setShowHireModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [systemHealth, setSystemHealth] = useState<'healthy' | 'degraded' | 'checking'>('checking');
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -86,6 +87,25 @@ function Dashboard() {
     const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, [fetchData]);
+
+  // Check system health (orchestrator connectivity)
+  useEffect(() => {
+    let cancelled = false;
+    const checkHealth = async () => {
+      try {
+        const res = await fetch('/api/health');
+        if (!cancelled) {
+          const data = await res.json();
+          setSystemHealth(data.status === 'healthy' ? 'healthy' : 'degraded');
+        }
+      } catch {
+        if (!cancelled) setSystemHealth('degraded');
+      }
+    };
+    checkHealth();
+    const interval = setInterval(checkHealth, 60000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, []);
 
   const daysLeft = state.trialEndsAt
     ? Math.max(0, Math.ceil((new Date(state.trialEndsAt).getTime() - Date.now()) / 86400000))
@@ -235,6 +255,13 @@ function Dashboard() {
           </button>
         </div>
       </header>
+
+      {systemHealth === 'degraded' && (
+        <div className="flex items-center gap-2 px-6 py-2 text-xs border-b border-[var(--border)]" style={{ background: '#422006', color: '#fb923c' }}>
+          <span className="inline-block w-2 h-2 rounded-full" style={{ background: '#fb923c' }} />
+          <span>System connection issue — some features may be unavailable. Your workers are still running.</span>
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto">
         {state.employees.length === 0 ? (

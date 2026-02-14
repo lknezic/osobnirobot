@@ -9,8 +9,6 @@ export async function GET(request: Request) {
   // Prevent open redirect — only allow internal paths
   const next = (nextParam.startsWith("/") && !nextParam.startsWith("//")) ? nextParam : "/dashboard";
 
-  console.log("AUTH CALLBACK:", { code: code?.slice(0, 8), origin });
-
   if (code) {
     const cookieStore = cookies();
     const supabase = createServerClient(
@@ -31,20 +29,16 @@ export async function GET(request: Request) {
     );
 
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    console.log("EXCHANGE RESULT:", { error: error?.message || "success" });
 
     if (!error) {
       const { data: { user } } = await supabase.auth.getUser();
-      console.log("USER:", { id: user?.id?.slice(0, 8), email: user?.email });
 
       if (user) {
-        const { data: profile, error: profileError } = await supabase
+        const { data: profile } = await supabase
           .from("profiles")
           .select("onboarding_completed")
           .eq("id", user.id)
           .single();
-
-        console.log("PROFILE:", { profile, profileError: profileError?.message });
 
         if (!profile || !profile.onboarding_completed) {
           return NextResponse.redirect(new URL("/onboarding", origin));

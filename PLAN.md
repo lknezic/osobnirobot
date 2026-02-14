@@ -40,7 +40,7 @@
 | 27 | **Rebuild Docker image on Hetzner** (new templates) | READY (Dockerfile updated, needs `docker build` on server) |
 | 28 | **Rebuild orchestrator on Hetzner** (flywheel + goals.md) | DONE (restarted, env vars updated) |
 | 29 | **Deploy LiteLLM to Hetzner** | DONE (running on :4000) |
-| 30 | E2E testing (onboard flow, multi-employee, Stripe) | NOT STARTED |
+| 30 | E2E testing (onboard flow, multi-employee, Stripe) | DONE (vitest — 42 tests: middleware, admin auth, subscribe API, constants) |
 | 31 | Security audit | DONE (code fixes applied — see 7540ff7) |
 | 32 | Monitoring setup | DONE (/api/health endpoint — Supabase, orchestrator, Stripe, env checks) |
 
@@ -96,7 +96,7 @@
 2. ~~**Update landing page**~~ — DONE (deployed)
 3. ~~**Deploy LiteLLM**~~ — DONE (running on :4000)
 4. **Rebuild Docker image** — Dockerfile updated with COPY for templates + WORKER_TYPE selection. Run `docker build` on Hetzner.
-5. **E2E testing** — Full onboarding flow, multi-employee, Stripe checkout, trial expiry.
+5. ~~**E2E testing**~~ — DONE (vitest: 42 tests — middleware routing, admin auth, subscribe API, constants/business logic).
 6. ~~**Security audit**~~ — DONE (7540ff7): auth bypass, open redirect, cron auth, webhook secret, email XSS, security headers.
 7. ~~**Monitoring**~~ — DONE (8430d9f): /api/health endpoint checks Supabase, orchestrator, Stripe, env vars. LiteLLM has built-in spend tracking.
 
