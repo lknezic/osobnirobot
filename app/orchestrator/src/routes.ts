@@ -1137,3 +1137,114 @@ containerRoutes.get('/summary/:id', async (req: Request, res: Response) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// ─── Content Pipeline — queue.json file inside container ───
+const CONTENT_QUEUE_PATH = `${CONTAINER_WORKSPACE}/content/queue.json`;
+
+interface ContentItem {
+  id: string;
+  type: 'comment' | 'tweet' | 'thread' | 'article';
+  status: 'draft' | 'pending' | 'approved' | 'posted' | 'rejected';
+  content: string;
+  target?: string; // target account or hashtag
+  platform: string;
+  createdAt: string;
+  updatedAt: string;
+  postedUrl?: string;
+  feedback?: string;
+}
+
+// ─── GET /content/:id — Read content queue from container ───
+containerRoutes.get('/content/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const name = containerName(id);
+    const container = docker.getContainer(name);
+
+    const raw = await readContainerFile(container, CONTENT_QUEUE_PATH);
+    if (!raw) {
+      return res.json({ items: [] });
+    }
+
+    try {
+      const data = JSON.parse(raw);
+      const items: ContentItem[] = Array.isArray(data) ? data : (data.items || []);
+      return res.json({ items });
+    } catch {
+      return res.json({ items: [] });
+    }
+  } catch (err: any) {
+    if (err.statusCode === 404) {
+      return res.json({ items: [] });
+    }
+    console.error('Content read error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── POST /content/:id/approve — Approve a content item ───
+containerRoutes.post('/content/:id/approve', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { itemId } = req.body;
+    if (!itemId) return res.status(400).json({ error: 'itemId required' });
+
+    const name = containerName(id);
+    const container = docker.getContainer(name);
+
+    const raw = await readContainerFile(container, CONTENT_QUEUE_PATH);
+    if (!raw) return res.status(404).json({ error: 'No content queue' });
+
+    const data = JSON.parse(raw);
+    const items: ContentItem[] = Array.isArray(data) ? data : (data.items || []);
+
+    const item = items.find(i => i.id === itemId);
+    if (!item) return res.status(404).json({ error: 'Item not found' });
+
+    item.status = 'approved';
+    item.updatedAt = new Date().toISOString();
+
+    const updated = Array.isArray(data) ? items : { ...data, items };
+    await writeContainerFile(container, CONTENT_QUEUE_PATH, JSON.stringify(updated, null, 2));
+
+    console.log(`♦ Content item ${itemId} approved in ${name}`);
+    res.json({ success: true, item });
+  } catch (err: any) {
+    console.error('Content approve error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── POST /content/:id/reject — Reject a content item ───
+containerRoutes.post('/content/:id/reject', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { itemId, feedback } = req.body;
+    if (!itemId) return res.status(400).json({ error: 'itemId required' });
+
+    const name = containerName(id);
+    const container = docker.getContainer(name);
+
+    const raw = await readContainerFile(container, CONTENT_QUEUE_PATH);
+    if (!raw) return res.status(404).json({ error: 'No content queue' });
+
+    const data = JSON.parse(raw);
+    const items: ContentItem[] = Array.isArray(data) ? data : (data.items || []);
+
+    const item = items.find(i => i.id === itemId);
+    if (!item) return res.status(404).json({ error: 'Item not found' });
+
+    item.status = 'rejected';
+    item.feedback = feedback || '';
+    item.updatedAt = new Date().toISOString();
+
+    const updated = Array.isArray(data) ? items : { ...data, items };
+    await writeContainerFile(container, CONTENT_QUEUE_PATH, JSON.stringify(updated, null, 2));
+
+    console.log(`♦ Content item ${itemId} rejected in ${name}`);
+    res.json({ success: true, item });
+  } catch (err: any) {
+    console.error('Content reject error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});

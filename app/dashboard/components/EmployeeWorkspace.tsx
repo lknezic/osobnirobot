@@ -7,8 +7,9 @@ import { KnowledgeBase } from './KnowledgeBase';
 import { WorkLog } from './WorkLog';
 import { StatusBanner } from './StatusBanner';
 import { Summary } from './Summary';
+import { ContentPipeline } from './ContentPipeline';
 
-type Tab = 'chat' | 'worklog' | 'summary' | 'browser' | 'settings';
+type Tab = 'chat' | 'worklog' | 'content' | 'summary' | 'browser' | 'settings';
 
 interface EmployeeWorkspaceProps {
   employee: Employee;
@@ -121,10 +122,11 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, onFire, onRefr
 
       {/* Tabs */}
       <nav className="flex border-b border-[var(--border)] shrink-0 pl-5" style={{ background: '#111' }}>
-        {(['chat', 'worklog', 'summary', 'browser', 'settings'] as Tab[]).map(t => {
+        {(['chat', 'worklog', 'content', 'summary', 'browser', 'settings'] as Tab[]).map(t => {
           const labels: Record<Tab, string> = {
             chat: '💬 Chat',
             worklog: '📋 Work Log',
+            content: '📝 Content',
             summary: '📊 Summary',
             browser: '🖥️ Browser',
             settings: '⚙️ Settings',
@@ -210,6 +212,10 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, onFire, onRefr
 
         {tab === 'worklog' && (
           <WorkLog employeeId={employee.id} employeeName={employee.name} containerStatus={employee.container_status} />
+        )}
+
+        {tab === 'content' && (
+          <ContentPipeline employeeId={employee.id} employeeName={employee.name} containerStatus={employee.container_status} />
         )}
 
         {tab === 'summary' && (

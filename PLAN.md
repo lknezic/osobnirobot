@@ -150,7 +150,7 @@
 | D2 | 6 | Agent status banner + error alert toasts | DONE | Orchestrator /status-detail endpoint |
 | D2 | 7 | Daily summary — team dashboard overview + per-employee Summary tab + searchable knowledge | DONE | Orchestrator /summary endpoint |
 | D2 | 8 | Performance metrics bar above chat iframe (4-stat-card pattern) | DONE (component) | Step 7 (reuses summary API) |
-| D2 | 9 | Content Pipeline / Approval Queue (kanban: Draft→Pending→Approved→Posted→Rejected) | NOT STARTED | Orchestrator /content endpoint |
+| D2 | 9 | Content Pipeline / Approval Queue (kanban: Draft→Pending→Approved→Posted→Rejected) | DONE | Orchestrator /content endpoint |
 | D3 | 10 | Telegram integration (connect flow, login link via Telegram, channel health cards) | NOT STARTED | Telegram bot created |
 | D3 | 11 | Slack integration (OAuth flow, channel health cards) | NOT STARTED | Slack app created |
 | D3 | 12 | Admin dashboard — Client Detail (per-client drill-down, usage, actions) | DONE | Step 3 |
