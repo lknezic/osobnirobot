@@ -1,9 +1,0 @@
-{
-  "competitor_accounts": [
-    {{TARGETS}}
-  ],
-  "trending_hashtags": [
-    {{HASHTAGS}}
-  ],
-  "niche": "{{NICHE}}"
-}

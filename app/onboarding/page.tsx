@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
-import { SKILLS, PLANS, TONES, WORKER_NAMES } from '@/lib/constants';
+import { SKILLS, CHANNELS, TONES, WORKER_NAMES, WORKER_PRICE } from '@/lib/constants';
 
 function getRandomName(): string {
   return WORKER_NAMES[Math.floor(Math.random() * WORKER_NAMES.length)];
@@ -64,32 +64,55 @@ export default function OnboardingPage() {
   );
 }
 
+const STORAGE_KEY = 'iw_onboarding';
+
+function loadSavedProgress(): Partial<{
+  step: number; selectedChannel: string;
+  name: string; companyUrl: string; clientDesc: string;
+  competitorUrls: string; tone: string;
+}> {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : {};
+  } catch { return {}; }
+}
+
 function Onboarding() {
   const [step, setStep] = useState(1);
-  const [plan, setPlan] = useState('junior');
-  const [selectedSkills, setSelectedSkills] = useState<string[]>(['x-article-writer']);
+  const [selectedChannel, setSelectedChannel] = useState('x-twitter');
   const [name, setName] = useState(getRandomName);
   const [companyUrl, setCompanyUrl] = useState('');
   const [clientDesc, setClientDesc] = useState('');
   const [competitorUrls, setCompetitorUrls] = useState('');
   const [tone, setTone] = useState('witty');
+  const [showCompetitors, setShowCompetitors] = useState(false);
   const [launching, setLaunching] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
 
-  const currentPlan = PLANS.find(p => p.id === plan)!;
-  const maxSkills = currentPlan.maxSkills;
+  // Restore saved progress on mount
+  useEffect(() => {
+    const saved = loadSavedProgress();
+    if (saved.step) setStep(saved.step);
+    if (saved.selectedChannel) setSelectedChannel(saved.selectedChannel);
+    if (saved.name) setName(saved.name);
+    if (saved.companyUrl) setCompanyUrl(saved.companyUrl);
+    if (saved.clientDesc) setClientDesc(saved.clientDesc);
+    if (saved.competitorUrls) setCompetitorUrls(saved.competitorUrls);
+    if (saved.tone) setTone(saved.tone);
+  }, []);
 
-  const toggleSkill = (id: string) => {
-    const skill = SKILLS.find(s => s.id === id);
-    if (!skill?.available) return;
-    if (plan === 'expert') return;
-    if (selectedSkills.includes(id)) {
-      setSelectedSkills(selectedSkills.filter(s => s !== id));
-    } else if (selectedSkills.length < maxSkills) {
-      setSelectedSkills([...selectedSkills, id]);
-    }
-  };
+  // Save progress on every change
+  useEffect(() => {
+    if (launching) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        step, selectedChannel, name, companyUrl, clientDesc, competitorUrls, tone,
+      }));
+    } catch { /* quota exceeded — ignore */ }
+  }, [step, selectedChannel, name, companyUrl, clientDesc, competitorUrls, tone, launching]);
+
+  const currentChannel = CHANNELS.find(c => c.id === selectedChannel) || CHANNELS[0];
 
   const handleLaunch = async () => {
     if (!name.trim()) { setError('Give your employee a name'); return; }
@@ -99,10 +122,7 @@ function Onboarding() {
 
     try {
       const toneDesc = TONES.find(t => t.id === tone)?.desc || tone;
-      const availableSkills = SKILLS.filter(s => s.available);
-      const skillIds = plan === 'expert'
-        ? availableSkills.map(s => s.id)
-        : selectedSkills;
+      const skillIds = currentChannel.skills;
 
       const res = await fetch('/api/employees', {
         method: 'POST',
@@ -114,7 +134,7 @@ function Onboarding() {
           skills: skillIds,
           workerConfig: {
             skills: skillIds,
-            plan,
+            plan: 'worker',
             companyUrl: companyUrl.trim(),
             clientDescription: clientDesc.trim(),
             competitorUrls: competitorUrls.split('\n').map(u => u.trim()).filter(Boolean),
@@ -128,6 +148,8 @@ function Onboarding() {
         throw new Error(data.error || 'Failed to hire employee');
       }
 
+      // Clear saved progress on success
+      localStorage.removeItem(STORAGE_KEY);
       // Wait for animation to feel complete, then redirect
       await new Promise(resolve => setTimeout(resolve, 12000));
       router.push('/dashboard');
@@ -146,39 +168,65 @@ function Onboarding() {
     <div className="flex items-center justify-center min-h-screen px-4 py-12">
       <div className="w-full max-w-xl">
 
-        {/* Progress */}
+        {/* Progress — 3 steps */}
         <div className="flex gap-2 mb-10">
-          {[1, 2, 3, 4].map(s => (
+          {[1, 2, 3].map(s => (
             <div key={s} className={`flex-1 h-1 rounded-full transition-all ${s <= step ? 'bg-[var(--accent)]' : 'bg-[var(--border)]'}`} />
           ))}
         </div>
 
-        {/* Step 1: Pick a plan */}
+        {/* Step 1: Choose your employee */}
         {step === 1 && (
           <>
-            <h1 className="text-2xl font-bold mb-2">Choose your plan</h1>
-            <p className="text-[var(--dim)] text-sm mb-6">Start with one employee or build a team. All plans run 24/7.</p>
+            <h1 className="text-2xl font-bold mb-2">Choose your employee</h1>
+            <p className="text-[var(--dim)] text-sm mb-6">Each employee specializes in one channel and masters all skills for it. ${WORKER_PRICE}/mo per employee.</p>
             <div className="space-y-3 mb-6">
-              {PLANS.map(p => (
-                <button
-                  key={p.id}
-                  onClick={() => { setPlan(p.id); setSelectedSkills([]); }}
-                  className={`w-full p-4 rounded-[var(--r2)] border text-left transition-all ${
-                    plan === p.id
-                      ? 'border-[var(--accent)]'
-                      : 'border-[var(--border)] hover:border-[var(--border-h)]'
-                  }`}
-                  style={{ background: plan === p.id ? 'rgba(124,107,240,0.06)' : 'var(--bg2)' }}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="font-bold text-base">{p.title}</span>
-                      <span className="text-xs text-[var(--dim)] ml-2">{p.desc}</span>
+              {CHANNELS.map(ch => {
+                const chSkills = SKILLS.filter(s => ch.skills.includes(s.id));
+                const hasAvailable = chSkills.some(s => s.available);
+                return (
+                  <button
+                    key={ch.id}
+                    onClick={() => { if (hasAvailable) { setSelectedChannel(ch.id); } }}
+                    disabled={!hasAvailable}
+                    className={`w-full p-4 rounded-[var(--r2)] border text-left transition-all ${
+                      selectedChannel === ch.id
+                        ? 'border-[var(--accent)]'
+                        : !hasAvailable
+                          ? 'border-[var(--border)] opacity-40 cursor-not-allowed'
+                          : 'border-[var(--border)] hover:border-[var(--border-h)]'
+                    }`}
+                    style={{ background: selectedChannel === ch.id ? 'rgba(124,107,240,0.06)' : 'var(--bg2)' }}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-base">{ch.title} Employee</span>
+                        {!hasAvailable && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full border border-[var(--border)] text-[var(--muted)]">Coming Soon</span>
+                        )}
+                      </div>
+                      <span className="text-xs text-[var(--dim)]">${WORKER_PRICE}/mo</span>
                     </div>
-                    <span className="font-extrabold text-lg">{p.price}<span className="text-xs text-[var(--dim)] font-normal">/mo</span></span>
-                  </div>
-                </button>
-              ))}
+                    <div className="flex flex-wrap gap-1.5">
+                      {chSkills.map(skill => (
+                        <span key={skill.id} className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded border border-[var(--border)] text-[var(--dim)]">
+                          <span>{skill.emoji}</span> {skill.title}
+                        </span>
+                      ))}
+                    </div>
+                  </button>
+                );
+              })}
+              {/* Other channels coming soon */}
+              <div className="p-4 rounded-[var(--r2)] border border-[var(--border)] opacity-40" style={{ background: 'var(--bg2)' }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="font-bold text-base">Other Channels</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full border border-[var(--border)] text-[var(--muted)]">Coming Soon</span>
+                </div>
+                <p className="text-xs text-[var(--muted)]">
+                  Instagram, YouTube, TikTok, LinkedIn, Email, Discord — each as a dedicated employee with all skills for that platform.
+                </p>
+              </div>
             </div>
             <button
               onClick={() => setStep(2)}
@@ -187,86 +235,16 @@ function Onboarding() {
             >
               Next
             </button>
-            <p className="text-center text-[var(--muted)] text-xs mt-3">7-day free trial on all plans</p>
+            <p className="text-center text-[var(--muted)] text-xs mt-3">7-day free trial. Cancel anytime.</p>
           </>
         )}
 
-        {/* Step 2: Pick skills */}
+        {/* Step 2: Teach your employee */}
         {step === 2 && (
           <>
-            <h1 className="text-2xl font-bold mb-2">
-              {plan === 'expert' ? 'Your skills (all included)' : `Pick your skill${maxSkills > 1 ? 's' : ''}`}
-            </h1>
+            <h1 className="text-2xl font-bold mb-2">Teach your employee</h1>
             <p className="text-[var(--dim)] text-sm mb-6">
-              {plan === 'expert'
-                ? `Expert plan includes all ${SKILLS.length} skills for each employee.`
-                : `${currentPlan.title} plan: choose ${maxSkills === 1 ? '1 skill' : `up to ${maxSkills} skills`}. ${selectedSkills.length}/${maxSkills} selected.`}
-            </p>
-
-            {Array.from(new Set(SKILLS.map(s => s.category))).map(category => (
-              <div key={category} className="mb-5">
-                <h3 className="text-xs font-semibold text-[var(--accent2)] mb-2">{category}</h3>
-                <div className="grid grid-cols-1 gap-2">
-                  {SKILLS.filter(s => s.category === category).map(skill => {
-                    const isAvailable = skill.available;
-                    const isSelected = isAvailable && (plan === 'expert' || selectedSkills.includes(skill.id));
-                    const isDisabled = !isAvailable || (plan !== 'expert' && !isSelected && selectedSkills.length >= maxSkills);
-                    return (
-                      <button
-                        key={skill.id}
-                        onClick={() => toggleSkill(skill.id)}
-                        disabled={isDisabled}
-                        className={`flex items-center gap-3 p-3 rounded-[var(--r2)] border text-left transition-all ${
-                          isSelected
-                            ? 'border-[var(--accent)]'
-                            : isDisabled
-                              ? 'border-[var(--border)] opacity-40 cursor-not-allowed'
-                              : 'border-[var(--border)] hover:border-[var(--border-h)] cursor-pointer'
-                        }`}
-                        style={{ background: isSelected ? 'rgba(124,107,240,0.06)' : 'var(--bg2)' }}
-                      >
-                        <span className="text-lg">{skill.emoji}</span>
-                        <span className="text-sm font-medium">{skill.title}</span>
-                        {!isAvailable && (
-                          <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full border border-[var(--border)] text-[var(--muted)]">Coming Soon</span>
-                        )}
-                        {isSelected && <span className="ml-auto text-[var(--green)] text-xs">✓</span>}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-
-            {error && (
-              <div className="mb-4 p-3 rounded-[var(--r2)] text-red-400 text-sm border border-red-800/30" style={{ background: 'rgba(239,68,68,0.08)' }}>
-                {error}
-              </div>
-            )}
-
-            <div className="flex gap-3 mt-2">
-              <button onClick={() => setStep(1)} className="px-6 py-3.5 rounded-[var(--r2)] text-sm border border-[var(--border)] text-[var(--dim)] hover:text-[var(--text)] transition-colors" style={{ background: 'var(--bg2)' }}>Back</button>
-              <button
-                onClick={() => {
-                  if (plan !== 'expert' && selectedSkills.length === 0) { setError('Pick at least one skill'); return; }
-                  setError('');
-                  setStep(3);
-                }}
-                className="flex-1 py-3.5 rounded-[var(--r2)] font-semibold text-sm text-white transition-all hover:brightness-110"
-                style={{ background: 'linear-gradient(135deg, var(--accent), #9b7bf7)' }}
-              >
-                Next
-              </button>
-            </div>
-          </>
-        )}
-
-        {/* Step 3: Educate your first employee */}
-        {step === 3 && (
-          <>
-            <h1 className="text-2xl font-bold mb-2">Educate your first employee</h1>
-            <p className="text-[var(--dim)] text-sm mb-6">
-              The more you share, the smarter your employee starts. They will deeply research your company, competitors, and audience.
+              Your employee will deeply research everything from your URL. The more you share, the smarter they start.
             </p>
 
             <div className="mb-5">
@@ -294,27 +272,19 @@ function Onboarding() {
                 placeholder="https://yourcompany.com"
                 className="w-full px-4 py-3 rounded-[var(--r2)] border border-[var(--border)] text-sm focus:border-[var(--accent)] focus:outline-none transition-colors"
                 style={{ background: 'var(--bg2)', color: 'var(--text)' }} />
+              <p className="text-[10px] text-[var(--muted)] mt-1">Your employee will research your website, products, and positioning automatically.</p>
             </div>
 
             <div className="mb-5">
-              <label className="block text-sm text-[var(--dim)] mb-2">Who is your target audience?</label>
+              <label className="block text-sm text-[var(--dim)] mb-2">What do you do and who do you help?</label>
               <textarea value={clientDesc} onChange={e => setClientDesc(e.target.value)}
-                placeholder="e.g. SaaS founders looking to scale from $1M to $10M ARR, struggling with customer acquisition..."
+                placeholder="e.g. We build AI tools for SaaS founders who want to scale from $1M to $10M ARR without hiring a marketing team."
                 rows={3}
                 className="w-full px-4 py-3 rounded-[var(--r2)] border border-[var(--border)] text-sm focus:border-[var(--accent)] focus:outline-none transition-colors resize-none"
                 style={{ background: 'var(--bg2)', color: 'var(--text)' }} />
             </div>
 
             <div className="mb-5">
-              <label className="block text-sm text-[var(--dim)] mb-2">Competitor websites (one per line)</label>
-              <textarea value={competitorUrls} onChange={e => setCompetitorUrls(e.target.value)}
-                placeholder={"https://competitor1.com\nhttps://competitor2.com\nhttps://competitor3.com"}
-                rows={3}
-                className="w-full px-4 py-3 rounded-[var(--r2)] border border-[var(--border)] text-sm focus:border-[var(--accent)] focus:outline-none transition-colors resize-none"
-                style={{ background: 'var(--bg2)', color: 'var(--text)' }} />
-            </div>
-
-            <div className="mb-6">
               <label className="block text-sm text-[var(--dim)] mb-2">Writing tone</label>
               <div className="grid grid-cols-2 gap-2">
                 {TONES.map(t => (
@@ -332,14 +302,33 @@ function Onboarding() {
               </div>
             </div>
 
+            {/* Optional competitors */}
+            {!showCompetitors ? (
+              <button
+                onClick={() => setShowCompetitors(true)}
+                className="text-xs text-[var(--accent2)] hover:underline mb-5 block"
+              >
+                + Add competitor websites (optional)
+              </button>
+            ) : (
+              <div className="mb-5">
+                <label className="block text-sm text-[var(--dim)] mb-2">Competitor websites <span className="text-[var(--muted)]">(optional)</span></label>
+                <textarea value={competitorUrls} onChange={e => setCompetitorUrls(e.target.value)}
+                  placeholder={"https://competitor1.com\nhttps://competitor2.com"}
+                  rows={2}
+                  className="w-full px-4 py-3 rounded-[var(--r2)] border border-[var(--border)] text-sm focus:border-[var(--accent)] focus:outline-none transition-colors resize-none"
+                  style={{ background: 'var(--bg2)', color: 'var(--text)' }} />
+              </div>
+            )}
+
             {error && (
               <div className="mb-4 p-3 rounded-[var(--r2)] text-red-400 text-sm border border-red-800/30" style={{ background: 'rgba(239,68,68,0.08)' }}>{error}</div>
             )}
 
             <div className="flex gap-3">
-              <button onClick={() => setStep(2)} className="px-6 py-3.5 rounded-[var(--r2)] text-sm border border-[var(--border)] text-[var(--dim)] hover:text-[var(--text)] transition-colors" style={{ background: 'var(--bg2)' }}>Back</button>
+              <button onClick={() => setStep(1)} className="px-6 py-3.5 rounded-[var(--r2)] text-sm border border-[var(--border)] text-[var(--dim)] hover:text-[var(--text)] transition-colors" style={{ background: 'var(--bg2)' }}>Back</button>
               <button
-                onClick={() => { if (!name.trim()) { setError('Give your employee a name'); return; } setError(''); setStep(4); }}
+                onClick={() => { if (!name.trim()) { setError('Give your employee a name'); return; } setError(''); setStep(3); }}
                 className="flex-1 py-3.5 rounded-[var(--r2)] font-semibold text-sm text-white transition-all hover:brightness-110"
                 style={{ background: 'linear-gradient(135deg, var(--accent), #9b7bf7)' }}
               >
@@ -349,25 +338,25 @@ function Onboarding() {
           </>
         )}
 
-        {/* Step 4: Confirm & Launch */}
-        {step === 4 && (
+        {/* Step 3: Confirm & Launch */}
+        {step === 3 && (
           <>
             <h1 className="text-2xl font-bold mb-2">Ready to hire {name}?</h1>
-            <p className="text-[var(--dim)] text-sm mb-6">Your employee will research your business before starting work.</p>
+            <p className="text-[var(--dim)] text-sm mb-6">{name} will research your business and introduce themselves in chat.</p>
 
             <div className="p-5 rounded-[var(--r)] border border-[var(--border)] mb-4" style={{ background: 'var(--bg2)' }}>
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <div className="font-bold text-lg">{name}</div>
-                  <div className="text-xs text-[var(--dim)]">X Article Writer · {TONES.find(t => t.id === tone)?.label} tone</div>
+                  <div className="text-xs text-[var(--dim)]">{currentChannel.title} Employee · {TONES.find(t => t.id === tone)?.label} tone</div>
                 </div>
-                <div className="text-xs text-[var(--dim)]">{currentPlan.title} plan</div>
+                <div className="text-xs text-[var(--dim)]">${WORKER_PRICE}/mo</div>
               </div>
               {companyUrl && (
                 <div className="text-xs mb-2"><span className="text-[var(--dim)]">Company:</span> {companyUrl}</div>
               )}
               {clientDesc && (
-                <div className="text-xs mb-2"><span className="text-[var(--dim)]">Target audience:</span> {clientDesc.slice(0, 100)}{clientDesc.length > 100 ? '...' : ''}</div>
+                <div className="text-xs mb-2"><span className="text-[var(--dim)]">About:</span> {clientDesc.slice(0, 100)}{clientDesc.length > 100 ? '...' : ''}</div>
               )}
               {competitorUrls.trim() && (
                 <div className="text-xs"><span className="text-[var(--dim)]">Competitors:</span> {competitorUrls.split('\n').filter(Boolean).length} website{competitorUrls.split('\n').filter(Boolean).length !== 1 ? 's' : ''}</div>
@@ -376,18 +365,18 @@ function Onboarding() {
 
             <div className="p-4 rounded-[var(--r2)] border border-[var(--accent)] mb-4" style={{ background: 'rgba(124,107,240,0.06)' }}>
               <p className="text-sm text-[var(--accent2)]">
-                {name} will first research your company, competitors, and target audience to build a content strategy. Then they start working.
+                {name} will research your company, competitors, and audience. Their first message will be an introduction with everything they learned.
               </p>
             </div>
 
             <div className="p-4 rounded-[var(--r2)] border border-[var(--green-b)] mb-4" style={{ background: 'var(--green-g)' }}>
               <p className="text-sm text-[var(--green)]">
-                After hiring, open the <strong>Browser tab</strong> on your dashboard and log into X. Your employee needs access to publish articles.
+                After hiring, open the <strong>Browser tab</strong> on your dashboard and log into {currentChannel.id === 'x-twitter' ? 'X' : currentChannel.title}. Your employee needs access to publish content.
               </p>
             </div>
 
             <p className="text-xs text-[var(--muted)] mb-4">
-              This is your first employee. You can hire up to {currentPlan.maxEmployees} on the {currentPlan.title} plan.
+              7-day free trial. ${WORKER_PRICE}/mo after trial. Cancel anytime.
             </p>
 
             {error && (
@@ -395,7 +384,7 @@ function Onboarding() {
             )}
 
             <div className="flex gap-3">
-              <button onClick={() => setStep(3)} className="px-6 py-3.5 rounded-[var(--r2)] text-sm border border-[var(--border)] text-[var(--dim)] hover:text-[var(--text)] transition-colors" style={{ background: 'var(--bg2)' }}>Back</button>
+              <button onClick={() => setStep(2)} className="px-6 py-3.5 rounded-[var(--r2)] text-sm border border-[var(--border)] text-[var(--dim)] hover:text-[var(--text)] transition-colors" style={{ background: 'var(--bg2)' }}>Back</button>
               <button onClick={handleLaunch}
                 className="flex-1 py-3.5 rounded-[var(--r2)] font-bold text-sm text-white transition-all hover:brightness-110 hover:scale-[1.01]"
                 style={{ background: 'linear-gradient(135deg, var(--accent), #9b7bf7)' }}
@@ -405,7 +394,7 @@ function Onboarding() {
             </div>
 
             <p className="text-center text-[var(--muted)] text-xs mt-4">
-              7-day free trial · No credit card required
+              No credit card required
             </p>
           </>
         )}

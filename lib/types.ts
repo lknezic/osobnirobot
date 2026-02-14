@@ -1,6 +1,8 @@
 // Shared types for InstantWorker
 
-export type PlanTier = 'junior' | 'medior' | 'expert';
+export type PlanTier = 'worker';
+// Legacy tiers kept for backward compat with existing subscriptions
+export type LegacyPlanTier = 'junior' | 'medior' | 'expert';
 export type PlanStatus = 'trial' | 'active' | 'past_due' | 'cancelled';
 export type ContainerStatus = 'none' | 'provisioning' | 'running' | 'stopped' | 'error';
 
@@ -45,9 +47,9 @@ export interface Profile {
 
 export interface KnowledgeFile {
   name: string;
-  path: string;
+  path?: string;
   size: number;
-  modified: string;
+  modified?: string;
 }
 
 export interface EmployeeKnowledge {
@@ -55,6 +57,13 @@ export interface EmployeeKnowledge {
   researchFindings: string | null;
   pendingQuestions: string | null;
   suggestions: string | null;
+}
+
+export interface EmployeeDoc {
+  filename: string;
+  title: string;
+  description: string;
+  content: string;
 }
 
 export interface ApiError {

@@ -27,7 +27,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgbm1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Create workspace defaults directory
+# Copy worker template defaults into image
+# Shared files (playbooks, docs, memory, learning) go to all workers
+COPY worker-templates/_shared/ /defaults/workspace/
+
+# Copy per-worker templates (x-commenter, x-tweet-writer, etc.)
+# These are selected at runtime by entrypoint based on WORKER_TYPE env var
+COPY worker-templates/ /defaults/templates/
+
+# Ensure directory structure exists
 RUN mkdir -p /defaults/workspace/config /defaults/workspace/skills /defaults/workspace/memory /defaults/workspace/reference
 
 # Copy entrypoint script

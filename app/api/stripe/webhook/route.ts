@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createSupabaseAdmin } from "@/lib/supabase-admin";
 import { sendEmail, paymentFailedEmail } from "@/lib/email";
-import { PLAN_LIMITS } from "@/lib/constants";
-import type { PlanTier } from "@/lib/types";
+import { PLAN_LIMITS, LEGACY_PLAN_LIMITS } from "@/lib/constants";
 
 function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -12,15 +11,20 @@ function getStripe() {
 export async function POST(request: Request) {
   const stripe = getStripe();
   const supabase = createSupabaseAdmin();
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    console.error("STRIPE_WEBHOOK_SECRET not configured");
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+  }
   const body = await request.text();
   const sig = request.headers.get("stripe-signature")!;
 
   let event: Stripe.Event;
   try {
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
-  } catch (err: any) {
-    console.error("Webhook signature error:", err.message);
+  } catch (err: unknown) {
+    const errMsg = err instanceof Error ? err.message : 'Unknown error';
+    console.error("Webhook signature error:", errMsg);
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
@@ -37,8 +41,8 @@ export async function POST(request: Request) {
           const isTrial = sub?.status === "trialing";
           const trialEnd = sub?.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null;
 
-          // Set max_employees based on plan tier
-          const planLimits = PLAN_LIMITS[planId as PlanTier];
+          // Set max_employees based on plan tier (new 'worker' plan or legacy plans)
+          const planLimits = PLAN_LIMITS.worker ?? LEGACY_PLAN_LIMITS[planId] ?? PLAN_LIMITS.worker;
           const maxEmployees = planLimits?.maxEmployees || 1;
 
           await supabase.from("profiles").update({

@@ -179,6 +179,7 @@ function Dashboard() {
           employee={activeEmployee}
           onBack={handleBack}
           onCheckout={handleCheckout}
+          onRefresh={fetchData}
           planStatus={state.planStatus}
           trialEndsAt={state.trialEndsAt}
           hasSubscription={state.hasSubscription}
@@ -237,7 +238,7 @@ function Dashboard() {
 
       {showHireModal && (
         <HireEmployeeModal
-          maxSkills={state.selectedPlan === 'expert' ? 15 : state.selectedPlan === 'medior' ? 5 : 1}
+          maxSkills={99}
           onHire={handleHire}
           onClose={() => setShowHireModal(false)}
         />

@@ -19,14 +19,66 @@ mkdir -p "$OPENCLAW_HOME/workspace"
 
 # Copy default workspace files if empty
 if [ ! -f "$OPENCLAW_HOME/workspace/SOUL.md" ] && [ -d /defaults/workspace ]; then
+    # 1. Copy shared files (reference, docs, memory, learning protocol, etc.)
     cp -rn /defaults/workspace/* "$OPENCLAW_HOME/workspace/" 2>/dev/null || true
-    echo "♦ Default workspace files copied"
+    echo "♦ Shared workspace files copied"
+
+    # 2. Copy worker-type-specific files (SOUL.md, HEARTBEAT.md, skills/, config/)
+    WORKER_TYPE="${WORKER_TYPE:-x-commenter}"
+    if [ -d "/defaults/templates/${WORKER_TYPE}" ]; then
+        cp -rn "/defaults/templates/${WORKER_TYPE}/"* "$OPENCLAW_HOME/workspace/" 2>/dev/null || true
+        echo "♦ Worker template '${WORKER_TYPE}' applied"
+    else
+        echo "♦ WARNING: No template found for worker type '${WORKER_TYPE}', using shared defaults only"
+    fi
 fi
 
 # Generate config from environment if no config exists
 if [ ! -f "$CONFIG_FILE" ]; then
     echo "♦♦  Generating openclaw.json from environment..."
-    cat > "$CONFIG_FILE" << CONFIGEOF
+
+    if [ -n "${LITELLM_URL:-}" ] && [ -n "${LITELLM_KEY:-}" ]; then
+        # LiteLLM proxy mode — containers never see real API keys
+        echo "♦ Using LiteLLM proxy at ${LITELLM_URL}"
+        cat > "$CONFIG_FILE" << CONFIGEOF
+{
+  "gateway": {
+    "port": ${OPENCLAW_GATEWAY_PORT:-18789},
+    "bind": "lan",
+    "auth": {
+      "mode": "token",
+      "token": "${GATEWAY_TOKEN}"
+    },
+    "controlUi": {
+      "enabled": true,
+      "allowInsecureAuth": true
+    }
+  },
+  "models": {
+    "providers": {
+      "openai": {
+        "apiKey": "${LITELLM_KEY}",
+        "baseUrl": "${LITELLM_URL}/v1",
+        "models": [
+          {"id": "gemini-2.0-flash", "name": "Gemini 2.0 Flash"},
+          {"id": "claude-sonnet-4", "name": "Claude Sonnet 4"}
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "workspace": "${OPENCLAW_HOME}/workspace"
+    }
+  },
+  "messages": {
+    "responsePrefix": "auto"
+  }
+}
+CONFIGEOF
+    else
+        # Direct API key mode (fallback — not recommended for production)
+        cat > "$CONFIG_FILE" << CONFIGEOF
 {
   "gateway": {
     "port": ${OPENCLAW_GATEWAY_PORT:-18789},
@@ -64,6 +116,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
   }
 }
 CONFIGEOF
+    fi
     echo "♦ Config generated"
 fi
 

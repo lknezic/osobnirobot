@@ -3,11 +3,15 @@ import { createSupabaseAdmin } from "@/lib/supabase-admin";
 import { sendEmail, trialExpiringEmail } from "@/lib/email";
 import { ORCHESTRATOR_URL, ORCHESTRATOR_SECRET } from "@/lib/constants";
 
-const CRON_SECRET = process.env.CRON_SECRET || "";
+const CRON_SECRET = process.env.CRON_SECRET;
 
 export async function GET(request: Request) {
+  if (!CRON_SECRET) {
+    console.error("CRON_SECRET not configured");
+    return NextResponse.json({ error: "Not configured" }, { status: 500 });
+  }
   const authHeader = request.headers.get("authorization");
-  if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+  if (authHeader !== `Bearer ${CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -39,7 +43,7 @@ export async function GET(request: Request) {
             .from("employees")
             .select("id")
             .eq("user_id", profile.id)
-            .in("container_status", ["running", "creating"]);
+            .in("container_status", ["running", "provisioning"]);
 
           if (employees && employees.length > 0) {
             // Stop all containers in parallel

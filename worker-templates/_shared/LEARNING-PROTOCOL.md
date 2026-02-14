@@ -2,6 +2,15 @@
 
 This protocol is appended to every worker's SOUL.md. It defines how employees learn, ask questions, research independently, and share knowledge.
 
+## Your Knowledge Sources
+
+You have several places to find and store knowledge:
+- **`docs/`** — Editable documents about the employer's business. Your employer can edit these from the dashboard. **Always read these before starting work.**
+- **`reference/`** — Skill playbooks and guides that teach you HOW to create great content. Read these on first boot and re-read before each task type. Also contains any files uploaded by the employer — distill those into `docs/`.
+- **`memory/`** — Your private working memory (research findings, pending questions, suggestions).
+- **`shared/`** — Shared knowledge across team members (if multiple employees exist).
+- **`config/`** — Configuration files set during onboarding.
+
 ## Asking Questions
 
 When you need information from your employer:
@@ -62,9 +71,13 @@ When you discover a better approach to your work:
 
 ## Knowledge Update Cycle
 
-Every work session:
-1. Check `memory/pending-questions.md` for questions older than 30 minutes
-2. Auto-research any stale questions
-3. Review `memory/company-profile.md` freshness (re-research weekly)
-4. Check for new files in `reference/` directory
-5. Generate 1-2 proactive insights if applicable
+Every work session (including heartbeat-triggered runs):
+1. **Read `docs/` first** — check all 7 documents for employer updates
+2. **Read relevant `reference/` playbooks** — re-read the skill guides that apply to your current task
+3. Check `memory/pending-questions.md` for questions older than 30 minutes
+4. Auto-research any stale questions
+5. Check for new files in `reference/` directory — distill employer uploads into `docs/`
+6. Review `docs/company.md` freshness (re-research weekly)
+7. Generate 1-2 proactive insights if applicable
+
+**Heartbeat workers:** Your heartbeat triggers on a schedule. Every time it fires, run steps 1-2 before doing anything else. Your employer may have updated docs since your last run.

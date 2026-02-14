@@ -112,9 +112,27 @@ systemctl restart caddy
 systemctl restart iw-orchestrator
 
 # ── 9. Build Docker image ──
-echo "[9] Building worker Docker image..."
+echo "[9/10] Building worker Docker image..."
 cd "$INSTALL_DIR"
 docker build -t instantworker/worker:latest -f app/docker/Dockerfile .
+
+# ── 10. LiteLLM proxy (optional but recommended) ──
+echo "[10/10] Setting up LiteLLM proxy..."
+
+# Pull LiteLLM image
+docker pull ghcr.io/berriai/litellm:main-latest 2>/dev/null || true
+
+# Create LiteLLM env file if missing
+if [ ! -f "$INSTALL_DIR/infra/litellm.env" ]; then
+    cp "$INSTALL_DIR/infra/litellm.env.example" "$INSTALL_DIR/infra/litellm.env"
+    chmod 600 "$INSTALL_DIR/infra/litellm.env"
+    echo "WARNING: Set your API keys in $INSTALL_DIR/infra/litellm.env"
+fi
+
+# Install LiteLLM systemd service
+cp "$INSTALL_DIR/infra/litellm.service" /etc/systemd/system/iw-litellm.service
+systemctl daemon-reload
+systemctl enable iw-litellm
 
 echo ""
 echo "=== Deploy complete ==="
@@ -122,13 +140,20 @@ echo ""
 echo "Remaining manual steps:"
 echo "  1. Set Cloudflare token:  nano /etc/caddy/env"
 echo "  2. Set orchestrator env:  nano $INSTALL_DIR/app/orchestrator/.env"
-echo "  3. Restart after config:  systemctl restart caddy iw-orchestrator"
-echo "  4. Set Vercel env vars:"
+echo "  3. Set LiteLLM keys:     nano $INSTALL_DIR/infra/litellm.env"
+echo "  4. Enable LiteLLM in orchestrator .env:"
+echo "     LITELLM_URL=http://172.17.0.1:4000"
+echo "     LITELLM_KEY=<same as LITELLM_MASTER_KEY in litellm.env>"
+echo "  5. Restart services:"
+echo "     systemctl restart iw-litellm iw-orchestrator caddy"
+echo "  6. Set Vercel env vars:"
 echo "     ORCHESTRATOR_URL=http://YOUR_SERVER_IP:3500"
 echo "     ORCHESTRATOR_SECRET=<same as in .env>"
 echo ""
 echo "Verify:"
-echo "  curl http://localhost:3500/health"
+echo "  curl http://localhost:3500/health        # orchestrator"
+echo "  curl http://localhost:4000/health         # litellm"
 echo "  systemctl status iw-orchestrator"
+echo "  systemctl status iw-litellm"
 echo "  systemctl status caddy"
 echo "  journalctl -u iw-orchestrator -f"

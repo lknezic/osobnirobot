@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import type { Employee, KnowledgeFile, EmployeeKnowledge } from '@/lib/types';
-import { listFiles, uploadFile, deleteFile, getKnowledge } from '@/lib/api/employees';
+import type { Employee, KnowledgeFile, EmployeeKnowledge, EmployeeDoc } from '@/lib/types';
+import { listFiles, uploadFile, deleteFile, getKnowledge, getDocs, updateDoc } from '@/lib/api/employees';
 import { FILE_UPLOAD_MAX_SIZE, FILE_UPLOAD_ALLOWED_TYPES } from '@/lib/constants';
 
 interface KnowledgeBaseProps {
@@ -11,8 +11,10 @@ interface KnowledgeBaseProps {
 
 export function KnowledgeBase({ employee }: KnowledgeBaseProps) {
   const [knowledge, setKnowledge] = useState<EmployeeKnowledge | null>(null);
+  const [docs, setDocs] = useState<EmployeeDoc[]>([]);
   const [files, setFiles] = useState<KnowledgeFile[]>([]);
   const [loadingKnowledge, setLoadingKnowledge] = useState(true);
+  const [loadingDocs, setLoadingDocs] = useState(true);
   const [loadingFiles, setLoadingFiles] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
@@ -29,6 +31,17 @@ export function KnowledgeBase({ employee }: KnowledgeBaseProps) {
     }
   }, [employee.id]);
 
+  const fetchDocs = useCallback(async () => {
+    try {
+      const data = await getDocs(employee.id);
+      setDocs(data);
+    } catch {
+      // Docs not available yet
+    } finally {
+      setLoadingDocs(false);
+    }
+  }, [employee.id]);
+
   const fetchFiles = useCallback(async () => {
     try {
       const data = await listFiles(employee.id);
@@ -42,8 +55,9 @@ export function KnowledgeBase({ employee }: KnowledgeBaseProps) {
 
   useEffect(() => {
     fetchKnowledge();
+    fetchDocs();
     fetchFiles();
-  }, [fetchKnowledge, fetchFiles]);
+  }, [fetchKnowledge, fetchDocs, fetchFiles]);
 
   const handleUpload = async (file: File) => {
     if (file.size > FILE_UPLOAD_MAX_SIZE) {
@@ -86,7 +100,28 @@ export function KnowledgeBase({ employee }: KnowledgeBaseProps) {
 
   return (
     <div className="space-y-4">
-      {/* What employee knows */}
+      {/* Your Documents — editable */}
+      <div className="p-5 rounded-[10px] border border-[var(--border)]" style={{ background: '#151515' }}>
+        <h2 className="text-sm font-semibold mb-1">Your Documents</h2>
+        <p className="text-xs text-[var(--muted)] mb-3">
+          Tell {employee.name} about your business. Edit these documents — {employee.name} reads them before every task.
+        </p>
+        {loadingDocs ? (
+          <p className="text-xs text-[var(--muted)]">Loading documents...</p>
+        ) : docs.length > 0 ? (
+          <div className="space-y-2">
+            {docs.map(doc => (
+              <DocCard key={doc.filename} doc={doc} employeeId={employee.id} />
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-[var(--muted)]">
+            Documents will be available once the container is running.
+          </p>
+        )}
+      </div>
+
+      {/* What employee knows — read-only */}
       <div className="p-5 rounded-[10px] border border-[var(--border)]" style={{ background: '#151515' }}>
         <h2 className="text-sm font-semibold mb-3">What {employee.name} knows</h2>
         {loadingKnowledge ? (
@@ -153,9 +188,8 @@ export function KnowledgeBase({ employee }: KnowledgeBaseProps) {
             {files.map(file => (
               <div key={file.name} className="flex items-center justify-between p-2.5 rounded border border-[var(--border)]" style={{ background: '#0a0a0a' }}>
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-xs">📄</span>
                   <span className="text-xs truncate">{file.name}</span>
-                  <span className="text-[10px] text-[var(--muted)]">{(file.size / 1024).toFixed(1)}KB</span>
+                  {file.size > 0 && <span className="text-[10px] text-[var(--muted)]">{(file.size / 1024).toFixed(1)}KB</span>}
                 </div>
                 <button
                   onClick={() => handleDelete(file.name)}
@@ -174,6 +208,91 @@ export function KnowledgeBase({ employee }: KnowledgeBaseProps) {
   );
 }
 
+function DocCard({ doc, employeeId }: { doc: EmployeeDoc; employeeId: string }) {
+  const [editing, setEditing] = useState(false);
+  const [content, setContent] = useState(doc.content);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const hasContent = doc.content.trim().length > 0;
+  // Check if the doc has been filled in (more than just the template headers)
+  const lines = doc.content.split('\n').filter(l => l.trim() && !l.startsWith('#') && !l.startsWith('<!--') && !l.startsWith('-') && !l.startsWith('**'));
+  const isFilled = lines.length > 2;
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await updateDoc(employeeId, doc.filename, content);
+      setSaved(true);
+      setEditing(false);
+      // Update local doc state
+      doc.content = content;
+      setTimeout(() => setSaved(false), 2000);
+    } catch {
+      // Error handled silently
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setContent(doc.content);
+    setEditing(false);
+  };
+
+  if (editing) {
+    return (
+      <div className="rounded border border-[var(--accent)] p-3" style={{ background: '#0a0a0a' }}>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-semibold">{doc.title}</span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleCancel}
+              className="text-xs text-[var(--muted)] hover:text-[var(--text)] px-2 py-1"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="text-xs bg-[var(--accent)] text-black px-3 py-1 rounded hover:opacity-90 disabled:opacity-50"
+            >
+              {saving ? 'Saving...' : 'Save'}
+            </button>
+          </div>
+        </div>
+        <textarea
+          value={content}
+          onChange={e => setContent(e.target.value)}
+          className="w-full bg-[#151515] border border-[var(--border)] rounded p-3 text-xs text-[var(--text)] leading-relaxed resize-y focus:outline-none focus:border-[var(--accent)]"
+          rows={12}
+          style={{ fontFamily: 'monospace', minHeight: '200px' }}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="flex items-center justify-between p-3 rounded border border-[var(--border)] cursor-pointer hover:border-[var(--accent)] transition-colors"
+      style={{ background: '#0a0a0a' }}
+      onClick={() => setEditing(true)}
+    >
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold">{doc.title}</span>
+          {saved && <span className="text-[10px] text-green-400">Saved</span>}
+          {!isFilled && hasContent && (
+            <span className="text-[10px] text-yellow-400/70">Not filled in</span>
+          )}
+        </div>
+        <p className="text-[11px] text-[var(--muted)] mt-0.5">{doc.description}</p>
+      </div>
+      <span className="text-xs text-[var(--muted)] shrink-0 ml-2">Edit</span>
+    </div>
+  );
+}
+
 function KnowledgeSection({ title, content }: { title: string; content: string }) {
   const [expanded, setExpanded] = useState(false);
   const preview = content.slice(0, 200);
@@ -182,7 +301,7 @@ function KnowledgeSection({ title, content }: { title: string; content: string }
   return (
     <div>
       <button onClick={() => setExpanded(!expanded)} className="text-xs font-semibold text-[var(--accent2)] mb-1 flex items-center gap-1">
-        <span className="transition-transform" style={{ transform: expanded ? 'rotate(90deg)' : 'none' }}>▸</span>
+        <span className="transition-transform" style={{ transform: expanded ? 'rotate(90deg)' : 'none' }}>&#9654;</span>
         {title}
       </button>
       <p className="text-xs text-[var(--dim)] leading-relaxed whitespace-pre-wrap">

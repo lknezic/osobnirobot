@@ -1,0 +1,44 @@
+# LiteLLM Proxy Config — InstantWorker
+# Docs: https://docs.litellm.ai/docs/proxy/configs
+#
+# Containers call LiteLLM instead of real APIs.
+# LiteLLM holds the real keys, applies rate limits and budgets.
+#
+# Run: docker run -d --name litellm \
+#        -v /opt/instantworker/infra/litellm_config.yaml:/app/config.yaml \
+#        -p 4000:4000 \
+#        ghcr.io/berriai/litellm:main-latest \
+#        --config /app/config.yaml
+
+model_list:
+  # Primary model — Gemini 2.0 Flash (fast, cheap)
+  - model_name: gemini-2.0-flash
+    litellm_params:
+      model: gemini/gemini-2.0-flash
+      api_key: os.environ/GOOGLE_AI_KEY
+
+  # Fallback model — Claude Sonnet 4
+  - model_name: claude-sonnet-4
+    litellm_params:
+      model: anthropic/claude-sonnet-4-20250514
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+litellm_settings:
+  # Master key for proxy auth (containers use this)
+  master_key: os.environ/LITELLM_MASTER_KEY
+
+  # Drop requests after 120s
+  request_timeout: 120
+
+  # Enable spend tracking
+  set_verbose: false
+
+  # Max budget per day (USD) — safety net
+  max_budget: 50.0
+
+  # Rate limits (requests per minute per key)
+  global_max_parallel_requests: 50
+
+general_settings:
+  # Health check endpoint
+  health_check: true

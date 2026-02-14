@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { Employee } from '@/lib/types';
-import { restartEmployee } from '@/lib/api/employees';
+import { restartEmployee, provisionEmployee } from '@/lib/api/employees';
 import { KnowledgeBase } from './KnowledgeBase';
 
 type Tab = 'chat' | 'browser' | 'settings';
@@ -11,17 +11,17 @@ interface EmployeeWorkspaceProps {
   employee: Employee;
   onBack: () => void;
   onCheckout: (planId: string) => void;
+  onRefresh?: () => void;
   planStatus?: string;
   trialEndsAt?: string;
   hasSubscription?: boolean;
 }
 
-export function EmployeeWorkspace({ employee, onBack, onCheckout, planStatus, trialEndsAt, hasSubscription }: EmployeeWorkspaceProps) {
+export function EmployeeWorkspace({ employee, onBack, onCheckout, onRefresh, planStatus, trialEndsAt, hasSubscription }: EmployeeWorkspaceProps) {
   const [tab, setTab] = useState<Tab>('chat');
   const [restarting, setRestarting] = useState(false);
-  const [showPaywall, setShowPaywall] = useState(false);
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [provisioning, setProvisioning] = useState(false);
+  const [provisionError, setProvisionError] = useState('');
 
   const HOST = process.env.NEXT_PUBLIC_CONTAINER_HOST || 'instantworker.ai';
   const isOnline = employee.container_status === 'running';
@@ -38,15 +38,6 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, planStatus, tr
     ? Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86400000))
     : 0;
 
-  // Chat tab paywall for trial users
-  useEffect(() => {
-    if (tab !== 'chat' || hasSubscription || planStatus !== 'trial') return;
-    const key = `iw_chat_views_${employee.id}`;
-    const views = parseInt(localStorage.getItem(key) || '0', 10) + 1;
-    localStorage.setItem(key, String(views));
-    if (views > 3) setShowPaywall(true);
-  }, [tab, hasSubscription, planStatus, employee.id]);
-
   const handleRestart = async () => {
     setRestarting(true);
     try {
@@ -58,17 +49,22 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, planStatus, tr
     }
   };
 
-  const handleCheckout = async (planId: string) => {
-    setCheckoutLoading(true);
-    setError('');
+  const handleProvision = async () => {
+    setProvisioning(true);
+    setProvisionError('');
     try {
-      onCheckout(planId);
-    } catch {
-      setError('Failed to start checkout');
+      await provisionEmployee(employee.id);
+      // Refresh dashboard data after successful provision
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      setProvisionError(err instanceof Error ? err.message : 'Provisioning failed');
     } finally {
-      setCheckoutLoading(false);
+      setProvisioning(false);
     }
   };
+
+  const needsProvision = employee.container_status === 'none' || employee.container_status === 'error';
+  const isProvisioning = employee.container_status === 'provisioning' || provisioning;
 
   const skillLabel = employee.worker_type === 'x-article-writer' ? 'X Article Writer' :
     employee.worker_type.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
@@ -129,55 +125,55 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, planStatus, tr
         {tab === 'chat' && (
           <div className="w-full h-full flex flex-col">
             {chatUrl ? (
-              <>
-                <iframe
-                  src={chatUrl}
-                  className="flex-1 w-full border-none"
+              <iframe
+                src={chatUrl}
+                className="flex-1 w-full border-none"
+                style={{ background: '#111' }}
+                allow="microphone; camera; clipboard-write; clipboard-read"
+                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-downloads"
+              />
+            ) : needsProvision ? (
+              <div className="flex flex-col items-center justify-center h-full text-center px-6 gap-4">
+                <div className="text-4xl">{employee.container_status === 'error' ? '⚠️' : '🔌'}</div>
+                <div>
+                  <h2 className="text-base font-semibold mb-1">
+                    {employee.container_status === 'error' ? 'Container failed to start' : 'Container not provisioned'}
+                  </h2>
+                  <p className="text-sm text-[var(--muted)]">
+                    {employee.container_status === 'error'
+                      ? 'The last provisioning attempt failed. Try again.'
+                      : `${employee.name} needs a container to start working.`}
+                  </p>
+                </div>
+                <button
+                  onClick={handleProvision}
+                  disabled={provisioning}
+                  className="px-6 py-2.5 rounded-lg font-semibold text-sm text-white"
                   style={{
-                    background: '#111',
-                    ...(showPaywall ? { filter: 'blur(6px)', pointerEvents: 'none' as const } : {}),
+                    background: provisioning ? '#333' : 'linear-gradient(135deg, #7c6bf0, #9b7bf7)',
+                    opacity: provisioning ? 0.6 : 1,
+                    cursor: provisioning ? 'wait' : 'pointer',
                   }}
-                  allow="microphone; camera; clipboard-write; clipboard-read"
-                  sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-downloads"
-                />
-                {showPaywall && (
-                  <div className="absolute inset-0 flex items-center justify-center z-50" style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)' }}>
-                    <div className="text-center p-8 rounded-2xl border border-[var(--border)] max-w-[420px] w-[90%]" style={{ background: '#111' }}>
-                      <div className="text-[40px] mb-3">🔒</div>
-                      <h2 className="text-xl font-bold mb-2">Enjoying {employee.name}?</h2>
-                      <p className="text-sm text-[var(--dim)] mb-6">Subscribe to keep chatting and let your team work 24/7.</p>
-                      <div className="flex flex-col gap-2.5 w-full max-w-[320px] mx-auto">
-                        {[
-                          { id: 'junior', title: 'Junior', price: '$99/mo', desc: '1 employee' },
-                          { id: 'medior', title: 'Medior', price: '$399/mo', desc: '5 employees' },
-                          { id: 'expert', title: 'Expert', price: '$499/mo', desc: '10 employees' },
-                        ].map(p => (
-                          <button
-                            key={p.id}
-                            onClick={() => handleCheckout(p.id)}
-                            disabled={checkoutLoading}
-                            className="flex justify-between items-center p-3.5 rounded-[10px] text-sm font-semibold text-white"
-                            style={{
-                              background: p.id === 'junior' ? 'linear-gradient(135deg, #7c6bf0, #9b7bf7)' : '#1a1a1a',
-                              border: p.id === 'junior' ? 'none' : '1px solid #333',
-                              opacity: checkoutLoading ? 0.6 : 1,
-                              cursor: checkoutLoading ? 'wait' : 'pointer',
-                            }}
-                          >
-                            <span>{p.title} - {p.desc}</span>
-                            <span className="font-bold">{p.price}</span>
-                          </button>
-                        ))}
-                      </div>
-                      {error && <p className="text-red-400 text-sm mt-3">{error}</p>}
-                      <p className="text-xs text-[var(--muted)] mt-4">7-day free trial · Cancel anytime</p>
-                    </div>
-                  </div>
-                )}
-              </>
+                >
+                  {provisioning ? 'Provisioning...' : 'Start container'}
+                </button>
+                {provisionError && <p className="text-red-400 text-sm">{provisionError}</p>}
+              </div>
+            ) : isProvisioning ? (
+              <div className="flex flex-col items-center justify-center h-full text-center gap-3 px-6">
+                <div className="w-8 h-8 border-3 border-[#333] border-t-[#3b82f6] rounded-full animate-spin" />
+                <p className="text-sm text-[var(--muted)]">Setting up {employee.name}&apos;s workspace...</p>
+                <p className="text-xs text-[var(--muted)] max-w-[320px]">
+                  {employee.name} will introduce themselves and share what they learned about your business once ready.
+                </p>
+              </div>
             ) : (
-              <div className="flex items-center justify-center h-full text-[var(--muted)] text-sm">
-                Connecting to {employee.name}...
+              <div className="flex flex-col items-center justify-center h-full text-center gap-3 px-6">
+                <div className="w-8 h-8 border-3 border-[#333] border-t-[#3b82f6] rounded-full animate-spin" />
+                <p className="text-sm text-[var(--muted)]">Connecting to {employee.name}...</p>
+                <p className="text-xs text-[var(--muted)] max-w-[320px]">
+                  Once connected, {employee.name} will introduce themselves and start researching your business.
+                </p>
               </div>
             )}
           </div>
@@ -198,9 +194,40 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, planStatus, tr
                   sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
                 />
               </>
+            ) : needsProvision ? (
+              <div className="flex flex-col items-center justify-center h-full text-center px-6 gap-4">
+                <div className="text-4xl">🖥️</div>
+                <div>
+                  <h2 className="text-base font-semibold mb-1">Browser not available yet</h2>
+                  <p className="text-sm text-[var(--muted)]">
+                    {employee.name} needs a running container to use the browser. Start their container first.
+                  </p>
+                </div>
+                <button
+                  onClick={handleProvision}
+                  disabled={provisioning}
+                  className="px-6 py-2.5 rounded-lg font-semibold text-sm text-white"
+                  style={{
+                    background: provisioning ? '#333' : 'linear-gradient(135deg, #7c6bf0, #9b7bf7)',
+                    opacity: provisioning ? 0.6 : 1,
+                    cursor: provisioning ? 'wait' : 'pointer',
+                  }}
+                >
+                  {provisioning ? 'Provisioning...' : 'Start container'}
+                </button>
+                {provisionError && <p className="text-red-400 text-sm">{provisionError}</p>}
+              </div>
+            ) : isProvisioning ? (
+              <div className="flex flex-col items-center justify-center h-full text-center gap-3">
+                <div className="w-8 h-8 border-3 border-[#333] border-t-[#3b82f6] rounded-full animate-spin" />
+                <p className="text-sm text-[var(--muted)]">Setting up {employee.name}&apos;s browser...</p>
+              </div>
             ) : (
-              <div className="flex items-center justify-center h-full text-[var(--muted)] text-sm">
-                Browser not available
+              <div className="flex flex-col items-center justify-center h-full text-center px-6 gap-3">
+                <div className="text-4xl">🖥️</div>
+                <p className="text-sm text-[var(--muted)]">
+                  Waiting for {employee.name}&apos;s browser to come online...
+                </p>
               </div>
             )}
           </div>
@@ -220,7 +247,13 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, planStatus, tr
               </div>
               <div className="flex justify-between py-2 text-sm">
                 <span className="text-[var(--muted)]">Status</span>
-                <span>{isOnline ? '🟢 Online' : '🔴 Offline'}</span>
+                <span>
+                  {isOnline ? '🟢 Online' :
+                   isProvisioning ? '🟡 Provisioning...' :
+                   employee.container_status === 'error' ? '🔴 Error' :
+                   employee.container_status === 'none' ? '⚪ Not provisioned' :
+                   '🔴 Offline'}
+                </span>
               </div>
             </div>
 
@@ -228,15 +261,38 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, planStatus, tr
 
             <div className="p-5 rounded-[10px] border border-[var(--border)]" style={{ background: '#151515' }}>
               <h2 className="text-sm font-semibold mb-3">Management</h2>
-              <button
-                onClick={handleRestart}
-                disabled={restarting}
-                className="px-4 py-2.5 rounded-lg text-sm border border-[var(--border)] text-white"
-                style={{ background: '#1a1a1a', opacity: restarting ? 0.5 : 1, cursor: restarting ? 'wait' : 'pointer' }}
-              >
-                {restarting ? 'Restarting...' : '🔄 Restart employee'}
-              </button>
-              <p className="text-xs text-[var(--muted)] mt-2">Restart will temporarily interrupt the conversation (~30 seconds).</p>
+              <div className="flex flex-col gap-2">
+                {needsProvision && (
+                  <>
+                    <button
+                      onClick={handleProvision}
+                      disabled={provisioning}
+                      className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white"
+                      style={{
+                        background: provisioning ? '#333' : 'linear-gradient(135deg, #7c6bf0, #9b7bf7)',
+                        opacity: provisioning ? 0.6 : 1,
+                        cursor: provisioning ? 'wait' : 'pointer',
+                      }}
+                    >
+                      {provisioning ? 'Provisioning...' : '🚀 Start container'}
+                    </button>
+                    {provisionError && <p className="text-xs text-red-400">{provisionError}</p>}
+                  </>
+                )}
+                <button
+                  onClick={handleRestart}
+                  disabled={restarting || needsProvision}
+                  className="px-4 py-2.5 rounded-lg text-sm border border-[var(--border)] text-white"
+                  style={{ background: '#1a1a1a', opacity: (restarting || needsProvision) ? 0.5 : 1, cursor: (restarting || needsProvision) ? 'not-allowed' : 'pointer' }}
+                >
+                  {restarting ? 'Restarting...' : '🔄 Restart employee'}
+                </button>
+              </div>
+              <p className="text-xs text-[var(--muted)] mt-2">
+                {needsProvision
+                  ? 'Container needs to be started before use.'
+                  : 'Restart will temporarily interrupt the conversation (~30 seconds).'}
+              </p>
             </div>
           </div>
         )}
