@@ -18,13 +18,13 @@ interface StatusBannerProps {
   containerStatus: string;
 }
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; pulse?: boolean }> = {
+const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; hint?: string }> = {
   'healthy': { label: 'Working', color: '#4ade80', bg: '#052e16' },
   'needs-attention': { label: 'Needs attention', color: '#fb923c', bg: '#431407' },
-  'unhealthy': { label: 'May be stuck', color: '#facc15', bg: '#422006' },
+  'unhealthy': { label: 'May be stuck', color: '#facc15', bg: '#422006', hint: 'Gateway not responding. Try restarting.' },
   'offline': { label: 'Offline', color: '#ef4444', bg: '#450a0a' },
   'not-found': { label: 'Not provisioned', color: '#888', bg: '#1a1a1a' },
-  'unknown': { label: 'Checking...', color: '#888', bg: '#1a1a1a' },
+  'unknown': { label: 'Starting up...', color: '#93c5fd', bg: '#0c1929', hint: 'Gateway is loading. This may take a minute.' },
 };
 
 export function StatusBanner({ employeeId, employeeName, containerStatus }: StatusBannerProps) {
@@ -71,13 +71,15 @@ export function StatusBanner({ employeeId, employeeName, containerStatus }: Stat
         {detail.hasQuestions && (
           <span>— {employeeName} has questions for you. Check the chat.</span>
         )}
-        {detail.status === 'unhealthy' && (
-          <span>— Gateway not responding. Try restarting.</span>
+        {config.hint && !detail.hasQuestions && (
+          <span>— {config.hint}</span>
         )}
       </div>
-      <span style={{ color: '#666' }}>
-        Uptime: {uptimeLabel}
-      </span>
+      {detail.uptimeHours > 0 && (
+        <span style={{ color: '#666' }}>
+          Uptime: {uptimeLabel}
+        </span>
+      )}
     </div>
   );
 }
