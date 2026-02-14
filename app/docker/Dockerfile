@@ -44,7 +44,9 @@ RUN chmod +x /entrypoint.sh
 
 # Custom UI overrides — inject InstantWorker branding into OpenClaw control UI
 COPY app/docker/custom-ui.css /app/dist/control-ui/assets/custom-ui.css
+COPY app/docker/iw-customize.js /app/dist/control-ui/assets/iw-customize.js
 RUN sed -i 's|</head>|<link rel="stylesheet" href="./assets/custom-ui.css"></head>|' /app/dist/control-ui/index.html \
+    && sed -i 's|</head>|<script src="./assets/iw-customize.js" defer></script></head>|' /app/dist/control-ui/index.html \
     && sed -i 's|<title>OpenClaw Control</title>|<title>InstantWorker</title>|' /app/dist/control-ui/index.html
 
 # Set display for Chrome

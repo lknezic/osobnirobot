@@ -126,12 +126,12 @@ if [ -n "$ASSISTANT_NAME" ] && [ -f /app/dist/control-ui/index.html ]; then
     sed -i "s|__OPENCLAW_ASSISTANT_AVATAR__=\"A\"|__OPENCLAW_ASSISTANT_AVATAR__=\"${ASSISTANT_NAME:0:1}\"|" /app/dist/control-ui/index.html
 fi
 
-# Inject inline CSS as backup (in case the external CSS link wasn't injected at build)
+# Inject CSS + JS as backup (in case not injected at build time)
 if [ -f /app/dist/control-ui/index.html ]; then
     grep -q "custom-ui.css" /app/dist/control-ui/index.html || \
     sed -i 's|</head>|<link rel="stylesheet" href="./assets/custom-ui.css"></head>|' /app/dist/control-ui/index.html
-    # Also inject a minimal inline style as nuclear fallback
-    sed -i 's|</head>|<style>aside[class*="nav"]{display:none!important;width:0!important}[class*="shell"]{grid-template-columns:0px 1fr!important}[class*="brand"]{display:none!important}[class*="nav-collapse"]{display:none!important}main[class*="content"]{grid-column:1/-1!important}</style></head>|' /app/dist/control-ui/index.html
+    grep -q "iw-customize.js" /app/dist/control-ui/index.html || \
+    sed -i 's|</head>|<script src="./assets/iw-customize.js" defer></script></head>|' /app/dist/control-ui/index.html
 fi
 
 # Fix any config issues
