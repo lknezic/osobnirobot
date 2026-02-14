@@ -40,7 +40,10 @@ if [ ! -f "$CONFIG_FILE" ]; then
     if [ -n "${LITELLM_URL:-}" ] && [ -n "${LITELLM_KEY:-}" ]; then
         # LiteLLM proxy mode — containers never see real API keys
         echo "♦ Using LiteLLM proxy at ${LITELLM_URL}"
-        cat > "$CONFIG_FILE" << CONFIGEOF
+        # Sanitize ASSISTANT_NAME for JSON (escape quotes and backslashes)
+    SAFE_NAME=$(echo "${ASSISTANT_NAME:-Assistant}" | sed 's/\\/\\\\/g; s/"/\\"/g')
+
+    cat > "$CONFIG_FILE" << CONFIGEOF
 {
   "gateway": {
     "port": ${OPENCLAW_GATEWAY_PORT:-18789},
@@ -53,6 +56,9 @@ if [ ! -f "$CONFIG_FILE" ]; then
       "enabled": true,
       "allowInsecureAuth": true
     }
+  },
+  "identity": {
+    "name": "${SAFE_NAME}"
   },
   "models": {
     "providers": {
@@ -78,6 +84,8 @@ if [ ! -f "$CONFIG_FILE" ]; then
 CONFIGEOF
     else
         # Direct API key mode (fallback — not recommended for production)
+        SAFE_NAME=$(echo "${ASSISTANT_NAME:-Assistant}" | sed 's/\\/\\\\/g; s/"/\\"/g')
+
         cat > "$CONFIG_FILE" << CONFIGEOF
 {
   "gateway": {
@@ -91,6 +99,9 @@ CONFIGEOF
       "enabled": true,
       "allowInsecureAuth": true
     }
+  },
+  "identity": {
+    "name": "${SAFE_NAME}"
   },
   "models": {
     "providers": {
@@ -120,11 +131,8 @@ CONFIGEOF
     echo "♦ Config generated"
 fi
 
-# Customize UI with worker name
-if [ -n "$ASSISTANT_NAME" ] && [ -f /app/dist/control-ui/index.html ]; then
-    sed -i "s|__OPENCLAW_ASSISTANT_NAME__=\"Assistant\"|__OPENCLAW_ASSISTANT_NAME__=\"${ASSISTANT_NAME}\"|" /app/dist/control-ui/index.html
-    sed -i "s|__OPENCLAW_ASSISTANT_AVATAR__=\"A\"|__OPENCLAW_ASSISTANT_AVATAR__=\"${ASSISTANT_NAME:0:1}\"|" /app/dist/control-ui/index.html
-fi
+# Note: Worker name is set via identity.name in openclaw.json (generated above).
+# The OpenClaw control UI reads the name from the gateway config automatically.
 
 # Inject CSS + JS as backup (in case not injected at build time)
 if [ -f /app/dist/control-ui/index.html ]; then
