@@ -42,14 +42,58 @@ aside[class*="nav"],
   display: none !important;
 }
 
-/* === Hide nav toggle button === */
+/* === Sidebar collapse support === */
+/* Toggle button styling */
 .nav-collapse-toggle,
 [class*="nav-collapse"],
 [class*="NavCollapse"],
 [class*="sidebar-toggle"],
 [class*="SidebarToggle"],
 [class*="menu-toggle"] {
-  display: none !important;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+.nav-collapse-toggle:hover,
+[class*="nav-collapse"]:hover,
+[class*="NavCollapse"]:hover,
+[class*="sidebar-toggle"]:hover,
+[class*="SidebarToggle"]:hover,
+[class*="menu-toggle"]:hover {
+  opacity: 1;
+}
+
+/* Collapsed sidebar state (toggled by JS) */
+body.iw-sidebar-collapsed aside.nav,
+body.iw-sidebar-collapsed aside[class*="nav"],
+body.iw-sidebar-collapsed [class*="sidebar"],
+body.iw-sidebar-collapsed [class*="Sidebar"] {
+  width: 48px !important;
+  min-width: 48px !important;
+  max-width: 48px !important;
+  overflow: hidden;
+}
+body.iw-sidebar-collapsed .shell,
+body.iw-sidebar-collapsed [class*="shell"],
+body.iw-sidebar-collapsed [class*="Shell"],
+body.iw-sidebar-collapsed [class*="layout"],
+body.iw-sidebar-collapsed [class*="Layout"] {
+  grid-template-columns: 48px 1fr !important;
+}
+
+/* Smooth transition */
+aside.nav,
+aside[class*="nav"],
+[class*="sidebar"],
+[class*="Sidebar"] {
+  transition: width 0.2s ease, min-width 0.2s ease, max-width 0.2s ease;
+}
+.shell,
+[class*="shell"],
+[class*="Shell"],
+[class*="layout"],
+[class*="Layout"] {
+  transition: grid-template-columns 0.2s ease;
 }
 
 /* === Hide external links group === */

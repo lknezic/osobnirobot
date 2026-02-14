@@ -139,8 +139,8 @@
 
 | Phase | Step | Item | Status | Depends on |
 |-------|------|------|--------|------------|
-| D1 | 1 | Rename heartbeat → "Work Log" (JS injection in container) | NOT STARTED | — |
-| D1 | 2 | OpenClaw sidebar: selective show/hide/rename/describe | NOT STARTED | Step 1 (same script) |
+| D1 | 1 | Rename heartbeat → "Work Log" (JS injection in container) | DONE | — |
+| D1 | 2 | OpenClaw sidebar: selective show/hide/rename/describe + collapsible | DONE | Step 1 (same script) |
 | D1 | 3 | Admin dashboard — Overview (clients, revenue, costs, profitability, health alerts, AI recs) | DONE | — |
 | D1 | 3b | Admin hub — Sidebar nav + layout | DONE | Step 3 |
 | D1 | 3c | Admin hub — My Workers page (free provisioning, manage own workers) | DONE | Step 3 |

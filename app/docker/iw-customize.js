@@ -111,18 +111,62 @@
     });
   }
 
+  // Sidebar collapse toggle
+  function setupCollapseToggle() {
+    if (document.querySelector('[data-iw-collapse-bound]')) return;
+
+    var toggleSelectors = [
+      '.nav-collapse-toggle',
+      '[class*="nav-collapse"]',
+      '[class*="NavCollapse"]',
+      '[class*="sidebar-toggle"]',
+      '[class*="SidebarToggle"]',
+      '[class*="menu-toggle"]',
+    ];
+
+    for (var i = 0; i < toggleSelectors.length; i++) {
+      var toggle = document.querySelector(toggleSelectors[i]);
+      if (toggle) {
+        toggle.setAttribute('data-iw-collapse-bound', 'true');
+        toggle.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          document.body.classList.toggle('iw-sidebar-collapsed');
+          // Persist preference
+          try {
+            localStorage.setItem('iw-sidebar-collapsed',
+              document.body.classList.contains('iw-sidebar-collapsed') ? '1' : '0');
+          } catch (_) {}
+        });
+        break;
+      }
+    }
+
+    // Restore persisted state
+    try {
+      if (localStorage.getItem('iw-sidebar-collapsed') === '1') {
+        document.body.classList.add('iw-sidebar-collapsed');
+      }
+    } catch (_) {}
+  }
+
+  function customize() {
+    processNavItems();
+    setupCollapseToggle();
+  }
+
   // Run on DOM ready
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', processNavItems);
+    document.addEventListener('DOMContentLoaded', customize);
   } else {
-    processNavItems();
+    customize();
   }
 
   // MutationObserver for SPA re-renders
   var debounceTimer = null;
   var observer = new MutationObserver(function () {
     if (debounceTimer) clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(processNavItems, 200);
+    debounceTimer = setTimeout(customize, 200);
   });
 
   // Start observing once body is available
