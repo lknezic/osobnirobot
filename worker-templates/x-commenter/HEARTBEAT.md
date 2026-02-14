@@ -21,6 +21,14 @@ If >= 8, reply HEARTBEAT_OK and wait for the next heartbeat.
 Between 00:00-06:00 UTC, reply HEARTBEAT_OK (your audience is likely asleep).
 Adjust if the employer specifies a different timezone in config/rules.md.
 
+## Weekly Review (Monday morning heartbeat)
+- Review last week's engagement data from memory files
+- Note top 3 most-replied-to comments and what made them effective
+- Identify which target accounts yielded the best engagement
+- Adjust approach: double down on what works, drop what doesn't
+- Save review to `memory/weekly-review-YYYY-WW.md`
+- Report summary to employer
+
 ## If Not Logged Into X
 If the browser is not logged into X, or bird returns auth errors:
 - Send a message to your employer: "I need to be logged into X to work. Please open the Browser tab and log into x.com."

@@ -1,7 +1,7 @@
 # InstantWorker — Security & Architecture Handoff
 
 > For any Claude session working on this project. Read fully before touching Docker, orchestrator, or security code.
-> Last updated: 2026-02-12
+> Last updated: 2026-02-14
 
 ---
 
@@ -17,15 +17,16 @@ Dashboard iframes: https://{port}.gw.instantworker.ai  /  https://{port}.vnc.ins
 
 ### What's deployed and working:
 - **Vercel frontend** — Next.js 14 on `instantworker.ai`, auto-deploys from GitHub
-- **Supabase** — Auth (magic link + Google OAuth) + profiles DB, migration v6 applied
-- **Stripe** — 3 plans (Simple $99, Expert $399, Legend $499) with 7-day trials, webhook handler complete
+- **Supabase** — Auth (magic link + Google OAuth) + profiles DB, migration v7 applied (employees table)
+- **Stripe** — $199/worker/month pricing with 7-day trials, webhook handler complete
 - **Caddy reverse proxy** — Wildcard TLS for `*.gw.instantworker.ai` and `*.vnc.instantworker.ai`, strips X-Frame-Options for iframe embedding
 - **Orchestrator** — Express on Hetzner port 3500 via pm2, proxied at `api.instantworker.ai`
 - **Docker image** — `instantworker/worker:latest` built on Hetzner, based on `alpine/openclaw:latest` + Xvfb/x11vnc/noVNC/Chromium
 - **Custom branding** — CSS injected into OpenClaw control UI (hides sidebar, brand, navigation; purple accent colors; "Powered by OpenClaw" badge)
-- **Worker templates** — 15 skill templates in `worker-templates/` with SOUL.md/HEARTBEAT.md/config/
+- **Worker templates** — 4 X/Twitter skill templates in `worker-templates/` with SOUL.md/HEARTBEAT.md/config/
 - **Trial expiry cron** — Vercel cron job (`/api/cron/check-trials`) runs every 6 hours, stops expired containers, sends warning emails 2 days before expiry via Resend
 - **Email system** — Welcome, trial expiring, and payment failed templates via Resend API
+- **Admin hub** — `/admin` with overview dashboard, health monitor, My Workers page. Sidebar nav. Admin subdomain rewriting in middleware (admin.instantworker.ai → /admin/*). Admin accounts get free provisioning (plan_status='active', max_employees=99, skip billing checks). DNS CNAME not yet configured.
 
 ### What's NOT done yet (security hardening):
 - No LiteLLM proxy — raw API keys injected directly into containers
@@ -47,7 +48,15 @@ Dashboard iframes: https://{port}.gw.instantworker.ai  /  https://{port}.vnc.ins
 - `app/api/stripe/webhook/route.ts` — Handles checkout.session.completed, subscription.updated/deleted, invoice.payment_failed
 - `app/api/cron/check-trials/route.ts` — Stops expired trial containers, sends warning emails
 - `lib/email.ts` — Email templates via Resend
-- `middleware.ts` — Auth protection, session refresh on every request
+- `middleware.ts` — Auth protection, session refresh, admin subdomain rewriting
+- `app/admin/layout.tsx` — Admin layout with sidebar, isAdmin() gate
+- `app/admin/page.tsx` — Overview dashboard (stats, clients, AI recommendations)
+- `app/admin/health/page.tsx` — Container health monitor
+- `app/admin/workers/page.tsx` — Admin's own worker management (free)
+- `app/admin/components/AdminNav.tsx` — Sidebar navigation
+- `app/api/admin/overview/route.ts` — Aggregated admin stats
+- `app/api/admin/health/route.ts` — Orchestrator health proxy
+- `lib/admin-auth.ts` — Email whitelist (contact@lukaknezic.com)
 
 ---
 
