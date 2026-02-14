@@ -34,6 +34,17 @@ export async function middleware(request: NextRequest) {
 
   // admin.instantworker.ai subdomain → rewrite to /admin routes
   if (isAdminSubdomain) {
+    // Allow API and internal paths through
+    if (path.startsWith('/_next') || path.startsWith('/api')) {
+      return response;
+    }
+    // Auth paths: allow through, but redirect logged-in users away from login page
+    if (path.startsWith('/auth')) {
+      if (path === '/auth/login' && user) {
+        return NextResponse.redirect(new URL('/', request.url));
+      }
+      return response;
+    }
     if (!user) {
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
@@ -59,12 +70,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
-  // Already logged in visiting login page
+  // Already logged in visiting login page → redirect to dashboard
   if (path === "/auth/login" && user) {
-    // Admin subdomain → redirect to admin, not dashboard
-    if (host.startsWith('admin.')) {
-      return NextResponse.redirect(new URL("/admin", request.url));
-    }
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
