@@ -82,8 +82,8 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, onFire, onRefr
     }
   };
 
-  const needsProvision = employee.container_status === 'none' || employee.container_status === 'error';
   const isProvisioning = employee.container_status === 'provisioning' || provisioning;
+  const needsProvision = !isOnline && !isProvisioning;
 
   const skillLabel = employee.worker_type === 'x-article-writer' ? 'X Article Writer' :
     employee.worker_type.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
@@ -166,15 +166,19 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, onFire, onRefr
               />
             ) : needsProvision ? (
               <div className="flex flex-col items-center justify-center h-full text-center px-6 gap-4">
-                <div className="text-4xl">{employee.container_status === 'error' ? '⚠️' : '🔌'}</div>
+                <div className="text-4xl">{employee.container_status === 'error' ? '⚠️' : employee.container_status === 'stopped' ? '⏸️' : '🔌'}</div>
                 <div>
                   <h2 className="text-base font-semibold mb-1">
-                    {employee.container_status === 'error' ? 'Container failed to start' : 'Container not provisioned'}
+                    {employee.container_status === 'error' ? 'Container failed to start'
+                      : employee.container_status === 'stopped' ? 'Container stopped'
+                      : 'Container not provisioned'}
                   </h2>
                   <p className="text-sm text-[var(--muted)]">
                     {employee.container_status === 'error'
                       ? 'The last provisioning attempt failed. Try again.'
-                      : `${employee.name} needs a container to start working.`}
+                      : employee.container_status === 'stopped'
+                        ? `${employee.name}'s container has stopped. Start it again to resume.`
+                        : `${employee.name} needs a container to start working.`}
                   </p>
                 </div>
                 <button
