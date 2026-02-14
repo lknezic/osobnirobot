@@ -36,6 +36,16 @@ export async function GET(_request: Request, { params }: RouteParams) {
     }
 
     const data = await res.json();
+
+    // Self-heal: if orchestrator says container is gone but DB says running, fix the DB
+    if (data.status === 'not-found' && employee.container_status === 'running') {
+      await supabase
+        .from('employees')
+        .update({ container_status: 'stopped' })
+        .eq('id', employee.id);
+      data.dbCorrected = true;
+    }
+
     return NextResponse.json(data);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';
