@@ -57,9 +57,6 @@ if [ ! -f "$CONFIG_FILE" ]; then
       "allowInsecureAuth": true
     }
   },
-  "identity": {
-    "name": "${SAFE_NAME}"
-  },
   "models": {
     "providers": {
       "openai": {
@@ -75,7 +72,13 @@ if [ ! -f "$CONFIG_FILE" ]; then
   "agents": {
     "defaults": {
       "workspace": "${OPENCLAW_HOME}/workspace"
-    }
+    },
+    "list": [
+      {
+        "id": "main",
+        "identity": { "name": "${SAFE_NAME}" }
+      }
+    ]
   },
   "messages": {
     "responsePrefix": "auto"
@@ -100,9 +103,6 @@ CONFIGEOF
       "allowInsecureAuth": true
     }
   },
-  "identity": {
-    "name": "${SAFE_NAME}"
-  },
   "models": {
     "providers": {
       "google": {
@@ -120,7 +120,13 @@ CONFIGEOF
   "agents": {
     "defaults": {
       "workspace": "${OPENCLAW_HOME}/workspace"
-    }
+    },
+    "list": [
+      {
+        "id": "main",
+        "identity": { "name": "${SAFE_NAME}" }
+      }
+    ]
   },
   "messages": {
     "responsePrefix": "auto"
@@ -131,8 +137,8 @@ CONFIGEOF
     echo "♦ Config generated"
 fi
 
-# Note: Worker name is set via identity.name in openclaw.json (generated above).
-# The OpenClaw control UI reads the name from the gateway config automatically.
+# Note: Worker name is set via agents.list[].identity.name in openclaw.json.
+# The OpenClaw control UI reads the name from the agent config automatically.
 
 # Inject CSS + JS as backup (in case not injected at build time)
 if [ -f /app/dist/control-ui/index.html ]; then
