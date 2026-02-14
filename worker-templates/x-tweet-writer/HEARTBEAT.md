@@ -27,9 +27,16 @@ Don't post all tweets in one burst. The heartbeat triggers every 2 hours — pos
 Before posting, count today's tweets from memory file.
 If >= 8 tweets today, reply HEARTBEAT_OK and wait for tomorrow.
 
-## Quiet Hours
-Between 00:00-06:00 UTC, reply HEARTBEAT_OK.
-Adjust if the employer specifies a different timezone in config/rules.md.
+## Quiet Hours (Timezone-Aware)
+Default: 00:00-06:00 UTC. But **always check `docs/goals.md` first** for the employer's timezone.
+
+If the employer set a timezone (e.g., "America/New_York", "Europe/Berlin"):
+- Convert quiet hours to their timezone: sleep when THEIR audience sleeps (typically 11 PM - 5 AM local)
+- Align posting windows to their local time (morning, midday, evening)
+- If no timezone set, use UTC default
+
+## Model Routing
+Follow `AGENTS.md` for which AI model to use per task. Use `fast` for reading/research, `quality` for writing tweets.
 
 ## Weekly Review (Monday morning heartbeat)
 - Review last week's engagement data from memory files

@@ -17,9 +17,18 @@
 Before commenting, count how many comments you've posted in the last hour (from memory file).
 If >= 8, reply HEARTBEAT_OK and wait for the next heartbeat.
 
-## Quiet Hours
-Between 00:00-06:00 UTC, reply HEARTBEAT_OK (your audience is likely asleep).
-Adjust if the employer specifies a different timezone in config/rules.md.
+## Quiet Hours (Timezone-Aware)
+Default: 00:00-06:00 UTC. But **always check `docs/goals.md` first** for the employer's timezone.
+
+If the employer set a timezone (e.g., "America/New_York", "Europe/Berlin"):
+- Convert quiet hours to their timezone: sleep when THEIR audience sleeps (typically 11 PM - 5 AM local)
+- Increase heartbeat activity during THEIR peak hours (8-10 AM, 12-2 PM, 5-7 PM local)
+- If no timezone set, use UTC default
+
+**Peak engagement windows:** Comment more aggressively during the employer's audience peak hours. During off-peak, focus on reading/research instead of posting.
+
+## Model Routing
+Follow `AGENTS.md` for which AI model to use per task. Use `fast` for reading tweets, `quality` for writing comments.
 
 ## Weekly Review (Monday morning heartbeat)
 - Review last week's engagement data from memory files

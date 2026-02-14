@@ -151,17 +151,17 @@
 | D2 | 7 | Daily summary — team dashboard overview + per-employee Summary tab + searchable knowledge | DONE | Orchestrator /summary endpoint |
 | D2 | 8 | Performance metrics bar above chat iframe (4-stat-card pattern) | DONE (component) | Step 7 (reuses summary API) |
 | D2 | 9 | Content Pipeline / Approval Queue (kanban: Draft→Pending→Approved→Posted→Rejected) | DONE | Orchestrator /content endpoint |
-| D3 | 10 | Telegram integration (connect flow, login link via Telegram, channel health cards) | NOT STARTED | Telegram bot created |
+| D3 | 10 | Telegram integration (connect flow, login link via Telegram, channel health cards) | DONE (code) | Telegram bot created |
 | D3 | 11 | Slack integration (OAuth flow, channel health cards) | NOT STARTED | Slack app created |
 | D3 | 12 | Admin dashboard — Client Detail (per-client drill-down, usage, actions) | DONE | Step 3 |
-| D4 | 13 | LiteLLM multi-model routing (auto-switch cheap models for low-level tasks) | NOT STARTED | LiteLLM deployed (already on :4000) |
-| D4 | 14 | Token usage + model inventory dashboard (admin: per-client USD spend, model table, budget viz) | NOT STARTED | Step 13 |
+| D4 | 13 | LiteLLM multi-model routing (auto-switch cheap models for low-level tasks) | DONE (config) | LiteLLM deployed (already on :4000) |
+| D4 | 14 | Token usage + model inventory dashboard (admin: per-client USD spend, model table, budget viz) | DONE | Step 13 |
 | D5 | 15 | Smart onboarding interview — "Brain" prompt (auto-fill all 7 docs from first conversation) | DONE (templates) | — |
-| D5 | 16 | Model routing architect — "Muscles" prompt (AGENTS.md with task→model map, cost ceilings) | NOT STARTED | Step 13 |
-| D5 | 17 | Activation triggers — "Eyes" prompt (custom heartbeat/cron based on client goals) | NOT STARTED | Step 15 |
+| D5 | 16 | Model routing architect — "Muscles" prompt (AGENTS.md with task→model map, cost ceilings) | DONE | Step 13 |
+| D5 | 17 | Activation triggers — "Eyes" prompt (custom heartbeat/cron based on client goals) | DONE | Step 15 |
 | D5 | 18 | Evolution/learning — "Heartbeat" prompt (goal tracking, milestone review, weekly retrospective) | DONE (templates) | Step 15 |
 | D6 | 19 | Admin — Scaling Readiness dashboard (real-time infra assessment) | DONE | — |
-| D6 | 20 | Ops Worker — autonomous monitoring (instant/hourly/daily/weekly tasks from OPERATIONS.md) | NOT STARTED | Step 19, Telegram (Step 10) |
+| D6 | 20 | Ops Worker — autonomous monitoring (instant/hourly/daily/weekly tasks from OPERATIONS.md) | DONE (template) | Step 19, Telegram (Step 10) |
 
 ### D6: Operations & Scaling
 

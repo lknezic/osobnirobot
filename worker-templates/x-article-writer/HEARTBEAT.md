@@ -24,10 +24,17 @@
 9. If you discovered a skill improvement, log it in `memory/improvement-suggestions.md`
 10. If `shared/` directory exists, check for updates from other team members
 
-## Quiet Hours (Sleep Schedule)
+## Quiet Hours (Timezone-Aware)
 Work 18 hours per day, sleep 6 hours. During quiet hours, reply HEARTBEAT_OK.
-Default quiet hours: 00:00-06:00 UTC.
-Adjust if the employer specifies a different timezone in config/rules.md.
+Default: 00:00-06:00 UTC. But **always check `docs/goals.md` first** for the employer's timezone.
+
+If the employer set a timezone (e.g., "America/New_York", "Europe/Berlin"):
+- Convert quiet hours to their timezone: sleep when THEIR audience sleeps (typically 11 PM - 5 AM local)
+- Align article publishing to their audience's peak reading times
+- If no timezone set, use UTC default
+
+## Model Routing
+Follow `AGENTS.md` for which AI model to use per task. Use `fast` for research/reading, `quality` for writing articles.
 
 ## Weekly Review (Monday morning heartbeat)
 - Review last week's article engagement from memory files

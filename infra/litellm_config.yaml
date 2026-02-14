@@ -11,17 +11,45 @@
 #        --config /app/config.yaml
 
 model_list:
-  # Primary model — Gemini 2.0 Flash (fast, cheap)
+  # ── Fast tier (cheap, high-volume tasks) ──
+  - model_name: fast
+    litellm_params:
+      model: gemini/gemini-2.0-flash
+      api_key: os.environ/GOOGLE_AI_KEY
+
+  # Also accessible by direct name
   - model_name: gemini-2.0-flash
     litellm_params:
       model: gemini/gemini-2.0-flash
       api_key: os.environ/GOOGLE_AI_KEY
 
-  # Fallback model — Claude Sonnet 4
+  # ── Quality tier (writing, research, analysis) ──
+  - model_name: quality
+    litellm_params:
+      model: anthropic/claude-sonnet-4-20250514
+      api_key: os.environ/ANTHROPIC_API_KEY
+
   - model_name: claude-sonnet-4
     litellm_params:
       model: anthropic/claude-sonnet-4-20250514
       api_key: os.environ/ANTHROPIC_API_KEY
+
+  # ── Premium tier (complex reasoning, rare) ──
+  - model_name: premium
+    litellm_params:
+      model: anthropic/claude-opus-4-6
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  - model_name: claude-opus-4.6
+    litellm_params:
+      model: anthropic/claude-opus-4-6
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+router_settings:
+  # Fallback from quality -> fast if quality model fails
+  fallbacks:
+    - quality: [fast]
+    - premium: [quality, fast]
 
 litellm_settings:
   # Master key for proxy auth (containers use this)
@@ -42,3 +70,6 @@ litellm_settings:
 general_settings:
   # Health check endpoint
   health_check: true
+
+  # Enable spend logging for dashboard
+  store_model_in_db: true

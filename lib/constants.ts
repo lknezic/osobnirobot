@@ -51,6 +51,8 @@ export const SKILLS: SkillDef[] = [
   // Reddit skills (coming soon)
   { id: 'reddit-commenter', emoji: '💬', title: 'Reddit Commenter', desc: 'Finds relevant subreddits and leaves valuable, on-topic comments that build authority and drive traffic.', category: 'Reddit', available: false },
   { id: 'reddit-poster', emoji: '📝', title: 'Reddit Poster', desc: 'Creates engaging Reddit posts that provide value, spark discussion, and grow your presence in target communities.', category: 'Reddit', available: false },
+  // Internal worker types (admin-only)
+  { id: 'ops-monitor', emoji: '🔧', title: 'Ops Monitor', desc: 'Internal: monitors infrastructure, workers, and business metrics. Admin-only.', category: 'Internal', available: false },
 ];
 
 // New pricing: per-worker, per-channel. No tiers.
