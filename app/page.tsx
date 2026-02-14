@@ -146,10 +146,12 @@ export default function Home() {
 
       {/* WHAT YOUR WORKER DOES */}
       <section className="max-w-[960px] mx-auto px-5 py-16">
-        <h2 className="text-center text-[clamp(22px,3.8vw,34px)] font-bold tracking-tight mb-3">One worker. Every X/Twitter skill.</h2>
-        <p className="text-center text-[var(--dim)] text-sm mb-10">Your worker runs all 4 skills automatically. Expert-level from day one.</p>
+        <h2 className="text-center text-[clamp(22px,3.8vw,34px)] font-bold tracking-tight mb-3">One Worker. One Channel.</h2>
+        <p className="text-center text-[var(--dim)] text-sm mb-10">Each worker masters every skill for their platform. Expert-level from day one.</p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* X/Twitter Worker */}
+        <h3 className="font-bold text-lg mb-4">X / Twitter Worker</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
           {skills.filter(s => s.category === 'X / Twitter').map(skill => (
             <div key={skill.id} className="p-5 rounded-[var(--r)] border border-[var(--border)] hover:border-[var(--border-h)] transition-all" style={{ background: "var(--bg2)" }}>
               <div className="text-2xl mb-2">{skill.emoji}</div>
@@ -159,9 +161,22 @@ export default function Home() {
           ))}
         </div>
 
-        <div className="mt-8 p-5 rounded-[var(--r)] border border-[var(--border)] text-center" style={{ background: "var(--bg2)" }}>
+        {/* Reddit Worker */}
+        <h3 className="font-bold text-lg mb-4">Reddit Worker <span className="text-xs font-normal text-[var(--muted)] ml-2">Coming Soon</span></h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+          {skills.filter(s => s.category === 'Reddit').map(skill => (
+            <div key={skill.id} className="p-5 rounded-[var(--r)] border border-[var(--border)] opacity-60" style={{ background: "var(--bg2)" }}>
+              <div className="text-2xl mb-2">{skill.emoji}</div>
+              <h4 className="font-bold text-sm mb-1">{skill.title}</h4>
+              <p className="text-xs text-[var(--dim)] leading-relaxed">{skill.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Coming Soon */}
+        <div className="p-5 rounded-[var(--r)] border border-[var(--border)] text-center" style={{ background: "var(--bg2)" }}>
           <p className="text-sm text-[var(--dim)]">
-            <span className="text-[var(--accent2)] font-semibold">Coming soon:</span> Reddit, YouTube, Instagram, TikTok, Email, Discord, LinkedIn channels.
+            <span className="text-[var(--accent2)] font-semibold">Coming next:</span> YouTube, Instagram, TikTok, Email, Discord, LinkedIn.
             Each channel = one worker with all skills for that platform.
           </p>
         </div>
@@ -229,31 +244,32 @@ export default function Home() {
       {/* MEET YOUR WORKERS */}
       <section className="max-w-[960px] mx-auto px-5 py-16">
         <h2 className="text-center text-[clamp(22px,3.8vw,34px)] font-bold tracking-tight mb-3">Meet your workers</h2>
-        <p className="text-center text-[var(--dim)] text-sm mb-10">Every skill is pre-trained by experts. Your employees hit the ground running.</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <p className="text-center text-[var(--dim)] text-sm mb-10">Each worker masters every skill for their channel. Expert-level from day one.</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
             {
-              name: "Axel", initial: "A", color: "#3b82f6", skill: "X Tweet Writer",
-              desc: "Writes scroll-stopping tweets using the 3-bucket system: authority, personality, and shareable content. Knows the X algorithm inside out.",
-              learns: "Your voice, niche trending topics, what hooks work, audience pain points"
+              name: "X / Twitter Worker", initial: "X", color: "#3b82f6",
+              skills: "Commenter, Tweet Writer, Thread Writer, Article Writer",
+              desc: "One worker runs all 4 X/Twitter skills automatically. Comments on target accounts, writes tweets and threads, publishes long-form articles — all in your voice, 18 hours a day.",
+              learns: "Your voice, niche topics, target accounts, competitor gaps, audience pain points, what hooks and formats get engagement"
             },
             {
-              name: "Nova", initial: "N", color: "#f59e0b", skill: "X Thread Writer",
-              desc: "Crafts viral threads that break down complex ideas into engaging multi-tweet stories. Builds your authority and gets bookmarked.",
-              learns: "Your expertise, competitor gaps, audience questions, what formats get engagement"
-            },
-            {
-              name: "Scout", initial: "S", color: "#10b981", skill: "X Commenter",
-              desc: "Finds relevant posts from target accounts in your niche and leaves smart, value-adding comments that get you noticed and followed.",
-              learns: "Target accounts, community tone, your positioning, conversation style"
+              name: "Reddit Worker", initial: "R", color: "#ff4500",
+              skills: "Commenter, Poster",
+              desc: "Finds relevant subreddits, leaves valuable comments that build authority, and creates engaging posts that spark discussion and drive traffic to your business.",
+              learns: "Your niche communities, subreddit rules and culture, what content gets upvoted, your positioning",
+              comingSoon: true
             },
           ].map((worker) => (
-            <div key={worker.name} className="p-6 rounded-[var(--r)] border border-[var(--border)]" style={{ background: "var(--bg2)" }}>
+            <div key={worker.name} className={`p-6 rounded-[var(--r)] border border-[var(--border)] ${worker.comingSoon ? 'opacity-60' : ''}`} style={{ background: "var(--bg2)" }}>
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white" style={{ background: worker.color }}>{worker.initial}</div>
                 <div>
-                  <div className="font-bold text-sm">{worker.name}</div>
-                  <div className="text-xs text-[var(--accent2)]">{worker.skill}</div>
+                  <div className="font-bold text-sm flex items-center gap-2">
+                    {worker.name}
+                    {worker.comingSoon && <span className="text-[10px] font-normal px-2 py-0.5 rounded-full border border-[var(--border)] text-[var(--muted)]">Coming Soon</span>}
+                  </div>
+                  <div className="text-xs text-[var(--accent2)]">{worker.skills}</div>
                 </div>
               </div>
               <p className="text-xs text-[var(--dim)] leading-relaxed mb-3">{worker.desc}</p>
@@ -294,7 +310,7 @@ export default function Home() {
       <section className="max-w-[520px] mx-auto px-5 py-16">
         <div className="text-center p-8 rounded-[var(--r)] border border-[var(--border)]" style={{ background: "var(--bg2)" }}>
           <h2 className="text-2xl font-bold mb-3">Ready to hire your AI worker?</h2>
-          <p className="text-sm text-[var(--dim)] mb-6">$199/mo. All X/Twitter skills included. 7 days free.</p>
+          <p className="text-sm text-[var(--dim)] mb-6">$199/mo per worker. All skills included. 7 days free.</p>
           <a
             href="/auth/login"
             className="inline-block text-center px-8 py-3.5 rounded-[var(--r2)] font-bold text-sm text-white transition-all hover:brightness-110"

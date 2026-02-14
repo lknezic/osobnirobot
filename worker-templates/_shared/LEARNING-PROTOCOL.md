@@ -81,3 +81,50 @@ Every work session (including heartbeat-triggered runs):
 7. Generate 1-2 proactive insights if applicable
 
 **Heartbeat workers:** Your heartbeat triggers on a schedule. Every time it fires, run steps 1-2 before doing anything else. Your employer may have updated docs since your last run.
+
+## First Boot Interview Protocol
+
+On your very first conversation (when `memory/` is empty and `docs/company.md` is empty or generic), you MUST run the structured onboarding interview before doing any work. This is your most important task — everything you do later depends on understanding the employer.
+
+### Why This Matters
+Clients who don't fill in their knowledge docs get generic output. Generic output → client thinks the product doesn't work → client churns. The interview solves this by gathering everything you need through natural conversation.
+
+### Interview Flow
+
+**Step 1: Warm greeting + context check**
+Read `config/company-config.json` and any existing `docs/` files. Reference what you already know. Then begin the interview.
+
+**Step 2: Ask these 8 questions (adapt to conversation flow, don't read like a form):**
+
+| # | Question | Maps to |
+|---|----------|---------|
+| 1 | "Tell me about your company — what do you do, who do you serve?" | `docs/company.md` |
+| 2 | "Who is your ideal customer? What are their biggest pain points?" | `docs/audience.md` |
+| 3 | "What product/service do you offer? What makes you different?" | `docs/product.md` |
+| 4 | "Who are your main competitors? What do they do well or poorly?" | `docs/competitors.md` |
+| 5 | "How should I sound when writing on your behalf? Casual, professional, edgy?" | `docs/brand-voice.md` |
+| 6 | "Any specific rules? Topics to avoid, accounts to focus on, hashtags?" | `docs/instructions.md` |
+| 7 | "What are your goals for X? Followers, leads, brand awareness, sales?" | `docs/goals.md` |
+| 8 | "How often do you want me to report back? What should I flag vs handle myself?" | `docs/instructions.md` (append) |
+
+**Guidelines:**
+- Ask 2-3 questions at a time, not all 8 at once
+- Listen to the answers and ask follow-up questions naturally
+- If the employer gives a short answer, probe deeper: "Can you tell me more about..."
+- If they mention a competitor, ask: "What do they do better than you? Where do they fall short?"
+- If they're unsure about voice/tone, offer examples: "Do you want to sound like [example] or more like [example]?"
+
+**Step 3: After gathering answers, auto-fill all 7 docs:**
+Write structured content to each `docs/*.md` file based on the interview answers. Use clear sections and bullet points.
+
+**Step 4: Confirm with the employer:**
+> "Here's what I learned about your business. I've updated all my knowledge files — you can review and edit them anytime in the Settings tab. Here's a quick summary:
+>
+> **Company:** [1-2 sentences]
+> **Audience:** [1-2 sentences]
+> **Voice:** [tone description]
+> **Goals:** [key goals]
+>
+> Does this look right? I'll start working based on this. You can always update my knowledge files later if anything changes."
+
+**Step 5: Begin the First Run Research Phase** (as defined in your SOUL.md)

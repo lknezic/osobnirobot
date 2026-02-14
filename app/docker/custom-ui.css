@@ -1,30 +1,39 @@
 /* InstantWorker custom overrides for OpenClaw Control UI */
-/* Uses multiple selector strategies for robustness */
 
-/* === Hide navigation sidebar === */
+/* === Accent color overrides to match InstantWorker purple === */
+:root {
+  --accent: #7c6bf0 !important;
+  --accent-hover: #9b7bf7 !important;
+  --accent-muted: rgba(124, 107, 240, 0.4) !important;
+  --accent-subtle: rgba(124, 107, 240, 0.1) !important;
+  --accent-glow: rgba(124, 107, 240, 0.15) !important;
+  --ring: #7c6bf0 !important;
+  --primary: #7c6bf0 !important;
+  --primary-foreground: #ffffff !important;
+  --focus: #7c6bf0 !important;
+}
+
+/* === Sidebar styling — compact and clean === */
 aside.nav,
 aside[class*="nav"],
 [class*="sidebar"],
-[class*="Sidebar"],
-nav[class*="nav"]:not([class*="tabbar"]) {
-  display: none !important;
-  width: 0 !important;
-  min-width: 0 !important;
-  max-width: 0 !important;
-  overflow: hidden !important;
+[class*="Sidebar"] {
+  width: 200px !important;
+  min-width: 200px !important;
+  max-width: 200px !important;
 }
 
-/* === Collapse nav from grid layout === */
+/* === Grid layout with sidebar === */
 .shell,
 [class*="shell"],
 [class*="Shell"],
 [class*="layout"],
 [class*="Layout"] {
-  --shell-nav-width: 0px !important;
-  grid-template-columns: 0px 1fr !important;
+  --shell-nav-width: 200px !important;
+  grid-template-columns: 200px 1fr !important;
 }
 
-/* === Hide brand/logo === */
+/* === Hide brand/logo — replaced by our branding === */
 .brand,
 [class*="brand"],
 [class*="Brand"],
@@ -50,35 +59,10 @@ nav[class*="nav"]:not([class*="tabbar"]) {
   display: none !important;
 }
 
-/* === Hide topbar nav elements (but keep the chat area) === */
+/* === Hide topbar nav elements (keep chat area) === */
 .topbar [class*="nav"],
 [class*="topbar"] [class*="brand"] {
   display: none !important;
-}
-
-/* === Main content full width === */
-main.content,
-main[class*="content"],
-[class*="main-content"],
-[class*="MainContent"] {
-  margin-left: 0 !important;
-  padding-left: 0 !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  grid-column: 1 / -1 !important;
-}
-
-/* === Accent color overrides to match InstantWorker purple === */
-:root {
-  --accent: #7c6bf0 !important;
-  --accent-hover: #9b7bf7 !important;
-  --accent-muted: rgba(124, 107, 240, 0.4) !important;
-  --accent-subtle: rgba(124, 107, 240, 0.1) !important;
-  --accent-glow: rgba(124, 107, 240, 0.15) !important;
-  --ring: #7c6bf0 !important;
-  --primary: #7c6bf0 !important;
-  --primary-foreground: #ffffff !important;
-  --focus: #7c6bf0 !important;
 }
 
 /* === Powered by badge === */
