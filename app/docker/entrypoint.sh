@@ -142,6 +142,28 @@ if [ -f /app/dist/control-ui/index.html ]; then
     sed -i 's|</head>|<script src="./assets/iw-customize.js" defer></script></head>|' /app/dist/control-ui/index.html
 fi
 
+# ————————————————————————————————
+# 1b. Configure HTTP proxy for browser isolation
+# ————————————————————————————————
+if [ -n "${WORKER_PROXY_URL:-}" ]; then
+    echo "♦ Configuring browser proxy: ${WORKER_PROXY_URL%%@*}@***"
+    export HTTP_PROXY="$WORKER_PROXY_URL"
+    export HTTPS_PROXY="$WORKER_PROXY_URL"
+    export http_proxy="$WORKER_PROXY_URL"
+    export https_proxy="$WORKER_PROXY_URL"
+    # Don't proxy local traffic (OpenClaw gateway, VNC, localhost)
+    export NO_PROXY="localhost,127.0.0.1,0.0.0.0"
+    export no_proxy="localhost,127.0.0.1,0.0.0.0"
+
+    # Write Chromium proxy flags so OpenClaw's browser uses the proxy
+    mkdir -p "$OPENCLAW_HOME/browser"
+    cat > "$OPENCLAW_HOME/browser/chromium-flags.conf" << EOF
+--proxy-server=${WORKER_PROXY_URL}
+EOF
+    # Set CHROMIUM_FLAGS for any Chromium launch
+    export CHROMIUM_FLAGS="--proxy-server=${WORKER_PROXY_URL}"
+fi
+
 # Fix any config issues
 rm -f /tmp/.X99-lock
 openclaw doctor --fix 2>/dev/null || true
