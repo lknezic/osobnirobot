@@ -146,10 +146,10 @@
 | D1 | 3c | Admin hub — My Workers page (free provisioning, manage own workers) | DONE | Step 3 |
 | D1 | 3d | Admin hub — Subdomain routing (admin.instantworker.ai → /admin/*) | DONE | — |
 | D1 | 4 | Admin dashboard — Health Monitor (container health, iframe status, WS disconnects) | DONE | Step 3 (shares layout) |
-| D2 | 5 | Work Log tab in employee workspace (heartbeat session output) | NOT STARTED | Orchestrator /activity endpoint |
-| D2 | 6 | Agent status banner + error alert toasts | NOT STARTED | Orchestrator /status-detail endpoint |
+| D2 | 5 | Work Log tab in employee workspace (heartbeat session output) | DONE | Orchestrator /activity endpoint |
+| D2 | 6 | Agent status banner + error alert toasts | DONE | Orchestrator /status-detail endpoint |
 | D2 | 7 | Daily summary — team dashboard overview + per-employee Summary tab + searchable knowledge | NOT STARTED | Orchestrator /summary endpoint |
-| D2 | 8 | Performance metrics bar above chat iframe (4-stat-card pattern) | NOT STARTED | Step 7 (reuses summary API) |
+| D2 | 8 | Performance metrics bar above chat iframe (4-stat-card pattern) | DONE (component) | Step 7 (reuses summary API) |
 | D2 | 9 | Content Pipeline / Approval Queue (kanban: Draft→Pending→Approved→Posted→Rejected) | NOT STARTED | Orchestrator /content endpoint |
 | D3 | 10 | Telegram integration (connect flow, login link via Telegram, channel health cards) | NOT STARTED | Telegram bot created |
 | D3 | 11 | Slack integration (OAuth flow, channel health cards) | NOT STARTED | Slack app created |

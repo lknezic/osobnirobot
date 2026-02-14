@@ -908,3 +908,123 @@ containerRoutes.get('/improvements', async (_req: Request, res: Response) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// ─── GET /activity/:id — Read heartbeat/work log from container ───
+// Returns recent heartbeat session output so the client can see what the agent did on auto-pilot
+containerRoutes.get('/activity/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const name = containerName(id);
+    const container = docker.getContainer(name);
+
+    const memoryDir = `${CONTAINER_WORKSPACE}/memory`;
+
+    // Read heartbeat log + daily logs + improvement suggestions
+    const [heartbeatLog, dailyFiles] = await Promise.all([
+      readContainerFile(container, `${memoryDir}/heartbeat-log.md`),
+      listContainerFiles(container, memoryDir),
+    ]);
+
+    // Read recent daily log files (YYYY-MM-DD.md pattern)
+    const dailyLogs = dailyFiles
+      .filter(f => /^\d{4}-\d{2}-\d{2}\.md$/.test(f))
+      .sort()
+      .reverse()
+      .slice(0, 7); // Last 7 days
+
+    const dailyEntries = await Promise.all(
+      dailyLogs.map(async (f) => {
+        const content = await readContainerFile(container, `${memoryDir}/${f}`);
+        return { date: f.replace('.md', ''), content };
+      })
+    );
+
+    // Read engagement stats if available
+    const engagementStats = await readContainerFile(container, `${memoryDir}/engagement-stats.md`);
+
+    res.json({
+      heartbeatLog,
+      dailyEntries: dailyEntries.filter(e => e.content),
+      engagementStats,
+    });
+  } catch (err: any) {
+    if (err.statusCode === 404) {
+      return res.json({ heartbeatLog: null, dailyEntries: [], engagementStats: null });
+    }
+    console.error('Activity read error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── GET /status-detail/:id — Detailed status for agent banner ───
+containerRoutes.get('/status-detail/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const name = containerName(id);
+    const container = docker.getContainer(name);
+
+    const info = await container.inspect();
+
+    const gatewayPort = info.HostConfig?.PortBindings?.['18789/tcp']?.[0]?.HostPort;
+    const isRunning = info.State.Running;
+    const startedAt = info.State.StartedAt;
+
+    // Calculate uptime
+    const uptimeMs = isRunning && startedAt ? Date.now() - new Date(startedAt).getTime() : 0;
+    const uptimeHours = Math.floor(uptimeMs / 3600000);
+
+    // Check gateway health
+    let gatewayHealthy = false;
+    if (isRunning && gatewayPort) {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 3000);
+        const resp = await fetch(`http://localhost:${gatewayPort}/health`, { signal: controller.signal });
+        clearTimeout(timeout);
+        gatewayHealthy = resp.ok;
+      } catch {
+        gatewayHealthy = false;
+      }
+    }
+
+    // Read pending questions from memory (for "needs attention" alerts)
+    const pendingQuestions = await readContainerFile(container, `${CONTAINER_WORKSPACE}/memory/pending-questions.md`);
+    const hasQuestions = pendingQuestions ? pendingQuestions.split('\n').length > 5 : false;
+
+    // Determine detailed status
+    let detailedStatus: string;
+    if (!isRunning) {
+      detailedStatus = 'offline';
+    } else if (!gatewayHealthy) {
+      detailedStatus = 'unhealthy';
+    } else if (hasQuestions) {
+      detailedStatus = 'needs-attention';
+    } else {
+      detailedStatus = 'healthy';
+    }
+
+    res.json({
+      status: detailedStatus,
+      isRunning,
+      uptimeHours,
+      gatewayHealthy,
+      hasQuestions,
+      startedAt: isRunning ? startedAt : null,
+      containerState: info.State.Status,
+    });
+  } catch (err: any) {
+    if (err.statusCode === 404) {
+      return res.json({
+        status: 'not-found',
+        isRunning: false,
+        uptimeHours: 0,
+        gatewayHealthy: false,
+        hasQuestions: false,
+        startedAt: null,
+        containerState: 'not-found',
+      });
+    }
+    console.error('Status detail error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
