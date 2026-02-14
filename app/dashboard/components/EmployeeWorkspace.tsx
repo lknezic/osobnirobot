@@ -4,8 +4,12 @@ import { useState } from 'react';
 import type { Employee } from '@/lib/types';
 import { restartEmployee, provisionEmployee, fireEmployee } from '@/lib/api/employees';
 import { KnowledgeBase } from './KnowledgeBase';
+import { WorkLog } from './WorkLog';
+import { StatusBanner } from './StatusBanner';
+import { Summary } from './Summary';
+import { ContentPipeline } from './ContentPipeline';
 
-type Tab = 'chat' | 'browser' | 'settings';
+type Tab = 'chat' | 'worklog' | 'content' | 'summary' | 'browser' | 'settings';
 
 interface EmployeeWorkspaceProps {
   employee: Employee;
@@ -113,25 +117,38 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, onFire, onRefr
         </div>
       </header>
 
+      {/* Status Banner */}
+      <StatusBanner employeeId={employee.id} employeeName={employee.name} containerStatus={employee.container_status} />
+
       {/* Tabs */}
       <nav className="flex border-b border-[var(--border)] shrink-0 pl-5" style={{ background: '#111' }}>
-        {(['chat', 'browser', 'settings'] as Tab[]).map(t => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className="px-5 py-2.5 text-sm font-medium border-b-2 transition-all"
-            style={{
-              color: tab === t ? '#fff' : '#888',
-              borderBottomColor: tab === t ? '#3b82f6' : 'transparent',
-              background: 'transparent',
-              border: 'none',
-              borderBottom: `2px solid ${tab === t ? '#3b82f6' : 'transparent'}`,
-              cursor: 'pointer',
-            }}
-          >
-            {t === 'chat' ? '💬 Chat' : t === 'browser' ? '🖥️ Browser' : '⚙️ Settings'}
-          </button>
-        ))}
+        {(['chat', 'worklog', 'content', 'summary', 'browser', 'settings'] as Tab[]).map(t => {
+          const labels: Record<Tab, string> = {
+            chat: '💬 Chat',
+            worklog: '📋 Work Log',
+            content: '📝 Content',
+            summary: '📊 Summary',
+            browser: '🖥️ Browser',
+            settings: '⚙️ Settings',
+          };
+          return (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className="px-5 py-2.5 text-sm font-medium border-b-2 transition-all"
+              style={{
+                color: tab === t ? '#fff' : '#888',
+                borderBottomColor: tab === t ? '#3b82f6' : 'transparent',
+                background: 'transparent',
+                border: 'none',
+                borderBottom: `2px solid ${tab === t ? '#3b82f6' : 'transparent'}`,
+                cursor: 'pointer',
+              }}
+            >
+              {labels[t]}
+            </button>
+          );
+        })}
       </nav>
 
       {/* Content */}
@@ -191,6 +208,18 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, onFire, onRefr
               </div>
             )}
           </div>
+        )}
+
+        {tab === 'worklog' && (
+          <WorkLog employeeId={employee.id} employeeName={employee.name} containerStatus={employee.container_status} />
+        )}
+
+        {tab === 'content' && (
+          <ContentPipeline employeeId={employee.id} employeeName={employee.name} containerStatus={employee.container_status} />
+        )}
+
+        {tab === 'summary' && (
+          <Summary employeeId={employee.id} employeeName={employee.name} containerStatus={employee.container_status} />
         )}
 
         {tab === 'browser' && (
