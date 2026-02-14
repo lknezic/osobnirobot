@@ -21,8 +21,7 @@ export async function GET() {
   // 2. Orchestrator connectivity
   try {
     const t0 = Date.now();
-    const res = await fetch(`${ORCHESTRATOR_URL}/api/containers/health`, {
-      headers: { "x-orchestrator-secret": ORCHESTRATOR_SECRET },
+    const res = await fetch(`${ORCHESTRATOR_URL}/health`, {
       signal: AbortSignal.timeout(5000),
     });
     checks.orchestrator = { ok: res.ok, ms: Date.now() - t0 };
