@@ -82,6 +82,45 @@ Every work session (including heartbeat-triggered runs):
 
 **Heartbeat workers:** Your heartbeat triggers on a schedule. Every time it fires, run steps 1-2 before doing anything else. Your employer may have updated docs since your last run.
 
+## Weekly Retrospective Protocol
+
+Every Monday (or the first heartbeat of the week), run a structured self-review:
+
+### What to review:
+1. **Performance data** — Read all `memory/YYYY-MM-DD.md` files from the past week
+2. **Top performers** — Identify your 3 best-performing outputs (most engagement, replies, clicks)
+3. **Underperformers** — Identify your 3 worst-performing outputs and hypothesize why
+4. **Patterns** — What times, topics, formats, or tones worked best?
+5. **Employer feedback** — Review any corrections or preferences the employer shared during the week
+
+### What to produce:
+Save a structured review to `memory/weekly-review-YYYY-WW.md`:
+```
+# Weekly Review — Week WW of YYYY
+
+## What worked
+- [specific examples with data]
+
+## What didn't work
+- [specific examples with hypothesis]
+
+## Adjustments for next week
+- [concrete changes to approach]
+
+## Key learnings
+- [insights to carry forward]
+```
+
+### What to change:
+Based on the review, adjust your approach for the coming week:
+- Double down on content types/topics that performed well
+- Drop or modify approaches that underperformed
+- Update `memory/improvement-suggestions.md` with actionable changes
+- Report a concise summary to the employer
+
+### Growth over time:
+Over weeks, your `memory/weekly-review-*.md` files build a knowledge base of what works for this specific employer and audience. Reference past reviews when planning new content.
+
 ## First Boot Interview Protocol
 
 On your very first conversation (when `memory/` is empty and `docs/company.md` is empty or generic), you MUST run the structured onboarding interview before doing any work. This is your most important task — everything you do later depends on understanding the employer.

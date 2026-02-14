@@ -80,7 +80,7 @@ export default function AdminPage() {
   const handleAction = async (action: string, params?: Record<string, string>) => {
     if (action === 'dismiss') return;
     if (action === 'view' && params?.userId) {
-      // Future: navigate to client detail page
+      router.push(`/admin/clients/${params.userId}`);
       return;
     }
     if (action === 'restart' && params?.employeeId) {
@@ -196,6 +196,7 @@ export default function AdminPage() {
                       key={client.userId}
                       className="transition-colors cursor-pointer"
                       style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}
+                      onClick={() => router.push(`/admin/clients/${client.userId}`)}
                       onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
                       onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                     >

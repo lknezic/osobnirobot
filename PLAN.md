@@ -106,6 +106,14 @@
 - ~~Fix "NaNKB" file size bug in reference files UI~~ — DONE (85557eb)
 - ~~Fix cron job `'creating'` status check~~ — DONE (85557eb)
 
+### Recently completed (Phase D1):
+- ~~**Admin hub overview**~~ — DONE (93f0428): stats cards, clients table, AI recommendations
+- ~~**Admin health monitor**~~ — DONE: container status, orchestrator health, restart actions
+- ~~**Admin sidebar nav + layout**~~ — DONE (93f0428): 200px sidebar, Overview/Workers/Health nav
+- ~~**Admin My Workers page**~~ — DONE (93f0428): free provisioning, reuses dashboard components
+- ~~**Admin subdomain routing**~~ — DONE (93f0428): middleware rewrites admin.instantworker.ai → /admin/*
+- **DNS setup needed**: admin.instantworker.ai CNAME → Vercel (owner action)
+
 ---
 
 ## Root-Level Documentation Index
@@ -133,8 +141,11 @@
 |-------|------|------|--------|------------|
 | D1 | 1 | Rename heartbeat → "Work Log" (JS injection in container) | NOT STARTED | — |
 | D1 | 2 | OpenClaw sidebar: selective show/hide/rename/describe | NOT STARTED | Step 1 (same script) |
-| D1 | 3 | Admin dashboard — Overview (clients, revenue, costs, profitability, health alerts, AI recs) | NOT STARTED | — |
-| D1 | 4 | Admin dashboard — Health Monitor (container health, iframe status, WS disconnects) | NOT STARTED | Step 3 (shares layout) |
+| D1 | 3 | Admin dashboard — Overview (clients, revenue, costs, profitability, health alerts, AI recs) | DONE | — |
+| D1 | 3b | Admin hub — Sidebar nav + layout | DONE | Step 3 |
+| D1 | 3c | Admin hub — My Workers page (free provisioning, manage own workers) | DONE | Step 3 |
+| D1 | 3d | Admin hub — Subdomain routing (admin.instantworker.ai → /admin/*) | DONE | — |
+| D1 | 4 | Admin dashboard — Health Monitor (container health, iframe status, WS disconnects) | DONE | Step 3 (shares layout) |
 | D2 | 5 | Work Log tab in employee workspace (heartbeat session output) | NOT STARTED | Orchestrator /activity endpoint |
 | D2 | 6 | Agent status banner + error alert toasts | NOT STARTED | Orchestrator /status-detail endpoint |
 | D2 | 7 | Daily summary — team dashboard overview + per-employee Summary tab + searchable knowledge | NOT STARTED | Orchestrator /summary endpoint |
@@ -142,13 +153,13 @@
 | D2 | 9 | Content Pipeline / Approval Queue (kanban: Draft→Pending→Approved→Posted→Rejected) | NOT STARTED | Orchestrator /content endpoint |
 | D3 | 10 | Telegram integration (connect flow, login link via Telegram, channel health cards) | NOT STARTED | Telegram bot created |
 | D3 | 11 | Slack integration (OAuth flow, channel health cards) | NOT STARTED | Slack app created |
-| D3 | 12 | Admin dashboard — Client Detail (per-client drill-down, usage, actions) | NOT STARTED | Step 3 |
+| D3 | 12 | Admin dashboard — Client Detail (per-client drill-down, usage, actions) | DONE | Step 3 |
 | D4 | 13 | LiteLLM multi-model routing (auto-switch cheap models for low-level tasks) | NOT STARTED | LiteLLM deployed (already on :4000) |
 | D4 | 14 | Token usage + model inventory dashboard (admin: per-client USD spend, model table, budget viz) | NOT STARTED | Step 13 |
-| D5 | 15 | Smart onboarding interview — "Brain" prompt (auto-fill all 7 docs from first conversation) | NOT STARTED | — |
+| D5 | 15 | Smart onboarding interview — "Brain" prompt (auto-fill all 7 docs from first conversation) | DONE (templates) | — |
 | D5 | 16 | Model routing architect — "Muscles" prompt (AGENTS.md with task→model map, cost ceilings) | NOT STARTED | Step 13 |
 | D5 | 17 | Activation triggers — "Eyes" prompt (custom heartbeat/cron based on client goals) | NOT STARTED | Step 15 |
-| D5 | 18 | Evolution/learning — "Heartbeat" prompt (goal tracking, milestone review, weekly retrospective) | NOT STARTED | Step 15 |
+| D5 | 18 | Evolution/learning — "Heartbeat" prompt (goal tracking, milestone review, weekly retrospective) | DONE (templates) | Step 15 |
 
 ### D1: Foundation (no external deps, buildable now)
 

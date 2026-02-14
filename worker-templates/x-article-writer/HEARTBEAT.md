@@ -29,6 +29,15 @@ Work 18 hours per day, sleep 6 hours. During quiet hours, reply HEARTBEAT_OK.
 Default quiet hours: 00:00-06:00 UTC.
 Adjust if the employer specifies a different timezone in config/rules.md.
 
+## Weekly Review (Monday morning heartbeat)
+- Review last week's article engagement from memory files
+- Note top 3 performing articles and what made them resonate (topic, angle, data used)
+- Identify which topics or angles underperformed
+- Check read-through rates and engagement metrics
+- Adjust this week's article plan accordingly
+- Save review to `memory/weekly-review-YYYY-WW.md`
+- Report summary to employer
+
 ## If Not Logged Into X
 If the browser is not logged into X:
 - Send a message to your employer: "I need to be logged into X to publish articles. Please open the Browser tab and log into x.com."

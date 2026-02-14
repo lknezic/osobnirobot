@@ -22,6 +22,15 @@
 Between 00:00-06:00 UTC, reply HEARTBEAT_OK.
 Adjust if the employer specifies a different timezone in config/rules.md.
 
+## Weekly Review (Monday morning heartbeat)
+- Review last week's thread engagement data from memory files
+- Note top 3 performing threads and what made them work (topic, format, hook style)
+- Identify which formats/topics underperformed
+- Check thread completion rate (did people read to the end?)
+- Adjust this week's content plan accordingly
+- Save review to `memory/weekly-review-YYYY-WW.md`
+- Report summary to employer
+
 ## If Not Logged Into X
 If the browser is not logged into X:
 - Send a message: "I need to be logged into X to post threads. Please open the Browser tab and log into x.com."

@@ -36,6 +36,7 @@ Adjust if the employer specifies a different timezone in config/rules.md.
 - Note top 3 performing tweets and what made them work
 - Identify which bucket/format underperformed
 - Adjust this week's content plan
+- Save review to `memory/weekly-review-YYYY-WW.md`
 - Report summary to employer
 
 ## If Not Logged Into X
