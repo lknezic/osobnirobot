@@ -55,6 +55,9 @@ ENV DISPLAY=:99
 # Expose ports: OpenClaw gateway + noVNC
 EXPOSE 18789 6080
 
+# Ensure node user owns its .openclaw directory so entrypoint can write config
+RUN mkdir -p /home/node/.openclaw/workspace && chown -R node:node /home/node/.openclaw
+
 USER node
 
 ENTRYPOINT ["/entrypoint.sh"]
