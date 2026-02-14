@@ -98,6 +98,24 @@ function Dashboard() {
     router.push('/');
   };
 
+  const handleBilling = async () => {
+    try {
+      const res = await fetch('/api/stripe/portal', { method: 'POST' });
+      if (res.ok) {
+        const { url } = await res.json();
+        if (url) window.location.href = url;
+      }
+    } catch (err) {
+      console.error('Billing portal error:', err);
+    }
+  };
+
+  const handleFire = async () => {
+    setActiveEmployee(null);
+    window.history.replaceState(null, '', '/dashboard');
+    await fetchData();
+  };
+
   const handleSelectEmployee = (emp: Employee) => {
     setActiveEmployee(emp);
     window.history.replaceState(null, '', `?employee=${emp.id}`);
@@ -179,6 +197,7 @@ function Dashboard() {
           employee={activeEmployee}
           onBack={handleBack}
           onCheckout={handleCheckout}
+          onFire={handleFire}
           onRefresh={fetchData}
           planStatus={state.planStatus}
           trialEndsAt={state.trialEndsAt}
@@ -205,6 +224,11 @@ function Dashboard() {
             <span className="text-xs px-2.5 py-1 rounded" style={{ background: '#052e16', color: '#4ade80' }}>
               {state.selectedPlan ? state.selectedPlan.charAt(0).toUpperCase() + state.selectedPlan.slice(1) : 'Active'} plan
             </span>
+          )}
+          {state.hasSubscription && (
+            <button onClick={handleBilling} className="text-xs px-3 py-1.5 rounded border border-[var(--border)] text-[var(--muted)] hover:text-white transition-colors" style={{ background: 'transparent' }}>
+              Manage billing
+            </button>
           )}
           <button onClick={handleLogout} className="text-xs px-3 py-1.5 rounded border border-[var(--border)] text-[var(--muted)] hover:text-white transition-colors" style={{ background: 'transparent' }}>
             Log out

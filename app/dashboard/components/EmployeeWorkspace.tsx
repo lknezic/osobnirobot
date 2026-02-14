@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { Employee } from '@/lib/types';
-import { restartEmployee, provisionEmployee } from '@/lib/api/employees';
+import { restartEmployee, provisionEmployee, fireEmployee } from '@/lib/api/employees';
 import { KnowledgeBase } from './KnowledgeBase';
 
 type Tab = 'chat' | 'browser' | 'settings';
@@ -11,17 +11,20 @@ interface EmployeeWorkspaceProps {
   employee: Employee;
   onBack: () => void;
   onCheckout: (planId: string) => void;
+  onFire?: () => void;
   onRefresh?: () => void;
   planStatus?: string;
   trialEndsAt?: string;
   hasSubscription?: boolean;
 }
 
-export function EmployeeWorkspace({ employee, onBack, onCheckout, onRefresh, planStatus, trialEndsAt, hasSubscription }: EmployeeWorkspaceProps) {
+export function EmployeeWorkspace({ employee, onBack, onCheckout, onFire, onRefresh, planStatus, trialEndsAt, hasSubscription }: EmployeeWorkspaceProps) {
   const [tab, setTab] = useState<Tab>('chat');
   const [restarting, setRestarting] = useState(false);
   const [provisioning, setProvisioning] = useState(false);
   const [provisionError, setProvisionError] = useState('');
+  const [firing, setFiring] = useState(false);
+  const [showFireConfirm, setShowFireConfirm] = useState(false);
 
   const HOST = process.env.NEXT_PUBLIC_CONTAINER_HOST || 'instantworker.ai';
   const isOnline = employee.container_status === 'running';
@@ -60,6 +63,17 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, onRefresh, pla
       setProvisionError(err instanceof Error ? err.message : 'Provisioning failed');
     } finally {
       setProvisioning(false);
+    }
+  };
+
+  const handleFire = async () => {
+    setFiring(true);
+    try {
+      await fireEmployee(employee.id);
+      if (onFire) onFire();
+    } catch {
+      setFiring(false);
+      setShowFireConfirm(false);
     }
   };
 
@@ -293,6 +307,41 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, onRefresh, pla
                   ? 'Container needs to be started before use.'
                   : 'Restart will temporarily interrupt the conversation (~30 seconds).'}
               </p>
+            </div>
+
+            {/* Danger zone */}
+            <div className="p-5 rounded-[10px] border border-red-900/50" style={{ background: '#151515' }}>
+              <h2 className="text-sm font-semibold mb-3 text-red-400">Danger Zone</h2>
+              {!showFireConfirm ? (
+                <button
+                  onClick={() => setShowFireConfirm(true)}
+                  className="px-4 py-2.5 rounded-lg text-sm border border-red-900/50 text-red-400 hover:bg-red-950/30 transition-colors"
+                  style={{ background: 'transparent' }}
+                >
+                  🗑️ Fire {employee.name}
+                </button>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm text-red-300">Are you sure? This will permanently delete {employee.name} and their container.</p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleFire}
+                      disabled={firing}
+                      className="px-4 py-2 rounded-lg text-sm font-semibold text-white"
+                      style={{ background: '#dc2626', opacity: firing ? 0.6 : 1 }}
+                    >
+                      {firing ? 'Firing...' : `Yes, fire ${employee.name}`}
+                    </button>
+                    <button
+                      onClick={() => setShowFireConfirm(false)}
+                      className="px-4 py-2 rounded-lg text-sm border border-[var(--border)] text-[var(--muted)]"
+                      style={{ background: '#1a1a1a' }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
