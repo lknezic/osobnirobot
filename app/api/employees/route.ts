@@ -5,6 +5,7 @@ import { listEmployees, createEmployee, countEmployees, getMaxEmployees, getEmpl
 import { unauthorized, badRequest, planLimitReached, serverError } from '@/lib/api-error';
 import { sanitize, sanitizeArray } from '@/lib/validate';
 import { ORCHESTRATOR_URL, ORCHESTRATOR_SECRET, PLAN_LIMITS, LEGACY_PLAN_LIMITS, TRIAL_DURATION_DAYS } from '@/lib/constants';
+import { isAdmin } from '@/lib/admin-auth';
 import { updateEmployeeContainer } from '@/lib/db/employees';
 
 /** GET /api/employees - list all employees + plan info for current user */
@@ -20,13 +21,16 @@ export async function GET() {
       admin.from('profiles').select('plan_status, selected_plan, trial_ends_at, stripe_subscription_id, max_employees').eq('id', user.id).single(),
     ]);
 
+    // Admin accounts always show as active with max employees
+    const userIsAdmin = isAdmin(user.email);
+
     return NextResponse.json({
       employees,
-      maxEmployees: profile?.max_employees || 1,
-      planStatus: profile?.plan_status || undefined,
+      maxEmployees: userIsAdmin ? 99 : (profile?.max_employees || 1),
+      planStatus: userIsAdmin ? 'active' : (profile?.plan_status || undefined),
       selectedPlan: profile?.selected_plan || undefined,
       trialEndsAt: profile?.trial_ends_at || undefined,
-      hasSubscription: !!profile?.stripe_subscription_id,
+      hasSubscription: userIsAdmin ? false : !!profile?.stripe_subscription_id,
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';
@@ -44,9 +48,22 @@ export async function POST(request: Request) {
 
     const body = await request.json();
 
-    // If this is onboarding (first employee), set up the profile
     const currentCount = await countEmployees(user.id);
-    if (currentCount === 0 && body.workerConfig?.plan) {
+    const userIsAdmin = isAdmin(user.email);
+
+    // Admin accounts: auto-setup with active plan, unlimited workers, no billing
+    if (userIsAdmin && currentCount === 0) {
+      const admin = createSupabaseAdmin();
+      await admin.from('profiles').update({
+        onboarding_completed: true,
+        selected_plan: 'worker',
+        max_employees: 99,
+        plan_status: 'active',
+      }).eq('id', user.id);
+    }
+
+    // If this is onboarding (first employee), set up the profile
+    if (!userIsAdmin && currentCount === 0 && body.workerConfig?.plan) {
       const plan = body.workerConfig.plan;
       const limits = PLAN_LIMITS.worker ?? LEGACY_PLAN_LIMITS[plan] ?? PLAN_LIMITS.worker;
       const admin = createSupabaseAdmin();
@@ -60,9 +77,11 @@ export async function POST(request: Request) {
       }).eq('id', user.id);
     }
 
-    // Check plan limits
-    const max = await getMaxEmployees(user.id);
-    if (currentCount >= max) return planLimitReached();
+    // Check plan limits (admin bypasses)
+    if (!userIsAdmin) {
+      const max = await getMaxEmployees(user.id);
+      if (currentCount >= max) return planLimitReached();
+    }
 
     const name = sanitize(body.name, 30);
     if (!name) return badRequest('Name is required');

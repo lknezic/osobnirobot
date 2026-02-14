@@ -111,34 +111,15 @@ export default function AdminPage() {
   const activeRecs = recommendations.filter(r => !dismissed.has(r.id));
 
   return (
-    <div className="min-h-screen" style={{ background: '#0a0a0a', color: '#e5e5e5' }}>
-      {/* Header */}
-      <header className="flex items-center justify-between px-6 py-3 border-b" style={{ background: '#111', borderColor: 'rgba(255,255,255,0.06)' }}>
-        <div className="font-bold text-base tracking-tight">
-          Instant<span style={{ color: '#7c6bf0' }}>Worker</span>
-          <span className="text-xs font-normal ml-2" style={{ color: '#666' }}>Admin</span>
+    <div className="min-h-screen">
+      {/* Top bar */}
+      <div className="flex items-center justify-between px-6 py-3 border-b" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+        <h1 className="text-sm font-semibold">Overview</h1>
+        <div className="flex items-center gap-1.5 text-xs" style={{ color: '#666' }}>
+          <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#4ade80' }} />
+          ONLINE {lastRefresh.toLocaleTimeString()}
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => router.push('/admin/health')}
-            className="text-xs px-3 py-1.5 rounded transition-colors"
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', color: '#999' }}
-          >
-            Health Monitor
-          </button>
-          <div className="flex items-center gap-1.5 text-xs" style={{ color: '#666' }}>
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#4ade80' }} />
-            ONLINE {lastRefresh.toLocaleTimeString()}
-          </div>
-          <button
-            onClick={() => router.push('/dashboard')}
-            className="text-xs px-3 py-1.5 rounded transition-colors"
-            style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.06)', color: '#999' }}
-          >
-            Dashboard
-          </button>
-        </div>
-      </header>
+      </div>
 
       <main className="max-w-[1400px] mx-auto px-6 py-6 space-y-6">
         {/* Stat Cards — 4 primary */}

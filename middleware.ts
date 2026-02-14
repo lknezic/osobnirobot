@@ -27,14 +27,35 @@ export async function middleware(request: NextRequest) {
   // Refresh session
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Protect dashboard/onboarding/admin
   const path = request.nextUrl.pathname;
+  const host = request.headers.get('host') || '';
+
+  // admin.instantworker.ai subdomain → rewrite to /admin routes
+  if (host.startsWith('admin.')) {
+    if (!user) {
+      return NextResponse.redirect(new URL("/auth/login", request.url));
+    }
+    // Root of admin subdomain → /admin
+    if (path === '/') {
+      return NextResponse.rewrite(new URL('/admin', request.url));
+    }
+    // /health → /admin/health, /workers → /admin/workers, etc.
+    if (!path.startsWith('/admin') && !path.startsWith('/api') && !path.startsWith('/auth') && !path.startsWith('/_next')) {
+      return NextResponse.rewrite(new URL(`/admin${path}`, request.url));
+    }
+  }
+
+  // Protect dashboard/onboarding/admin
   if ((path.startsWith("/dashboard") || path.startsWith("/onboarding") || path.startsWith("/admin")) && !user) {
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
   // Already logged in visiting login page
   if (path === "/auth/login" && user) {
+    // Admin subdomain → redirect to admin, not dashboard
+    if (host.startsWith('admin.')) {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
@@ -42,5 +63,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/onboarding/:path*", "/admin/:path*", "/auth/login"],
+  matcher: ["/dashboard/:path*", "/onboarding/:path*", "/admin/:path*", "/auth/login", "/", "/health", "/workers/:path*"],
 };
