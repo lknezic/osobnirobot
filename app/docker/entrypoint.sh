@@ -160,9 +160,8 @@ EOF
     export CHROMIUM_FLAGS="--proxy-server=${WORKER_PROXY_URL}"
 fi
 
-# Fix any config issues
+# Clean up stale X lock
 rm -f /tmp/.X99-lock
-openclaw doctor --fix 2>/dev/null || true
 
 # ————————————————————————————————
 # 2. Start Xvfb (virtual display for Chrome)
