@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { href: '/admin/clients', label: 'Clients', icon: '●' },
   { href: '/admin/workers', label: 'My Workers', icon: '⚡' },
   { href: '/admin/health', label: 'Health', icon: '♥' },
+  { href: '/admin/scaling', label: 'Scaling', icon: '▲' },
 ];
 
 export function AdminNav() {

@@ -1028,3 +1028,112 @@ containerRoutes.get('/status-detail/:id', async (req: Request, res: Response) =>
     res.status(500).json({ error: err.message });
   }
 });
+
+// ─── GET /summary/:id — Summary data for employee (stats + knowledge search) ───
+containerRoutes.get('/summary/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { q } = req.query; // Optional search query
+    const name = containerName(id);
+    const container = docker.getContainer(name);
+
+    const memoryDir = `${CONTAINER_WORKSPACE}/memory`;
+
+    // Read all available data in parallel
+    const [
+      engagementStats,
+      improvementSuggestions,
+      pendingQuestions,
+      researchFindings,
+      memoryFiles,
+      docFiles,
+    ] = await Promise.all([
+      readContainerFile(container, `${memoryDir}/engagement-stats.md`),
+      readContainerFile(container, `${memoryDir}/improvement-suggestions.md`),
+      readContainerFile(container, `${memoryDir}/pending-questions.md`),
+      readContainerFile(container, `${memoryDir}/research-findings.md`),
+      listContainerFiles(container, memoryDir),
+      listContainerFiles(container, DOCS_DIR),
+    ]);
+
+    // Parse stats from engagement-stats.md if available
+    let stats = {
+      commentsToday: 0,
+      repliesReceived: 0,
+      accountsEngaged: 0,
+      postsCreated: 0,
+    };
+    if (engagementStats) {
+      // Try to parse numbers from markdown
+      const numMatch = (pattern: RegExp) => {
+        const m = engagementStats.match(pattern);
+        return m ? parseInt(m[1]) || 0 : 0;
+      };
+      stats.commentsToday = numMatch(/comments?[:\s]*(\d+)/i);
+      stats.repliesReceived = numMatch(/repl(?:y|ies)[:\s]*(\d+)/i);
+      stats.accountsEngaged = numMatch(/accounts?[:\s]*(\d+)/i);
+      stats.postsCreated = numMatch(/(?:posts?|tweets?|threads?)[:\s]*(\d+)/i);
+    }
+
+    // Build knowledge base entries
+    const knowledgeEntries: Array<{
+      category: string;
+      filename: string;
+      content: string | null;
+    }> = [];
+
+    // Read doc files
+    for (const f of docFiles) {
+      const content = await readContainerFile(container, `${DOCS_DIR}/${f}`);
+      knowledgeEntries.push({ category: 'docs', filename: f, content });
+    }
+
+    // Read memory files (skip binary/large)
+    for (const f of memoryFiles) {
+      if (f.endsWith('.md') || f.endsWith('.txt') || f.endsWith('.json')) {
+        const content = await readContainerFile(container, `${memoryDir}/${f}`);
+        knowledgeEntries.push({ category: 'memory', filename: f, content });
+      }
+    }
+
+    // Apply search filter if query provided
+    let filteredKnowledge = knowledgeEntries.filter(e => e.content);
+    if (q && typeof q === 'string' && q.trim()) {
+      const query = q.trim().toLowerCase();
+      filteredKnowledge = filteredKnowledge.filter(e =>
+        e.filename.toLowerCase().includes(query) ||
+        (e.content && e.content.toLowerCase().includes(query))
+      );
+    }
+
+    res.json({
+      stats,
+      issues: {
+        pendingQuestions: pendingQuestions ? pendingQuestions.split('\n').filter((l: string) => l.trim()).length : 0,
+        improvementCount: improvementSuggestions ? improvementSuggestions.split('\n').filter((l: string) => l.startsWith('- ')).length : 0,
+      },
+      engagementStats,
+      improvementSuggestions,
+      researchFindings,
+      knowledge: filteredKnowledge.map(e => ({
+        category: e.category,
+        filename: e.filename,
+        preview: e.content ? e.content.slice(0, 300) : '',
+        fullContent: e.content,
+      })),
+    });
+  } catch (err: any) {
+    if (err.statusCode === 404) {
+      return res.json({
+        stats: { commentsToday: 0, repliesReceived: 0, accountsEngaged: 0, postsCreated: 0 },
+        issues: { pendingQuestions: 0, improvementCount: 0 },
+        engagementStats: null,
+        improvementSuggestions: null,
+        researchFindings: null,
+        knowledge: [],
+      });
+    }
+    console.error('Summary error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});

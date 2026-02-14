@@ -148,7 +148,7 @@
 | D1 | 4 | Admin dashboard — Health Monitor (container health, iframe status, WS disconnects) | DONE | Step 3 (shares layout) |
 | D2 | 5 | Work Log tab in employee workspace (heartbeat session output) | DONE | Orchestrator /activity endpoint |
 | D2 | 6 | Agent status banner + error alert toasts | DONE | Orchestrator /status-detail endpoint |
-| D2 | 7 | Daily summary — team dashboard overview + per-employee Summary tab + searchable knowledge | NOT STARTED | Orchestrator /summary endpoint |
+| D2 | 7 | Daily summary — team dashboard overview + per-employee Summary tab + searchable knowledge | DONE | Orchestrator /summary endpoint |
 | D2 | 8 | Performance metrics bar above chat iframe (4-stat-card pattern) | DONE (component) | Step 7 (reuses summary API) |
 | D2 | 9 | Content Pipeline / Approval Queue (kanban: Draft→Pending→Approved→Posted→Rejected) | NOT STARTED | Orchestrator /content endpoint |
 | D3 | 10 | Telegram integration (connect flow, login link via Telegram, channel health cards) | NOT STARTED | Telegram bot created |
@@ -160,6 +160,38 @@
 | D5 | 16 | Model routing architect — "Muscles" prompt (AGENTS.md with task→model map, cost ceilings) | NOT STARTED | Step 13 |
 | D5 | 17 | Activation triggers — "Eyes" prompt (custom heartbeat/cron based on client goals) | NOT STARTED | Step 15 |
 | D5 | 18 | Evolution/learning — "Heartbeat" prompt (goal tracking, milestone review, weekly retrospective) | DONE (templates) | Step 15 |
+| D6 | 19 | Admin — Scaling Readiness dashboard (real-time infra assessment) | DONE | — |
+| D6 | 20 | Ops Worker — autonomous monitoring (instant/hourly/daily/weekly tasks from OPERATIONS.md) | NOT STARTED | Step 19, Telegram (Step 10) |
+
+### D6: Operations & Scaling
+
+#### Step 19: Scaling Readiness Dashboard — DONE
+
+**Route:** `/admin/scaling` — shows 10 infrastructure checks with severity, progress bars, actions.
+
+**Checks:** Port usage, memory estimate, disk, orchestrator health, health check timing, port race condition risk, HA/SPOF, DB pooling, temp file cleanup.
+
+**Shows:** 4-stat cards, resource projections to next milestone, per-check action items with cadence labels.
+
+#### Step 20: Ops Worker (Future)
+
+**What:** A dedicated AI worker that monitors all OPERATIONS.md tasks autonomously.
+
+**Runs on its own container with access to:**
+- Admin API endpoints (scaling, health, clients)
+- Orchestrator (restart containers, check status)
+- Stripe API (payment health)
+- LiteLLM (cost monitoring)
+
+**Task cadence (from OPERATIONS.md):**
+- **Instant (8 tasks):** Container crashes, payment failures, X account restrictions, orchestrator down
+- **Hourly (4 tasks):** Worker activity checks, content quality spot-checks, rate limit monitoring
+- **Daily (10 tasks):** Engagement review, new signups, disk/memory check, container health
+- **Weekly (12 tasks):** Performance analysis, flywheel updates, business metrics, infra maintenance
+
+**Escalation:** If the ops worker needs help, it messages you via Telegram (requires Step 10). Critical issues trigger immediate notification. Non-critical issues compile into daily/weekly reports.
+
+**Implementation:** New worker template `worker-templates/ops-monitor/` with custom SOUL.md + SKILL.md. Heartbeat runs the monitoring cadence. Requires Telegram integration for escalation.
 
 ### D1: Foundation (no external deps, buildable now)
 
