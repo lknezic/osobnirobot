@@ -30,8 +30,10 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const host = request.headers.get('host') || '';
 
+  const isAdminSubdomain = host.startsWith('admin.');
+
   // admin.instantworker.ai subdomain → rewrite to /admin routes
-  if (host.startsWith('admin.')) {
+  if (isAdminSubdomain) {
     if (!user) {
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
@@ -39,14 +41,21 @@ export async function middleware(request: NextRequest) {
     if (path === '/') {
       return NextResponse.rewrite(new URL('/admin', request.url));
     }
-    // /health → /admin/health, /workers → /admin/workers, etc.
+    // /health → /admin/health, /workers → /admin/workers, /clients → /admin/clients, etc.
     if (!path.startsWith('/admin') && !path.startsWith('/api') && !path.startsWith('/auth') && !path.startsWith('/_next')) {
       return NextResponse.rewrite(new URL(`/admin${path}`, request.url));
     }
+    // Already an /admin path on the subdomain — allow through
+    return response;
   }
 
-  // Protect dashboard/onboarding/admin
-  if ((path.startsWith("/dashboard") || path.startsWith("/onboarding") || path.startsWith("/admin")) && !user) {
+  // Block /admin paths on the main domain — admin is only via subdomain
+  if (path.startsWith("/admin")) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  // Protect dashboard/onboarding
+  if ((path.startsWith("/dashboard") || path.startsWith("/onboarding")) && !user) {
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
@@ -63,5 +72,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/onboarding/:path*", "/admin/:path*", "/auth/login", "/", "/health", "/workers/:path*"],
+  matcher: ["/dashboard/:path*", "/onboarding/:path*", "/admin/:path*", "/auth/login", "/", "/health", "/workers/:path*", "/clients/:path*"],
 };
