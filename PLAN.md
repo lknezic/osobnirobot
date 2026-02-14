@@ -144,6 +144,10 @@
 | D3 | 11 | Admin dashboard — Client Detail (per-client drill-down, usage, actions) | NOT STARTED | Step 3 |
 | D4 | 12 | LiteLLM multi-model routing (auto-switch cheap models for low-level tasks) | NOT STARTED | LiteLLM deployed (already on :4000) |
 | D4 | 13 | Token usage dashboard (admin + per-client USD spend) | NOT STARTED | Step 12 |
+| D5 | 14 | Smart onboarding interview — "Brain" prompt (auto-fill all 7 docs from first conversation) | NOT STARTED | — |
+| D5 | 15 | Model routing architect — "Muscles" prompt (AGENTS.md with task→model map, cost ceilings) | NOT STARTED | Step 12 |
+| D5 | 16 | Activation triggers — "Eyes" prompt (custom heartbeat/cron based on client goals) | NOT STARTED | Step 14 |
+| D5 | 17 | Evolution/learning — "Heartbeat" prompt (goal tracking, milestone review, weekly retrospective) | NOT STARTED | Step 14 |
 
 ### D1: Foundation (no external deps, buildable now)
 
@@ -377,11 +381,177 @@ All steps in D2 need orchestrator API additions to read data from inside contain
 
 **Shows:** Per-client cost column in admin, per-employee cost in client detail, total MTD cost and margin.
 
+### D5: Smart Agent Initialization (inspired by kloss_xyz's 8-organ system)
+
+kloss_xyz built an 8-phase initialization system for OpenClaw where each "organ" is a specialized
+system prompt that deeply interviews the user, then auto-generates workspace files. We adapt 4 of
+the 8 organs to our use case — the ones that solve real problems we have.
+
+**The core insight:** Clients don't fill in their 7 docs manually. Instead, the employee's first
+conversation should BE the structured interview that auto-populates everything.
+
+#### Step 14: Smart Onboarding Interview — "Brain" Prompt
+
+**Problem it solves:** Clients launch an employee, see 7 empty docs in Settings, and never fill
+them. The employee has no context, writes generic content, client churns.
+
+**What:** Replace the employee's generic first greeting with a structured 10-15 question interview
+modeled on kloss_xyz's "Brain" organ. The employee asks purposeful questions, then auto-fills all
+7 `docs/` files.
+
+**kloss_xyz's Brain covers 15 dimensions:**
+1. Identity (who you are, company, mission)
+2. Operations (tools, workflows, daily routines)
+3. People (team, audience, stakeholders)
+4. Resources (assets, accounts, content library)
+5. Friction (bottlenecks, pain points, blockers)
+6. Goals (short/mid/long term, KPIs)
+7. Cognition (how you think, decision style)
+8. Content (voice, style, existing content)
+9. Communication (channels, frequency, tone)
+10. Codebases (repos, tech stack) — skip for our use case
+11. Integrations (connected tools) — partially relevant
+12. Voice/Soul (personality, archetype)
+13. Automation (what to automate, boundaries)
+14. Mission Control (review cadence, reporting)
+15. Memory/Boundaries (what to remember, what to forget)
+
+**Our adapted version (8 questions, mapped to our 7 docs):**
+
+| Question | Fills | Doc |
+|----------|-------|-----|
+| "Tell me about your company — what do you do, who do you serve?" | Company name, URL, mission, industry | `docs/company.md` |
+| "Who is your ideal customer? What are their biggest pain points?" | Target personas, pain points, goals | `docs/audience.md` |
+| "What product/service do you offer? What makes you different?" | Product details, features, USP | `docs/product.md` |
+| "Who are your main competitors? What do they do well/poorly?" | Competitor names, strengths, gaps | `docs/competitors.md` |
+| "How should I sound when writing on your behalf? Casual, professional, edgy?" | Tone, style, words to use/avoid | `docs/brand-voice.md` |
+| "Any specific rules? Topics to avoid, accounts to focus on, hashtags?" | Custom instructions, priorities | `docs/instructions.md` |
+| "What are your goals for X? Followers, leads, brand awareness?" | Content goals, output expectations | `docs/goals.md` |
+| "How often do you want me to report back? What should I flag?" | Reporting cadence, alert thresholds | `docs/instructions.md` (append) |
+
+**After the interview:** Employee writes all 7 docs, confirms with the client:
+> "Here's what I learned. I've updated my knowledge files — check the Settings tab to review
+> and correct anything. I'll start working based on this. Ready?"
+
+**Implementation:**
+
+Modify the SOUL.md first-interaction section. Replace the generic greeting with a structured
+interview protocol. No code changes needed — this is purely a prompt/template change.
+
+**Modified files:**
+- `worker-templates/x-commenter/SOUL.md` — replace "First Interaction" section
+- `worker-templates/x-tweet-writer/SOUL.md` — same
+- `worker-templates/x-thread-writer/SOUL.md` — same
+- `worker-templates/x-article-writer/SOUL.md` — same
+- `worker-templates/_shared/LEARNING-PROTOCOL.md` — add "First Boot Interview Protocol" section
+
+**Why this is high-impact:** This single change fixes the #1 retention risk (empty docs → generic
+output → client thinks the product doesn't work → churns). No new code, no new endpoints, no DB
+changes. Just better prompts.
+
+#### Step 15: Model Routing Architect — "Muscles" Prompt
+
+**Problem it solves:** All tasks currently use the same model (Gemini Flash or Sonnet). Expensive
+models are wasted on simple tasks, cheap models produce bad output on important tasks.
+
+**What:** Adopt kloss_xyz's `AGENTS.md` model routing table format. Create a workspace file that
+defines which model to use for which task type, with cost ceilings and fallback chains.
+
+**kloss_xyz's Muscles prompt generates:**
+- Model inventory (what's available, cost per token)
+- Task→model routing map (which model for which task)
+- Cost routing (budget guards, spending limits per day/week)
+- Fallback chains (if primary model fails, try secondary)
+- Multi-agent roster (which agent handles which domain)
+
+**Our adapted version — `AGENTS.md` workspace file:**
+
+```markdown
+# AGENTS.md — Model Routing & Cost Control
+
+## Model Inventory
+| Alias | Model | Cost/1K in | Cost/1K out | Use for |
+|-------|-------|------------|-------------|---------|
+| fast | gemini-2.0-flash | $0.00001 | $0.00004 | Heartbeat, reading, checking |
+| quality | claude-sonnet-4 | $0.003 | $0.015 | Writing, research, analysis |
+| premium | claude-opus-4.6 | $0.015 | $0.075 | Complex reasoning (rare) |
+
+## Task Routing
+| Task | Primary | Fallback | Max tokens |
+|------|---------|----------|------------|
+| heartbeat-check | fast | — | 2000 |
+| read-tweets | fast | — | 1000 |
+| write-comment | quality | fast | 500 |
+| research | quality | fast | 4000 |
+| daily-summary | quality | fast | 2000 |
+| first-boot-interview | quality | — | 8000 |
+
+## Budget Guards
+- Daily ceiling: $5.00 per worker
+- Weekly ceiling: $25.00 per worker
+- If ceiling hit: switch all tasks to `fast` model
+- Alert owner if ceiling hit 3 days in a row
+```
+
+**Implementation:** This ties into Step 12 (LiteLLM multi-model routing). The `AGENTS.md` file is
+the workspace-level config that OpenClaw reads. LiteLLM provides the actual routing at the API
+proxy level. Both work together.
+
+**Modified files:**
+- `worker-templates/_shared/AGENTS.md` — new file, model routing config
+- `app/docker/entrypoint.sh` — pass model aliases via openclaw.json
+- LiteLLM config (on Hetzner) — create model groups matching aliases
+
+#### Step 16: Activation Triggers — "Eyes" Prompt
+
+**Problem it solves:** Every worker runs the same 30-minute heartbeat regardless of the client's
+timezone, audience, or goals. A SaaS founder targeting US tech Twitter needs different timing than
+a European e-commerce brand.
+
+**What:** During the smart onboarding interview (Step 14), ask about timezone and peak engagement
+windows. Auto-generate a custom `HEARTBEAT.md` with adjusted:
+- Quiet hours (based on client timezone, not hardcoded UTC 00-06)
+- Peak engagement windows (when their audience is most active)
+- Heartbeat frequency (more frequent during peak, less during off-peak)
+- Custom triggers ("check trending topics in my niche every 2 hours")
+
+**Implementation:**
+- Add timezone + peak hours questions to the onboarding interview
+- Modify `HEARTBEAT.md` template to use variables from `docs/goals.md`
+- No code changes — the employee adjusts its own heartbeat behavior based on docs
+
+#### Step 17: Evolution/Learning — "Heartbeat" Prompt
+
+**Problem it solves:** Workers don't improve over time. They comment the same way on day 30 as day
+1. No goal tracking, no retrospective, no adaptation.
+
+**What:** Add a weekly self-review protocol. Every Sunday (or configurable), the worker:
+1. Reviews the week's engagement stats from `memory/engagement-stats.md`
+2. Identifies top 3 performing comment styles
+3. Identifies bottom 3 performing approaches
+4. Updates `memory/improvement-suggestions.md` with what to change
+5. Adjusts its approach for the next week
+6. Posts a weekly summary to the client
+
+**kloss_xyz's Heartbeat organ covers:**
+- Active goals + milestones + deadlines
+- Review rhythm (daily standup, weekly retro, monthly strategy)
+- What's working vs what's not
+- Adaptation based on results
+
+**Implementation:**
+- Add weekly review section to `HEARTBEAT.md` template
+- Add `memory/weekly-review-YYYY-WW.md` convention
+- Modify SOUL.md to include self-improvement protocol
+
+**Modified files:**
+- `worker-templates/*/HEARTBEAT.md` — add weekly review trigger
+- `worker-templates/_shared/LEARNING-PROTOCOL.md` — add weekly retrospective section
+
 ### Owner actions needed (non-code)
 
 | Item | Phase | Action |
 |------|-------|--------|
-| kloss_xyz tweet content | D1 | Paste text/screenshot so we can evaluate their sidebar approach |
 | Telegram bot | D3 | Create @InstantWorkerBot via @BotFather, share token |
 | Slack app | D3 | Create at api.slack.com, share client ID + secret |
 | LiteLLM per-client keys | D4 | Create virtual keys per client for spend tracking |
