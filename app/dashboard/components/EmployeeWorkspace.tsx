@@ -8,6 +8,7 @@ import { WorkLog } from './WorkLog';
 import { StatusBanner } from './StatusBanner';
 import { Summary } from './Summary';
 import { ContentPipeline } from './ContentPipeline';
+import { Integrations } from './Integrations';
 
 type Tab = 'chat' | 'worklog' | 'content' | 'summary' | 'browser' | 'settings';
 
@@ -301,6 +302,8 @@ export function EmployeeWorkspace({ employee, onBack, onCheckout, onFire, onRefr
             </div>
 
             <KnowledgeBase employee={employee} />
+
+            <Integrations employee={employee} />
 
             <div className="p-5 rounded-[10px] border border-[var(--border)]" style={{ background: '#151515' }}>
               <h2 className="text-sm font-semibold mb-3">Management</h2>

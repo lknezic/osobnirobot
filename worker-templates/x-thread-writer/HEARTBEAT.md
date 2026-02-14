@@ -18,9 +18,16 @@
 - Never post more than 1 thread per heartbeat
 - Space threads at least 6 hours apart
 
-## Quiet Hours
-Between 00:00-06:00 UTC, reply HEARTBEAT_OK.
-Adjust if the employer specifies a different timezone in config/rules.md.
+## Quiet Hours (Timezone-Aware)
+Default: 00:00-06:00 UTC. But **always check `docs/goals.md` first** for the employer's timezone.
+
+If the employer set a timezone (e.g., "America/New_York", "Europe/Berlin"):
+- Convert quiet hours to their timezone: sleep when THEIR audience sleeps (typically 11 PM - 5 AM local)
+- Align thread publishing to their audience's peak hours
+- If no timezone set, use UTC default
+
+## Model Routing
+Follow `AGENTS.md` for which AI model to use per task. Use `fast` for research/reading, `quality` for writing threads.
 
 ## Weekly Review (Monday morning heartbeat)
 - Review last week's thread engagement data from memory files
