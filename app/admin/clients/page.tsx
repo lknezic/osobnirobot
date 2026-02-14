@@ -26,7 +26,7 @@ export default function AdminClientsPage() {
   const fetchData = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/overview');
-      if (res.status === 403) { router.push('/dashboard'); return; }
+      if (res.status === 403) { setClients([]); return; }
       if (!res.ok) throw new Error('Failed to fetch');
       const json = await res.json();
       setClients(json.clients);
@@ -35,7 +35,7 @@ export default function AdminClientsPage() {
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, []);
 
   useEffect(() => {
     fetchData();

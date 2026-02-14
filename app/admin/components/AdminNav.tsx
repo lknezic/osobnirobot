@@ -55,7 +55,10 @@ export function AdminNav() {
       {/* Footer */}
       <div className="px-3 py-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
         <button
-          onClick={() => router.push('/dashboard')}
+          onClick={() => {
+            const host = window.location.hostname.replace(/^admin\./, '');
+            window.location.href = `${window.location.protocol}//${host}/dashboard`;
+          }}
           className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-colors text-left"
           style={{ color: '#555' }}
         >

@@ -56,7 +56,7 @@ export default function AdminPage() {
     try {
       const res = await fetch('/api/admin/overview');
       if (res.status === 403) {
-        router.push('/dashboard');
+        setError('Not authorized');
         return;
       }
       if (!res.ok) throw new Error('Failed to fetch');
@@ -69,7 +69,7 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, []);
 
   useEffect(() => {
     fetchData();

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 
 interface Container {
   employeeId: string;
@@ -35,13 +34,12 @@ export default function HealthPage() {
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [restarting, setRestarting] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState<string>('all');
-  const router = useRouter();
 
   const fetchData = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/health');
       if (res.status === 403) {
-        router.push('/dashboard');
+        setError('Not authorized');
         return;
       }
       if (!res.ok) throw new Error('Failed to fetch');
@@ -54,7 +52,7 @@ export default function HealthPage() {
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, []);
 
   useEffect(() => {
     fetchData();
