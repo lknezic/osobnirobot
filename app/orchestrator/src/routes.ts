@@ -422,10 +422,22 @@ containerRoutes.post('/provision', async (req: Request, res: Response) => {
     }
 
     // Per-worker HTTP proxy for browser isolation (unique IP per worker)
-    const proxyUrl = workerConfig?.proxyUrl || process.env.DEFAULT_WORKER_PROXY || '';
-    if (proxyUrl) {
-      containerEnv.push(`WORKER_PROXY_URL=${proxyUrl}`);
-      console.log(`♦ Worker proxy configured: ${proxyUrl.replace(/:[^:@]*@/, ':***@')}`);
+    // IPRoyal format: session params are in the password (_country-xx_session-xx_lifetime-xx)
+    // Store DEFAULT_WORKER_PROXY WITHOUT _session-xx; orchestrator injects per-worker session
+    const baseProxyUrl = workerConfig?.proxyUrl || process.env.DEFAULT_WORKER_PROXY || '';
+    if (baseProxyUrl) {
+      let workerProxyUrl = baseProxyUrl;
+      if (employeeId) {
+        const sessionId = employeeId.slice(0, 12);
+        // Inject _session-{id} before _lifetime if present, otherwise before @
+        if (workerProxyUrl.includes('_lifetime-')) {
+          workerProxyUrl = workerProxyUrl.replace('_lifetime-', `_session-${sessionId}_lifetime-`);
+        } else if (workerProxyUrl.includes('@')) {
+          workerProxyUrl = workerProxyUrl.replace('@', `_session-${sessionId}@`);
+        }
+      }
+      containerEnv.push(`WORKER_PROXY_URL=${workerProxyUrl}`);
+      console.log(`♦ Worker proxy configured with sticky session: ${workerProxyUrl.replace(/:[^:@]*@/, ':***@')}`);
     }
 
     // Create container
