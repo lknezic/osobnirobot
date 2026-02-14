@@ -422,10 +422,18 @@ containerRoutes.post('/provision', async (req: Request, res: Response) => {
     }
 
     // Per-worker HTTP proxy for browser isolation (unique IP per worker)
-    const proxyUrl = workerConfig?.proxyUrl || process.env.DEFAULT_WORKER_PROXY || '';
-    if (proxyUrl) {
-      containerEnv.push(`WORKER_PROXY_URL=${proxyUrl}`);
-      console.log(`♦ Worker proxy configured: ${proxyUrl.replace(/:[^:@]*@/, ':***@')}`);
+    // IPRoyal sticky sessions: append _session-{id} to username for per-worker IP
+    const baseProxyUrl = workerConfig?.proxyUrl || process.env.DEFAULT_WORKER_PROXY || '';
+    if (baseProxyUrl) {
+      let workerProxyUrl = baseProxyUrl;
+      // Auto-generate sticky session per worker by appending _session-{employeeId} to username
+      const proxyMatch = baseProxyUrl.match(/^(https?:\/\/)([^:]+):([^@]+)@(.+)$/);
+      if (proxyMatch && employeeId) {
+        const sessionId = employeeId.slice(0, 12);
+        workerProxyUrl = `${proxyMatch[1]}${proxyMatch[2]}_session-${sessionId}:${proxyMatch[3]}@${proxyMatch[4]}`;
+      }
+      containerEnv.push(`WORKER_PROXY_URL=${workerProxyUrl}`);
+      console.log(`♦ Worker proxy configured with sticky session: ${workerProxyUrl.replace(/:[^:@]*@/, ':***@')}`);
     }
 
     // Create container
